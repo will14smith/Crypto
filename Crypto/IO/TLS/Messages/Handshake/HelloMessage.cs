@@ -5,13 +5,13 @@ namespace Crypto.IO.TLS.Messages
 {
     public abstract class HelloMessage : HandshakeMessage
     {
-        protected HelloMessage(HandshakeType type, uint length, Version version, uint gmtUnixTime, byte[] randomBytes, byte[] sessionId, HelloExtension[] extensions) : base(type, length)
+        protected HelloMessage(HandshakeType type, TlsVersion version, uint gmtUnixTime, byte[] randomBytes, byte[] sessionId, HelloExtension[] extensions) : base(type)
         {
             Version = version;
             GmtUnixTime = gmtUnixTime;
 
-            SecurityAssert.NotNull(RandomBytes);
-            SecurityAssert.SAssert(RandomBytes.Length == 28);
+            SecurityAssert.NotNull(randomBytes);
+            SecurityAssert.SAssert(randomBytes.Length == 28);
             RandomBytes = randomBytes;
 
             SecurityAssert.NotNull(sessionId);
@@ -23,7 +23,7 @@ namespace Crypto.IO.TLS.Messages
             Extensions = extensions;
         }
 
-        public Version Version { get; }
+        public TlsVersion Version { get; }
 
         // RANDOM
         public uint GmtUnixTime { get; }

@@ -2,7 +2,7 @@
 {
     public abstract class Record
     {
-        protected Record(RecordType type, Version version, ushort length)
+        protected Record(RecordType type, TlsVersion version, ushort length)
         {
             Type = type;
             Version = version;
@@ -10,7 +10,9 @@
         }
 
         public RecordType Type { get; }
-        public Version Version { get; }
+        public TlsVersion Version { get; }
         public ushort Length { get; }
+
+        internal abstract byte[] GetContents(TlsState state);
     }
 }

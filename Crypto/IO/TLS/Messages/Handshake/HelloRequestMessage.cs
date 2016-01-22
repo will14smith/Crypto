@@ -2,7 +2,7 @@
 {
     public class HelloRequestMessage : HandshakeMessage
     {
-        public HelloRequestMessage() : base(HandshakeType.HelloRequest, 0)
+        public HelloRequestMessage() : base(HandshakeType.HelloRequest)
         {
         }
     }

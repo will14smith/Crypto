@@ -5,7 +5,7 @@ namespace Crypto.IO.TLS.Messages
 {
     public class CertificateMessage : HandshakeMessage
     {
-        public CertificateMessage(uint length, ASN1Certificate[] certificates) : base(HandshakeType.Certificate, length)
+        public CertificateMessage(ASN1Certificate[] certificates) : base(HandshakeType.Certificate)
         {
             SecurityAssert.NotNull(certificates);
             SecurityAssert.SAssert(certificates.Length <= 0xFFFFFF);

@@ -9,6 +9,7 @@ Implement a TLS1.2 steam wrapper without using any cryptography libraries
 ## Layout
 
     Crypto/
+      Certificates/ Certificate handling
       Encryption/   Asymmetric & symmetric encryption / decryption
       Hashing/      One way hash functions
       IO/           TLS functionality

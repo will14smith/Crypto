@@ -45,9 +45,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Certificates\ASN1Certificate.cs" />
-    <Compile Include="Certificates\ASN1Class.cs" />
-    <Compile Include="Certificates\ASN1UniversalTag.cs" />
-    <Compile Include="Certificates\DERReader.cs" />
+    <Compile Include="Certificates\X509Reader.cs" />
     <Compile Include="Certificates\X509Certificate.cs" />
     <Compile Include="Encryption\AESCipher.cs" />
     <Compile Include="Encryption\CipherBlockMode.cs" />
@@ -61,8 +59,6 @@
     <Compile Include="Hashing\NullMACAlgorithm.cs" />
     <Compile Include="Hashing\SHA1MACAlgorithm.cs" />
     <Compile Include="Hashing\SHA256MACAlgorithm.cs" />
-    <Compile Include="IO\StreamReader.cs" />
-    <Compile Include="IO\StreamWriter.cs" />
     <Compile Include="IO\TLS\CipherSuite.cs" />
     <Compile Include="IO\TLS\CipherSuiteExtensions.cs" />
     <Compile Include="IO\TLS\CompressionMethod.cs" />
@@ -102,15 +98,17 @@
     <Compile Include="IO\TLS\TlsStream.cs" />
     <Compile Include="IO\TLS\TlsVersion.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Utils\BigEndianBitConverter.cs" />
-    <Compile Include="IO\EndianBinaryReader.cs" />
-    <Compile Include="IO\EndianBinaryWriter.cs" />
-    <Compile Include="Utils\EndianBitConverter.cs" />
-    <Compile Include="Utils\Endianness.cs" />
-    <Compile Include="Utils\LittleEndianBitConverter.cs" />
-    <Compile Include="Utils\SecurityAssert.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\Crypto.ASN1\Crypto.ASN1.csproj">
+      <Project>{7593403b-7c8c-462c-a5b9-9a915928f6e2}</Project>
+      <Name>Crypto.ASN1</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Crypto.Utils\Crypto.Utils.csproj">
+      <Project>{01c34216-1249-4f84-a73c-046b5aed4b51}</Project>
+      <Name>Crypto.Utils</Name>
+    </ProjectReference>
+  </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>

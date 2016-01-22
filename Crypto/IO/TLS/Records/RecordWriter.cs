@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using StreamWriter = Crypto.Utils.IO.StreamWriter;
 
 namespace Crypto.IO.TLS
 {

@@ -1,4 +1,6 @@
-﻿namespace Crypto.IO.TLS
+﻿using Crypto.Utils.IO;
+
+namespace Crypto.IO.TLS
 {
     internal static class EndianBinaryReaderExtensions
     {

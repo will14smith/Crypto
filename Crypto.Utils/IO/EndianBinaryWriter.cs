@@ -1,9 +1,8 @@
 using System;
 using System.IO;
 using System.Text;
-using Crypto.Utils;
 
-namespace Crypto.IO
+namespace Crypto.Utils.IO
 {
     /// <summary>
     ///     Equivalent of System.IO.BinaryWriter, but with either endianness, depending on

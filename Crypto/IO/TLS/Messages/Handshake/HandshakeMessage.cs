@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using Crypto.Utils;
+using Crypto.Utils.IO;
 
 namespace Crypto.IO.TLS.Messages
 {

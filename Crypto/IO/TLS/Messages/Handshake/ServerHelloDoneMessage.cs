@@ -1,4 +1,6 @@
-﻿namespace Crypto.IO.TLS.Messages
+﻿using Crypto.Utils.IO;
+
+namespace Crypto.IO.TLS.Messages
 {
     public class ServerHelloDoneMessage : HandshakeMessage
     {

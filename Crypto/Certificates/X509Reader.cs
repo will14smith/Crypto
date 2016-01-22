@@ -3,17 +3,16 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using Crypto.ASN1;
 using Crypto.IO;
 using Crypto.Utils;
 
 namespace Crypto.Certificates
 {
-    class X509Reader
+    public class X509Reader
     {
         private static readonly Regex HeaderRegex = new Regex("^-----BEGIN ([A-Z ]*)-----", RegexOptions.Compiled | RegexOptions.Multiline);
-
-        private readonly MemoryStream input;
-        private readonly EndianBinaryReader reader;
+        private byte[] input;
 
         public X509Reader(byte[] input)
         {
@@ -31,42 +30,23 @@ namespace Crypto.Certificates
                 }
             }
 
-            this.input = new MemoryStream(input);
-            reader = new EndianBinaryReader(EndianBitConverter.Big, this.input);
+            this.input = input;
         }
 
         // http://www.itu.int/ITU-T/studygroups/com17/languages/X.690-0207.pdf for reading the DER format
-        // https://www.cs.auckland.ac.nz/~pgut001/pubs/x509guide.txt for what fields to read
+        // https://www.cs.auckland.ac.nz/~pgut001/pubs/x509guide.txt for fields in certificate
+        // https://tls.mbed.org/kb/cryptography/asn1-key-structures-in-der-and-pem for fields in private key (PKCS#1)
         // https://lapo.it/asn1js javascript parser / visualizer
 
-        public void Read()
+        public X509Certificate ReadCertificate()
         {
-            var id = reader.ReadByte();
-            var tagClass = (ASN1Class)(id >> 6);
-            var primitive = (id & 0x20) == 0;
-            var tagNumber = (ASN1UniversalTag)(id & 0x1F);
-
-            var length = ReadLength();
-        }
-
-        private int ReadLength()
-        {
-            var initial = reader.ReadByte();
-            if (initial == 0x80)
+            using (var ms = new MemoryStream())
             {
-                throw new NotSupportedException("Indefinite length isn't supported in DER");
+                var reader = new DERReader(ms);
+                var asn1 = reader.Read();
+
+                throw new NotImplementedException();
             }
-
-            if (initial < 0x80)
-            {
-                return initial;
-            }
-
-            var count = initial & 0x7F;
-            var bytes = reader.ReadBytes(count);
-
-            // in big endian order
-            return bytes.Aggregate(0, (current, b) => (current << 8) | b);
         }
     }
 }

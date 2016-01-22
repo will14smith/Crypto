@@ -89,8 +89,8 @@ namespace Crypto.IO.TLS
 
         public void AddCertificate(byte[] derCert)
         {
-            var derReader = new DERReader(derCert);
-            derReader.Read();
+            var reader = new X509Reader(derCert);
+            var cert = reader.ReadCertificate();
 
             throw new NotImplementedException();
         }

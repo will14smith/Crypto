@@ -2,6 +2,7 @@
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
+using Crypto.Certificates;
 using Crypto.IO.TLS;
 
 namespace Crypto.Client
@@ -10,6 +11,12 @@ namespace Crypto.Client
     {
         static void Main(string[] args)
         {
+            var pemCert = File.ReadAllBytes("localhost.cert");
+            var reader = new X509Reader(pemCert);
+            var cert = reader.ReadCertificate();
+            
+
+
             var server = new TcpListener(IPAddress.Any, 443);
             server.Start();
 

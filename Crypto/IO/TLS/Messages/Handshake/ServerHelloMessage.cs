@@ -1,5 +1,6 @@
 ﻿using System;
 using Crypto.IO.TLS.Messages.Handshake;
+using Crypto.Utils.IO;
 
 namespace Crypto.IO.TLS.Messages
 {

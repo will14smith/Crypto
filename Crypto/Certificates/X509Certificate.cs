@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Crypto.Certificates
 {
-    class X509Certificate
+    public class X509Certificate
     {
 
     }

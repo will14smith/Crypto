@@ -1,7 +1,6 @@
 ﻿using System.IO;
-using Crypto.Utils;
 
-namespace Crypto.IO
+namespace Crypto.Utils.IO
 {
     public abstract class StreamReader
     {

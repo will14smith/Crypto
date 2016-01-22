@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using Crypto.IO.TLS.Messages.Handshake;
 using Crypto.Utils;
+using Crypto.Utils.IO;
 
 namespace Crypto.IO.TLS.Messages
 {

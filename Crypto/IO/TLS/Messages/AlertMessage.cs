@@ -47,5 +47,15 @@ namespace Crypto.IO.TLS.Messages
 
         public AlertLevel Level { get; }
         public AlertDescription Description { get; }
+
+        internal static AlertMessage Read(byte[] data)
+        {
+            return new AlertMessage((AlertLevel)data[0], (AlertDescription)data[1]);
+        }
+
+        internal byte[] GetBytes()
+        {
+            return new byte[] { (byte)Level, (byte)Description };
+        }
     }
 }

@@ -58,5 +58,6 @@ namespace Crypto.IO.TLS.Messages
             SecurityAssert.SAssert(length >= min && length <= max);
             return length;
         }
+
     }
 }

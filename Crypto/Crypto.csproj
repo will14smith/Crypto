@@ -45,38 +45,44 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Certificates\ASN1Certificate.cs" />
+    <Compile Include="Encryption\ICipher.cs" />
+    <Compile Include="Hashing\IMACAlgorithm.cs" />
     <Compile Include="IO\StreamReader.cs" />
+    <Compile Include="IO\StreamWriter.cs" />
     <Compile Include="IO\TLS\CipherSuite.cs" />
     <Compile Include="IO\TLS\CompressionMethod.cs" />
+    <Compile Include="IO\TLS\DefaultTlsNegotiation.cs" />
+    <Compile Include="IO\TLS\ITlsNegotiation.cs" />
     <Compile Include="IO\TLS\Messages\AlertDescription.cs" />
     <Compile Include="IO\TLS\Messages\AlertLevel.cs" />
     <Compile Include="IO\TLS\Messages\AlertMessage.cs" />
     <Compile Include="IO\TLS\Messages\ChangeCipherSpecMessage.cs" />
     <Compile Include="IO\TLS\Messages\ChangeCipherSpecType.cs" />
     <Compile Include="IO\TLS\Messages\EndianBinaryReaderExtensions.cs" />
+    <Compile Include="IO\TLS\Messages\EndianBinaryWriterExtensions.cs" />
     <Compile Include="IO\TLS\Messages\Handshake\CertificateMessage.cs" />
     <Compile Include="IO\TLS\Messages\Handshake\ClientHelloMessage.cs" />
     <Compile Include="IO\TLS\Messages\Handshake\HandshakeMessage.cs" />
     <Compile Include="IO\TLS\Messages\Handshake\HandshakeReader.cs" />
     <Compile Include="IO\TLS\Messages\Handshake\HandshakeType.cs" />
+    <Compile Include="IO\TLS\Messages\Handshake\HandshakeWriter.cs" />
     <Compile Include="IO\TLS\Messages\Handshake\HelloExtension.cs" />
     <Compile Include="IO\TLS\Messages\Handshake\HelloMessage.cs" />
     <Compile Include="IO\TLS\Messages\Handshake\HelloRequestMessage.cs" />
+    <Compile Include="IO\TLS\Messages\Handshake\ServerHelloDoneMessage.cs" />
     <Compile Include="IO\TLS\Messages\Handshake\ServerHelloMessage.cs" />
     <Compile Include="IO\TLS\Messages\Message.cs" />
-    <Compile Include="IO\TLS\Records\AEADCiphertextRecord.cs" />
     <Compile Include="IO\TLS\Records\EndianBinaryReaderExtensions.cs" />
-    <Compile Include="IO\TLS\Records\BlockCiphertextRecord.cs" />
-    <Compile Include="IO\TLS\Records\CompressedRecord.cs" />
+    <Compile Include="IO\TLS\Records\EndianBinaryWriterExtensions.cs" />
     <Compile Include="IO\TLS\Records\PlaintextReader.cs" />
-    <Compile Include="IO\TLS\Records\PlaintextRecord.cs" />
+    <Compile Include="IO\TLS\Records\PlaintextWriter.cs" />
     <Compile Include="IO\TLS\Records\Record.cs" />
     <Compile Include="IO\TLS\Records\RecordReader.cs" />
     <Compile Include="IO\TLS\Records\RecordType.cs" />
+    <Compile Include="IO\TLS\Records\RecordWriter.cs" />
     <Compile Include="IO\TLS\TlsState.cs" />
+    <Compile Include="IO\TLS\TlsStateType.cs" />
     <Compile Include="IO\TLS\TlsStream.cs" />
-    <Compile Include="IO\TLS\Records\CiphertextRecord.cs" />
-    <Compile Include="IO\TLS\Records\StreamCiphertextRecord.cs" />
     <Compile Include="IO\TLS\TlsVersion.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utils\BigEndianBitConverter.cs" />
@@ -87,10 +93,7 @@
     <Compile Include="Utils\LittleEndianBitConverter.cs" />
     <Compile Include="Utils\SecurityAssert.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Encryption\" />
-    <Folder Include="Hashing\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>

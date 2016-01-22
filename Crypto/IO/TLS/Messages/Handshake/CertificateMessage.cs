@@ -1,4 +1,5 @@
-﻿using Crypto.Certificates;
+﻿using System;
+using Crypto.Certificates;
 using Crypto.Utils;
 
 namespace Crypto.IO.TLS.Messages
@@ -13,5 +14,10 @@ namespace Crypto.IO.TLS.Messages
         }
 
         public ASN1Certificate[] Certificates { get; }
+
+        protected override void Write(EndianBinaryWriter writer)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

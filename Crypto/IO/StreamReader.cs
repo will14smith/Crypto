@@ -3,7 +3,7 @@ using Crypto.Utils;
 
 namespace Crypto.IO
 {
-    public class StreamReader
+    public abstract class StreamReader
     {
         protected readonly Stream Stream;
         protected readonly EndianBinaryReader Reader;

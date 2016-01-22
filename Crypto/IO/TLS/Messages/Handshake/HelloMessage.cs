@@ -5,13 +5,12 @@ namespace Crypto.IO.TLS.Messages
 {
     public abstract class HelloMessage : HandshakeMessage
     {
-        protected HelloMessage(HandshakeType type, TlsVersion version, uint gmtUnixTime, byte[] randomBytes, byte[] sessionId, HelloExtension[] extensions) : base(type)
+        protected HelloMessage(HandshakeType type, TlsVersion version, byte[] randomBytes, byte[] sessionId, HelloExtension[] extensions) : base(type)
         {
             Version = version;
-            GmtUnixTime = gmtUnixTime;
 
             SecurityAssert.NotNull(randomBytes);
-            SecurityAssert.SAssert(randomBytes.Length == 28);
+            SecurityAssert.SAssert(randomBytes.Length == 32);
             RandomBytes = randomBytes;
 
             SecurityAssert.NotNull(sessionId);
@@ -24,14 +23,22 @@ namespace Crypto.IO.TLS.Messages
         }
 
         public TlsVersion Version { get; }
-
-        // RANDOM
-        public uint GmtUnixTime { get; }
         public byte[] RandomBytes { get; }
-        // END RANDOM
-
         public byte[] SessionId { get; }
 
         public HelloExtension[] Extensions { get; }
+
+        protected sealed override void Write(EndianBinaryWriter writer)
+        {
+            writer.Write(Version);
+            writer.Write(RandomBytes);
+            writer.WriteVariable(1, SessionId);
+            WriteHello(writer);
+
+            // TODO extensions
+            SecurityAssert.SAssert(Extensions.Length == 0);
+        }
+
+        protected abstract void WriteHello(EndianBinaryWriter writer);
     }
 }

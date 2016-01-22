@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Crypto.Utils;
 
 namespace Crypto.IO.TLS
 {
@@ -19,9 +20,11 @@ namespace Crypto.IO.TLS
             var version = Reader.ReadVersion();
             var length = Reader.ReadUInt16();
 
+            SecurityAssert.SAssert(length <= 0x4000);
+
             var data = Reader.ReadBytes(length);
 
-            return new PlaintextRecord(type, version, length, data);
+            return new Record(type, version, data);
         }
     }
 }

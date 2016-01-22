@@ -24,10 +24,22 @@ namespace Crypto.IO.TLS
 
         public void AuthenticateAsServer()
         {
-            // Read ClientHello
-            var message = (ClientHelloMessage)new HandshakeReader(state).Read();
+            var reader = new HandshakeReader(state);
+            var writer = new HandshakeWriter(state);
 
-            // build ServerHello
+            // Read ClientHello
+            var clientHello = (ClientHelloMessage)reader.Read();
+            state.HandleClientHello(clientHello);
+
+            // Send ServerHello
+            var serverHellos = state.GenerateServerHello();
+            foreach (var message in serverHellos)
+            {
+                writer.Write(message);
+            }
+
+            // Read ClientResponse
+            var clientResponse = reader.Read();
 
             throw new NotImplementedException();
         }

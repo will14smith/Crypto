@@ -1,7 +1,4 @@
-﻿using System.IO;
-using Crypto.Utils;
-
-namespace Crypto.IO.TLS
+﻿namespace Crypto.IO.TLS
 {
     internal static class EndianBinaryReaderExtensions
     {

@@ -1,18 +1,26 @@
-﻿namespace Crypto.IO.TLS
+﻿using Crypto.Utils;
+
+namespace Crypto.IO.TLS
 {
-    public abstract class Record
+    /// <summary>
+    /// SENDING: unfragmented record
+    /// RECIEVING fragmented record
+    /// </summary>
+    public class Record
     {
-        protected Record(RecordType type, TlsVersion version, ushort length)
+        public Record(RecordType type, TlsVersion version, byte[] data)
         {
             Type = type;
             Version = version;
-            Length = length;
+
+            SecurityAssert.NotNull(data);
+            Data = data;
         }
 
         public RecordType Type { get; }
         public TlsVersion Version { get; }
-        public ushort Length { get; }
+        public byte[] Data { get; }
 
-        internal abstract byte[] GetContents(TlsState state);
+        public int Length => Data.Length;
     }
 }

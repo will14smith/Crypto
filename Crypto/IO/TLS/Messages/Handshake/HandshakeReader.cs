@@ -21,9 +21,7 @@ namespace Crypto.IO.TLS.Messages
 
             SecurityAssert.SAssert(record.Type == RecordType.Handshake);
 
-            var data = record.GetContents(state);
-
-            using (var ms = new MemoryStream(data))
+            using (var ms = new MemoryStream(record.Data))
             {
                 var msReader = new EndianBinaryReader(EndianBitConverter.Big, ms);
 

@@ -40,7 +40,7 @@ namespace Crypto.IO.TLS
         private CipherSuite cipherSuite;
         private CompressionMethod compressionMethod;
 
-        private ICipher bulkCipherAlgorithm;
+        private ICipher cipherAlgorithm;
         private IMACAlgorithm macAlgorithm;
 
         private byte[] masterSecret;
@@ -70,27 +70,25 @@ namespace Crypto.IO.TLS
 
         public IEnumerable<HandshakeMessage> GenerateServerHello()
         {
+            SecurityAssert.SAssert(state == TlsStateType.RecievedClientHello);
+            state = TlsStateType.SentServerHello;
+
             var messages = new List<HandshakeMessage>();
             //TODO extensions
             messages.Add(new ServerHelloMessage(Version, serverRandom, sessionId, new HelloExtension[0], cipherSuite, compressionMethod));
 
-            var requiresCertificate = false;
-            if (requiresCertificate)
+            var keyExchange = cipherSuite.GetKeyExchange();
+            if (keyExchange.RequiresCertificate())
             {
                 throw new NotImplementedException();
             }
 
-            var requiresKeyExchange = false;
-            if (requiresKeyExchange)
+            if (keyExchange.RequiresKeyExchange())
             {
                 throw new NotImplementedException();
             }
 
-            var requiresClientCertificate = false;
-            if (requiresClientCertificate)
-            {
-                throw new NotImplementedException();
-            }
+            // TODO optionally ask for client certificate
 
             messages.Add(new ServerHelloDoneMessage());
 
@@ -100,7 +98,6 @@ namespace Crypto.IO.TLS
         private void NegotiateParameters()
         {
             SecurityAssert.SAssert(state == TlsStateType.RecievedClientHello);
-            state = TlsStateType.RecievedClientHello;
 
             // set parameters
             Version = negotiator.DecideVersion(clientMaxVersion);
@@ -116,7 +113,8 @@ namespace Crypto.IO.TLS
 
             //TODO extensions
 
-            //TODO set bulkCipherAlgorithm & macAlgorithm
+            cipherAlgorithm = cipherSuite.GetCipher();
+            macAlgorithm = cipherSuite.GetMACAlgorithm();
         }
 
         #endregion

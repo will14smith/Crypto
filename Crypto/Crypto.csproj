@@ -45,14 +45,27 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Certificates\ASN1Certificate.cs" />
+    <Compile Include="Encryption\AESCipher.cs" />
+    <Compile Include="Encryption\CipherBlockMode.cs" />
     <Compile Include="Encryption\ICipher.cs" />
+    <Compile Include="Encryption\NullCipher.cs" />
+    <Compile Include="Encryption\RC4Cipher.cs" />
+    <Compile Include="Encryption\ThreeDESCipher.cs" />
+    <Compile Include="Encryption\ThreeDESKeyOptions.cs" />
     <Compile Include="Hashing\IMACAlgorithm.cs" />
+    <Compile Include="Hashing\MD5MACAlgorithm.cs" />
+    <Compile Include="Hashing\NullMACAlgorithm.cs" />
+    <Compile Include="Hashing\SHA1MACAlgorithm.cs" />
+    <Compile Include="Hashing\SHA256MACAlgorithm.cs" />
     <Compile Include="IO\StreamReader.cs" />
     <Compile Include="IO\StreamWriter.cs" />
     <Compile Include="IO\TLS\CipherSuite.cs" />
+    <Compile Include="IO\TLS\CipherSuiteExtensions.cs" />
     <Compile Include="IO\TLS\CompressionMethod.cs" />
     <Compile Include="IO\TLS\DefaultTlsNegotiation.cs" />
     <Compile Include="IO\TLS\ITlsNegotiation.cs" />
+    <Compile Include="IO\TLS\KeyExchange.cs" />
+    <Compile Include="IO\TLS\KeyExchangeExtensions.cs" />
     <Compile Include="IO\TLS\Messages\AlertDescription.cs" />
     <Compile Include="IO\TLS\Messages\AlertLevel.cs" />
     <Compile Include="IO\TLS\Messages\AlertMessage.cs" />

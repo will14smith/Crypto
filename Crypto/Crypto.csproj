@@ -45,6 +45,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Certificates\ASN1Certificate.cs" />
+    <Compile Include="Certificates\ASN1Class.cs" />
+    <Compile Include="Certificates\ASN1UniversalTag.cs" />
+    <Compile Include="Certificates\DERReader.cs" />
+    <Compile Include="Certificates\X509Certificate.cs" />
     <Compile Include="Encryption\AESCipher.cs" />
     <Compile Include="Encryption\CipherBlockMode.cs" />
     <Compile Include="Encryption\ICipher.cs" />

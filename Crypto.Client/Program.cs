@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using Crypto.IO.TLS;
@@ -22,6 +23,9 @@ namespace Crypto.Client
                 Console.WriteLine("Client connected: " + client.Client.RemoteEndPoint);
 
                 var tlsStream = new TlsStream(clientStream);
+
+                tlsStream.AddCertificate(File.ReadAllBytes("localhost.cert"));
+                tlsStream.AddPrivateKey(File.ReadAllBytes("localhost.key"));
 
                 Console.WriteLine("Starting TLS connection");
                 tlsStream.AuthenticateAsServer();

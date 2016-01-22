@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using Crypto.Certificates;
 using Crypto.IO.TLS.Messages;
 using Crypto.Utils;
 
@@ -85,5 +86,17 @@ namespace Crypto.IO.TLS
         }
 
         #endregion
+
+        public void AddCertificate(byte[] derCert)
+        {
+            var derReader = new DERReader(derCert);
+            derReader.Read();
+
+            throw new NotImplementedException();
+        }
+        public void AddPrivateKey(byte[] derKey)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Numerics;
 
 namespace Crypto.ASN1
 {
@@ -10,5 +11,12 @@ namespace Crypto.ASN1
         }
 
         public DateTimeOffset Value { get; }
+
+        public override BigInteger ByteLength => 13;
+
+        internal override void Accept(IASN1ObjectWriter writer)
+        {
+            writer.Write(this);
+        }
     }
 }

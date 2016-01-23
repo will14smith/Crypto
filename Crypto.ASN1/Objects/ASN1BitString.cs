@@ -1,4 +1,6 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
+using System.Numerics;
 
 namespace Crypto.ASN1
 {
@@ -9,6 +11,13 @@ namespace Crypto.ASN1
         public ASN1BitString(BitArray value)
         {
             Value = value;
+        }
+
+        public override BigInteger ByteLength => (int)Math.Ceiling(Value.Count / 8m) + 1;
+
+        internal override void Accept(IASN1ObjectWriter writer)
+        {
+            writer.Write(this);
         }
     }
 }

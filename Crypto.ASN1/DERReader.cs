@@ -24,27 +24,27 @@ namespace Crypto.ASN1
             var id = reader.ReadByte();
 
             var tagClass = (ASN1Class)(id >> 6);
-            var primitive = (id & 0x20) == 0;
+            var constructed = (id & 0x20) != 0;
             var tagNumber = id & 0x1F;
 
             switch (tagClass)
             {
                 case ASN1Class.Universal:
-                    return ReadUniversal(primitive, (ASN1UniversalTag)tagNumber);
+                    return ReadUniversal(constructed, (ASN1UniversalTag)tagNumber);
 
                 case ASN1Class.Context:
-                    return ReadContext(primitive, (uint)tagNumber);
+                    return ReadContext(constructed, (uint)tagNumber);
 
                 default:
                     throw new NotImplementedException();
             }
         }
 
-        private ASN1Object ReadContext(bool primitive, uint tag)
+        private ASN1Object ReadContext(bool constructed, uint tag)
         {
             var length = ReadLength();
 
-            if (primitive)
+            if (!constructed)
             {
                 return new ASN1TaggedPrimitive(tag, reader.ReadBytes((int)length));
             }
@@ -96,7 +96,7 @@ namespace Crypto.ASN1
 
         #region universal
 
-        private ASN1Object ReadUniversal(bool primitive, ASN1UniversalTag tag)
+        private ASN1Object ReadUniversal(bool constructed, ASN1UniversalTag tag)
         {
             if (tag == ASN1UniversalTag.LongForm)
             {
@@ -107,9 +107,8 @@ namespace Crypto.ASN1
 
             // ignoring:
             // * 8.5 Encoding of a real value 
-
-
-            if (primitive)
+            
+            if (!constructed)
             {
                 switch (tag)
                 {
@@ -189,39 +188,9 @@ namespace Crypto.ASN1
 
         private ASN1Object ReadObjectIdentifier(uint length)
         {
-            var oid = new StringBuilder();
-            var firstOctet = reader.ReadByte();
-            length--;
-
-            oid.AppendFormat("{0}.{1}", firstOctet / 40, firstOctet % 40);
-
-            while (length > 0)
-            {
-                var value = new BigInteger();
-
-                while (true)
-                {
-                    var b = reader.ReadByte();
-                    length--;
-
-                    if ((b & 0x80) == 0)
-                    {
-                        value = value << 7 | b;
-                        break;
-                    }
-
-                    if (length == 0)
-                    {
-                        SecurityAssert.SAssert(false);
-                    }
-
-                    value = value << 7 | (b & 0x7F);
-                }
-
-                oid.AppendFormat(".{0}", value);
-            }
-
-            return new ASN1ObjectIdentifier(oid.ToString());
+            var bytes = reader.ReadBytes((int) length);
+            
+            return new ASN1ObjectIdentifier(ASN1ObjectIdentifier.Format(bytes));
         }
 
         private ASN1UTF8String ReadUTF8String(uint length)

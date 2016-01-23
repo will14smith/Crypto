@@ -1,4 +1,6 @@
-﻿namespace Crypto.ASN1
+﻿using System.Numerics;
+
+namespace Crypto.ASN1
 {
     public class ASN1TaggedPrimitive : ASN1Object
     {
@@ -9,6 +11,12 @@
         {
             Tag = tag;
             Value = value;
+        }
+
+        public override BigInteger ByteLength => Value.Length;
+        internal override void Accept(IASN1ObjectWriter writer)
+        {
+            writer.Write(this);
         }
     }
 }

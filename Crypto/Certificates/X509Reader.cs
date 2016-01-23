@@ -58,7 +58,7 @@ namespace Crypto.Certificates
             var tbsCertSeq = ToSeq(GetElement(root, 0), 7, 10);
 
             var taggedVersion = GetElement<ASN1Tagged>(tbsCertSeq, 0);
-            SecurityAssert.SAssert(taggedVersion.Tag == 0 && taggedVersion.Length == 1);
+            SecurityAssert.SAssert(taggedVersion.Tag == 0 && taggedVersion.Count == 1);
             var versionInt = GetElement<ASN1Integer>(taggedVersion, 0);
             SecurityAssert.SAssert(versionInt.Value >= 0 && versionInt.Value <= 2);
             var version = (byte)(versionInt.Value + 1);
@@ -87,28 +87,28 @@ namespace Crypto.Certificates
             {
                 //TODO issuerUniqueID  
                 //TODO subjectUniqueID 
+            }
 
-                if (version >= 3)
+            if (version >= 3)
+            {
+                var extensionsOffset = 7;
+                while (true)
                 {
-                    var extensionsOffset = 7;
-                    while (true)
+                    if (extensionsOffset >= tbsCertSeq.Count) break;
+
+                    var obj = GetElement(tbsCertSeq, extensionsOffset++);
+                    var tagged = obj as ASN1Tagged;
+                    if (tagged == null || tagged.Tag != 3)
                     {
-                        if (extensionsOffset >= tbsCertSeq.Length) break;
-
-                        var obj = GetElement(tbsCertSeq, extensionsOffset++);
-                        var tagged = obj as ASN1Tagged;
-                        if (tagged == null || tagged.Tag != 3)
-                        {
-                            continue;
-                        }
-
-                        SecurityAssert.SAssert(tagged.Length == 1);
-
-                        var extensionsSeq = ToSeq(tagged.Elements[0]);
-                        extensions = ReadExtensions(extensionsSeq);
-
-                        break;
+                        continue;
                     }
+
+                    SecurityAssert.SAssert(tagged.Count == 1);
+
+                    var extensionsSeq = ToSeq(tagged.Elements[0]);
+                    extensions = ReadExtensions(extensionsSeq);
+
+                    break;
                 }
             }
 
@@ -162,8 +162,8 @@ namespace Crypto.Certificates
                 var extSeq = ToSeq(extInfo, 2, 3);
 
                 var id = GetElement<ASN1ObjectIdentifier>(extSeq, 0).Identifier;
-                var critical = extSeq.Length == 3 && GetElement<ASN1Boolean>(extSeq, 1).Value;
-                var value = GetElement<ASN1OctetString>(extSeq, extInfo.Length - 1).Value;
+                var critical = extSeq.Count == 3 && GetElement<ASN1Boolean>(extSeq, 1).Value;
+                var value = GetElement<ASN1OctetString>(extSeq, extInfo.Count - 1).Value;
                 ASN1Object asn1Value;
                 using (var ms = new MemoryStream(value))
                 {
@@ -182,7 +182,7 @@ namespace Crypto.Certificates
             var seq = asn1 as ASN1Sequence;
 
             SecurityAssert.NotNull(seq);
-            SecurityAssert.SAssert(seq.Length >= minLength && seq.Length <= maxLength);
+            SecurityAssert.SAssert(seq.Count >= minLength && seq.Count <= maxLength);
 
             return seq;
         }
@@ -191,14 +191,14 @@ namespace Crypto.Certificates
             var seq = asn1 as ASN1Set;
 
             SecurityAssert.NotNull(seq);
-            SecurityAssert.SAssert(seq.Length >= minLength && seq.Length <= maxLength);
+            SecurityAssert.SAssert(seq.Count >= minLength && seq.Count <= maxLength);
 
             return seq;
         }
 
         private ASN1Object GetElement(ASN1Object asn1, int index)
         {
-            SecurityAssert.SAssert(index >= 0 && index < asn1.Length);
+            SecurityAssert.SAssert(index >= 0 && index < asn1.Count);
 
             return asn1.Elements[index];
         }

@@ -53,6 +53,7 @@
     <Compile Include="Certificates\X509Reader.cs" />
     <Compile Include="Certificates\X509Certificate.cs" />
     <Compile Include="Certificates\X509Validity.cs" />
+    <Compile Include="Certificates\X509Writer.cs" />
     <Compile Include="Encryption\AESCipher.cs" />
     <Compile Include="Encryption\CipherBlockMode.cs" />
     <Compile Include="Encryption\ICipher.cs" />

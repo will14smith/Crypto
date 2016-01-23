@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 
 namespace Crypto.ASN1
 {
@@ -12,5 +13,11 @@ namespace Crypto.ASN1
         }
 
         public uint Tag { get; }
+
+        public override BigInteger ByteLength => Elements.Aggregate(BigInteger.Zero, (a, x) => a + 1 + x.LengthSize + x.ByteLength);
+        internal override void Accept(IASN1ObjectWriter writer)
+        {
+            writer.Write(this);
+        }
     }
 }

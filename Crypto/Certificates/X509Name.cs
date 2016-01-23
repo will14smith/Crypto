@@ -7,17 +7,17 @@ namespace Crypto.Certificates
 {
     public class X509Name
     {
-        private readonly Dictionary<string, ASN1Object> values;
+        internal readonly IReadOnlyDictionary<string, ASN1Object> Values;
 
         public X509Name(IDictionary<string, ASN1Object> values)
         {
-            this.values = values.ToDictionary(x => x.Key, x => x.Value);
+            Values = values.ToDictionary(x => x.Key, x => x.Value);
         }
 
         public ASN1Object Get(string oid, bool throwOnMissing = true)
         {
             ASN1Object result;
-            if (values.TryGetValue(oid, out result))
+            if (Values.TryGetValue(oid, out result))
             {
                 return result;
             }

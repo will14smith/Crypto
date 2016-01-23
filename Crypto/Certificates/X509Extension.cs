@@ -4,15 +4,15 @@ namespace Crypto.Certificates
 {
     public class X509Extension
     {
-        private readonly string id;
-        private readonly bool critical;
-        private readonly ASN1Object value;
+        public string Id { get; }
+        public bool Critical { get; }
+        public ASN1Object Value { get; }
 
         public X509Extension(string id, bool critical, ASN1Object value)
         {
-            this.id = id;
-            this.critical = critical;
-            this.value = value;
+            this.Id = id;
+            this.Critical = critical;
+            this.Value = value;
         }
     }
 }

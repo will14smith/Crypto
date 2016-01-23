@@ -27,7 +27,7 @@ namespace Crypto.IO.TLS.Messages
                 writer.Seek(1, SeekOrigin.Begin);
                 writer.WriteUInt24((uint)ms.Length - 4);
 
-                return ms.GetBuffer();
+                return ms.ToArray();
             }
         }
 

@@ -42,6 +42,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ASN1Class.cs" />
+    <Compile Include="DERWriter.cs" />
+    <Compile Include="IASN1ObjectWriter.cs" />
     <Compile Include="Objects\ASN1BitString.cs" />
     <Compile Include="Objects\ASN1Boolean.cs" />
     <Compile Include="Objects\ASN1Integer.cs" />

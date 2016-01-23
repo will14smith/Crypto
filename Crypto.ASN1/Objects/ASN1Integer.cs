@@ -14,5 +14,12 @@ namespace Crypto.ASN1
         {
             Value = value;
         }
+
+
+        public override BigInteger ByteLength => Value.ToByteArray().Length;
+        internal override void Accept(IASN1ObjectWriter writer)
+        {
+            writer.Write(this);
+        }
     }
 }

@@ -12,7 +12,7 @@ namespace Crypto.Certificates
     public class X509Reader
     {
         private static readonly Regex HeaderRegex = new Regex("^-----BEGIN ([A-Z ]*)-----", RegexOptions.Compiled | RegexOptions.Multiline);
-        private byte[] input;
+        private readonly byte[] input;
 
         public X509Reader(byte[] input)
         {
@@ -34,13 +34,13 @@ namespace Crypto.Certificates
         }
 
         // http://www.itu.int/ITU-T/studygroups/com17/languages/X.690-0207.pdf for reading the DER format
-        // https://www.cs.auckland.ac.nz/~pgut001/pubs/x509guide.txt for fields in certificate
+        // https://www.ietf.org/rfc/rfc5280.txt for fields in certificate
         // https://tls.mbed.org/kb/cryptography/asn1-key-structures-in-der-and-pem for fields in private key (PKCS#1)
         // https://lapo.it/asn1js javascript parser / visualizer
 
         public X509Certificate ReadCertificate()
         {
-            using (var ms = new MemoryStream())
+            using (var ms = new MemoryStream(input))
             {
                 var reader = new DERReader(ms);
                 var asn1 = reader.Read();

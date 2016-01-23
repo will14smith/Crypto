@@ -1,4 +1,4 @@
-﻿namespace Crypto.Certificates
+﻿namespace Crypto.ASN1
 {
     enum ASN1Class
     {

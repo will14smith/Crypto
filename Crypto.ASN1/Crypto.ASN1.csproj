@@ -32,6 +32,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Numerics" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -41,9 +42,20 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ASN1Class.cs" />
+    <Compile Include="Objects\ASN1BitString.cs" />
+    <Compile Include="Objects\ASN1Boolean.cs" />
+    <Compile Include="Objects\ASN1Integer.cs" />
+    <Compile Include="Objects\ASN1Null.cs" />
     <Compile Include="Objects\ASN1Object.cs" />
     <Compile Include="DERReader.cs" />
     <Compile Include="ASN1UniversalTag.cs" />
+    <Compile Include="Objects\ASN1ObjectIdentifier.cs" />
+    <Compile Include="Objects\ASN1OctetString.cs" />
+    <Compile Include="Objects\ASN1Sequence.cs" />
+    <Compile Include="Objects\ASN1Set.cs" />
+    <Compile Include="Objects\ASN1Tagged.cs" />
+    <Compile Include="Objects\ASN1UTCTime.cs" />
+    <Compile Include="Objects\ASN1UTF8String.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

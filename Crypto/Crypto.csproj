@@ -36,6 +36,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Numerics" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -45,8 +46,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Certificates\ASN1Certificate.cs" />
+    <Compile Include="Certificates\ASN1ObjectExtensions.cs" />
+    <Compile Include="Certificates\X509AlgorithmIdentifier.cs" />
+    <Compile Include="Certificates\X509Extension.cs" />
+    <Compile Include="Certificates\X509Name.cs" />
     <Compile Include="Certificates\X509Reader.cs" />
     <Compile Include="Certificates\X509Certificate.cs" />
+    <Compile Include="Certificates\X509Validity.cs" />
     <Compile Include="Encryption\AESCipher.cs" />
     <Compile Include="Encryption\CipherBlockMode.cs" />
     <Compile Include="Encryption\ICipher.cs" />

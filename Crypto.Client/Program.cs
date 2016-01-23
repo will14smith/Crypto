@@ -11,12 +11,6 @@ namespace Crypto.Client
     {
         static void Main(string[] args)
         {
-            var pemCert = File.ReadAllBytes("localhost.cert");
-            var reader = new X509Reader(pemCert);
-            var cert = reader.ReadCertificate();
-            
-
-
             var server = new TcpListener(IPAddress.Any, 443);
             server.Start();
 

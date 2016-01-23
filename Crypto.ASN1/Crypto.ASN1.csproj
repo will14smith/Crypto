@@ -54,6 +54,7 @@
     <Compile Include="Objects\ASN1Sequence.cs" />
     <Compile Include="Objects\ASN1Set.cs" />
     <Compile Include="Objects\ASN1Tagged.cs" />
+    <Compile Include="Objects\ASN1TaggedPrimitive.cs" />
     <Compile Include="Objects\ASN1UTCTime.cs" />
     <Compile Include="Objects\ASN1UTF8String.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

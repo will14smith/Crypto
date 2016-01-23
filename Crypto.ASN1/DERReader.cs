@@ -42,9 +42,13 @@ namespace Crypto.ASN1
 
         private ASN1Object ReadContext(bool primitive, uint tag)
         {
-            SecurityAssert.SAssert(primitive == false);
-
             var length = ReadLength();
+
+            if (primitive)
+            {
+                return new ASN1TaggedPrimitive(tag, reader.ReadBytes((int)length));
+            }
+
             var elems = ReadObjects(length);
 
             return new ASN1Tagged(tag, elems);

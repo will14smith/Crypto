@@ -15,9 +15,7 @@ namespace Crypto.ASN1
 
         public ASN1BitString(byte[] value)
         {
-            //TODO check endianness
-
-            throw new NotImplementedException();
+            Value = new BitArray(value);
         }
 
         public override BigInteger ByteLength => (int)Math.Ceiling(Value.Count / 8m) + 1;

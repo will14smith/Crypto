@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections;
+using System.IO;
 using System.Numerics;
+using Crypto.ASN1;
 using Crypto.Utils;
 
 namespace Crypto.Certificates.Keys
@@ -26,7 +28,18 @@ namespace Crypto.Certificates.Keys
 
         public override byte[] GetBytes()
         {
-            throw new NotImplementedException();
+            var asn1 = new ASN1Sequence(new[]
+            {
+                new ASN1Integer(Modulus),
+                new ASN1Integer(Exponent),
+            });
+
+            using (var ms = new MemoryStream())
+            {
+                new DERWriter(ms).Write(asn1);
+
+                return ms.ToArray();
+            }
         }
 
         protected override int HashCode => HashCodeHelper.ToInt(Modulus ^ Exponent);

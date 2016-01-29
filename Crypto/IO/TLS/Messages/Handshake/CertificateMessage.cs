@@ -1,4 +1,6 @@
 ﻿using System;
+using System.IO;
+using System.Linq;
 using Crypto.Certificates;
 using Crypto.Utils;
 using Crypto.Utils.IO;
@@ -18,7 +20,23 @@ namespace Crypto.IO.TLS.Messages
 
         protected override void Write(EndianBinaryWriter writer)
         {
-            throw new NotImplementedException();
+            var certificates = Certificates.Select(GetBytes).ToArray();
+            var totalLength = certificates.Sum(x => x.Length + 2);
+
+            writer.Write((ushort)totalLength);
+            foreach (var cert in certificates)
+            {
+                writer.WriteVariable(2, cert);
+            }
+        }
+
+        private byte[] GetBytes(X509Certificate certificate)
+        {
+            using (var ms = new MemoryStream())
+            {
+                new X509Writer(ms).WriteCertificate(certificate);
+                return ms.ToArray();
+            }
         }
     }
 }

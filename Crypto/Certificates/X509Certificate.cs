@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using Crypto.Certificates.Keys;
 
 namespace Crypto.Certificates
 {
@@ -19,12 +20,12 @@ namespace Crypto.Certificates
         public X509Name Subject { get; }
 
         public X509AlgorithmIdentifier SubjectPublicKeyAlgorithm { get; }
-        public BitArray SubjectPublicKey { get; }
+        public PublicKey SubjectPublicKey { get; }
 
         public IReadOnlyList<X509Extension> Extensions { get; }
 
         public X509Certificate(byte version, BigInteger serialNumber, X509Validity validity,
-            X509Name issuer, X509Name subject, X509AlgorithmIdentifier subjectPublicKeyAlgorithm, BitArray subjectPublicKey,
+            X509Name issuer, X509Name subject, X509AlgorithmIdentifier subjectPublicKeyAlgorithm, PublicKey subjectPublicKey,
             X509AlgorithmIdentifier signatureAlgorithm, BitArray signature, IEnumerable<X509Extension> extensions)
         {
             Version = version;

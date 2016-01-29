@@ -18,5 +18,19 @@ namespace Crypto.Utils
 
             return value;
         }
+
+        public static byte[] GetBytes(this BitArray arr, int offset, int length)
+        {
+            SecurityAssert.SAssert(arr.Length + 7 > offset + length * 8);
+
+            var buffer = new byte[length];
+
+            for (var i = 0; i < length; i++)
+            {
+                buffer[i] = arr.GetByte(offset + i * 8);
+            }
+
+            return buffer;
+        }
     }
 }

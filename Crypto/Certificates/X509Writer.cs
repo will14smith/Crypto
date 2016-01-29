@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -38,7 +39,7 @@ namespace Crypto.Certificates
             var subjectPublicKeyInfo = new ASN1Sequence(new[]
             {
                 GetAlgorithmIdentifier(cert.SubjectPublicKeyAlgorithm),
-                new ASN1BitString(cert.SubjectPublicKey)
+                new ASN1BitString(cert.SubjectPublicKey.GetBytes())
             });
 
             var tbs = new List<ASN1Object>

@@ -13,6 +13,13 @@ namespace Crypto.ASN1
             Value = value;
         }
 
+        public ASN1BitString(byte[] value)
+        {
+            //TODO check endianness
+
+            throw new NotImplementedException();
+        }
+
         public override BigInteger ByteLength => (int)Math.Ceiling(Value.Count / 8m) + 1;
 
         internal override void Accept(IASN1ObjectWriter writer)

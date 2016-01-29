@@ -1,37 +1,21 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
 using Crypto.ASN1;
-using Crypto.IO;
+using Crypto.Certificates.Keys;
 using Crypto.Utils;
 
 namespace Crypto.Certificates
 {
     public class X509Reader
     {
-        private static readonly Regex HeaderRegex = new Regex("^-----BEGIN ([A-Z ]*)-----", RegexOptions.Compiled | RegexOptions.Multiline);
         private readonly byte[] input;
 
         public X509Reader(byte[] input)
         {
-            var strInput = Encoding.UTF8.GetString(input).Replace("\r", "").Replace("\n", "");
-            var header = HeaderRegex.Match(strInput);
-            if (header.Success)
-            {
-                var title = header.Groups[1].Value;
-                var footer = $"-----END {title}-----";
-                if (strInput.EndsWith(footer))
-                {
-                    input = Convert.FromBase64String(strInput
-                        .Replace(header.Value, "")
-                        .Replace(footer, ""));
-                }
-            }
-
-            this.input = input;
+            this.input = DERReadingHelper.TryConvertFromBase64(input).Item2;
         }
 
         // http://www.itu.int/ITU-T/studygroups/com17/languages/X.690-0207.pdf for reading the DER format
@@ -79,7 +63,8 @@ namespace Crypto.Certificates
 
             var subjectPublicKeyInfo = ToSeq(GetElement(tbsCertSeq, 6), 2, 2);
             var subjectPublicKeyAlgorithm = ReadAlgorithmIdentifer(GetElement(subjectPublicKeyInfo, 0));
-            var subjectPublicKey = GetElement<ASN1BitString>(subjectPublicKeyInfo, 1).Value;
+            var subjectPublicKeyBits = GetElement<ASN1BitString>(subjectPublicKeyInfo, 1).Value;
+            var subjectPublicKey = ReadPublicKey(subjectPublicKeyAlgorithm, subjectPublicKeyBits);
 
             var extensions = new List<X509Extension>();
 
@@ -151,6 +136,32 @@ namespace Crypto.Certificates
             }
 
             return new X509Name(result);
+        }
+
+        private PublicKey ReadPublicKey(X509AlgorithmIdentifier algorithm, BitArray bits)
+        {
+            // currently only supporting RSA
+            SecurityAssert.SAssert(algorithm.Algorithm == WellKnownObjectIdentifiers.RSAEncryption);
+            SecurityAssert.SAssert(algorithm.Parameters.Count == 1 && algorithm.Parameters[0] is ASN1Null);
+
+            var dataLength = (int)Math.Ceiling(bits.Length / 8m);
+            var data = bits.GetBytes(0, dataLength);
+
+            ASN1Object asn1;
+            using (var ms = new MemoryStream(data))
+            {
+                asn1 = new DERReader(ms).Read();
+            }
+
+            var keySeq = asn1 as ASN1Sequence;
+            SecurityAssert.SAssert(keySeq != null && keySeq.Count == 2);
+
+            var modulusInt = keySeq.Elements[0] as ASN1Integer;
+            SecurityAssert.SAssert(modulusInt != null);
+            var exponentInt = keySeq.Elements[1] as ASN1Integer;
+            SecurityAssert.SAssert(exponentInt != null);
+
+            return new RSAPublicKey(modulusInt.Value, exponentInt.Value);
         }
 
         private List<X509Extension> ReadExtensions(ASN1Sequence seq)

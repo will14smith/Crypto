@@ -2,7 +2,6 @@
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
-using Crypto.Certificates;
 using Crypto.IO.TLS;
 
 namespace Crypto.Client
@@ -13,6 +12,7 @@ namespace Crypto.Client
         {
             var server = new TcpListener(IPAddress.Any, 443);
             server.Start();
+
 
             Console.WriteLine("Listening for clients on {0}", server.LocalEndpoint);
 
@@ -25,8 +25,8 @@ namespace Crypto.Client
 
                 var tlsStream = new TlsStream(clientStream);
 
-                tlsStream.AddCertificate(File.ReadAllBytes("localhost.cert"));
-                tlsStream.AddPrivateKey(File.ReadAllBytes("localhost.key"));
+                tlsStream.Certificates.AddCertificate(File.ReadAllBytes("localhost.cert"));
+                tlsStream.Certificates.AddPrivateKey(File.ReadAllBytes("localhost.key"));
 
                 Console.WriteLine("Starting TLS connection");
                 tlsStream.AuthenticateAsServer();

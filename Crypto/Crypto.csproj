@@ -45,8 +45,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Certificates\ASN1Certificate.cs" />
     <Compile Include="Certificates\ASN1ObjectExtensions.cs" />
+    <Compile Include="Certificates\CertificateManager.cs" />
     <Compile Include="Certificates\DERReadingHelper.cs" />
     <Compile Include="Certificates\Keys\PrivateKey.cs" />
     <Compile Include="Certificates\Keys\RSAPrivateKey.cs" />

@@ -17,8 +17,10 @@ namespace Crypto.IO.TLS
             SecurityAssert.SAssert(inner.CanRead);
             SecurityAssert.SAssert(inner.CanWrite);
 
-            this.state = new TlsState(inner);
+            state = new TlsState(inner);
         }
+
+        public CertificateManager Certificates => state.Certificates;
 
         public override bool CanRead => true;
         public override bool CanWrite => true;
@@ -29,7 +31,7 @@ namespace Crypto.IO.TLS
             var writer = new HandshakeWriter(state);
 
             // Read ClientHello
-            var clientHello = (ClientHelloMessage)reader.Read();
+            var clientHello = (ClientHelloMessage) reader.Read();
             state.HandleClientHello(clientHello);
 
             // Send ServerHello
@@ -86,17 +88,5 @@ namespace Crypto.IO.TLS
         }
 
         #endregion
-
-        public void AddCertificate(byte[] derCert)
-        {
-            var reader = new X509Reader(derCert);
-            var cert = reader.ReadCertificate();
-
-            throw new NotImplementedException();
-        }
-        public void AddPrivateKey(byte[] derKey)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

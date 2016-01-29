@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using Crypto.Certificates;
 using Crypto.Encryption;
 using Crypto.Hashing;
@@ -22,6 +21,8 @@ namespace Crypto.IO.TLS
             state = TlsStateType.Initial;
         }
 
+        public CertificateManager Certificates { get; } = new CertificateManager();
+
         #region client capabilities
 
         private TlsVersion clientMaxVersion;
@@ -34,6 +35,9 @@ namespace Crypto.IO.TLS
         #region connection properties
 
         private TlsStateType state;
+
+        private X509Certificate certificate;
+        private X509Certificate[] certificateChain;
 
         public TlsVersion Version { get; private set; }
         private byte[] sessionId;
@@ -80,7 +84,7 @@ namespace Crypto.IO.TLS
             var keyExchange = cipherSuite.GetKeyExchange();
             if (keyExchange.RequiresCertificate())
             {
-                throw new NotImplementedException();
+                messages.Add(new CertificateMessage(certificateChain));
             }
 
             if (keyExchange.RequiresKeyExchange())
@@ -115,17 +119,28 @@ namespace Crypto.IO.TLS
 
             cipherAlgorithm = cipherSuite.GetCipher();
             macAlgorithm = cipherSuite.GetMACAlgorithm();
+
+            if (cipherSuite.GetKeyExchange().RequiresCertificate())
+            {
+                //TODO determine which certificate to use (using SNI)
+                //TODO determine chain of certificates to send
+
+                certificate = Certificates.GetDefaultCertificate();
+                certificateChain = new[] { certificate };
+            }
         }
 
         #endregion
 
         #region stream
+
         private readonly Stream stream;
 
         public RecordReader GetRecordReader()
         {
             return new PlaintextReader(stream);
         }
+
         public RecordWriter GetRecordWriter()
         {
             return new PlaintextWriter(stream);
@@ -135,6 +150,7 @@ namespace Crypto.IO.TLS
         {
             stream.Flush();
         }
+
         #endregion
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Numerics;
 using Crypto.Certificates;
 using Crypto.Encryption;
 using Crypto.Hashing;
@@ -36,15 +37,18 @@ namespace Crypto.IO.TLS
 
         private TlsStateType state;
 
-        private X509Certificate certificate;
-        private X509Certificate[] certificateChain;
+        public X509Certificate Certificate { get; private set; }
+        public X509Certificate[] CertificateChain { get; private set; }
+
+        public IDictionary<string, BigInteger> Params { get; } = new Dictionary<string, BigInteger>();
 
         public TlsVersion Version { get; private set; }
+
         private byte[] sessionId;
         private CipherSuite cipherSuite;
         private CompressionMethod compressionMethod;
 
-        private ICipher cipherAlgorithm;
+        public ICipher CipherAlgorithm { get; private set; }
         private IMACAlgorithm macAlgorithm;
 
         private byte[] masterSecret;
@@ -52,6 +56,16 @@ namespace Crypto.IO.TLS
         private byte[] serverRandom;
 
         // TODO extensions
+
+        public void SetCertificates(X509Certificate cert, X509Certificate[] chain)
+        {
+            SecurityAssert.NotNull(cert);
+            SecurityAssert.NotNull(chain);
+            SecurityAssert.SAssert(chain.Length > 0);
+
+            Certificate = cert;
+            CertificateChain = chain;
+        }
 
         #endregion
 
@@ -82,15 +96,7 @@ namespace Crypto.IO.TLS
             messages.Add(new ServerHelloMessage(Version, serverRandom, sessionId, new HelloExtension[0], cipherSuite, compressionMethod));
 
             var keyExchange = cipherSuite.GetKeyExchange();
-            if (keyExchange.RequiresCertificate())
-            {
-                messages.Add(new CertificateMessage(certificateChain));
-            }
-
-            if (keyExchange.RequiresKeyExchange())
-            {
-                throw new NotImplementedException();
-            }
+            messages.AddRange(keyExchange.GenerateHandshakeMessages(this));
 
             // TODO optionally ask for client certificate
 
@@ -117,17 +123,10 @@ namespace Crypto.IO.TLS
 
             //TODO extensions
 
-            cipherAlgorithm = cipherSuite.GetCipher();
+            CipherAlgorithm = cipherSuite.GetCipher();
             macAlgorithm = cipherSuite.GetMACAlgorithm();
 
-            if (cipherSuite.GetKeyExchange().RequiresCertificate())
-            {
-                //TODO determine which certificate to use (using SNI)
-                //TODO determine chain of certificates to send
-
-                certificate = Certificates.GetDefaultCertificate();
-                certificateChain = new[] { certificate };
-            }
+            cipherSuite.GetKeyExchange().InitialiseState(this);
         }
 
         #endregion

@@ -73,13 +73,17 @@
     <Compile Include="Hashing\NullMACAlgorithm.cs" />
     <Compile Include="Hashing\SHA1MACAlgorithm.cs" />
     <Compile Include="Hashing\SHA256MACAlgorithm.cs" />
+    <Compile Include="IO\Signing\SignedStream.cs" />
     <Compile Include="IO\TLS\CipherSuite.cs" />
     <Compile Include="IO\TLS\CipherSuiteExtensions.cs" />
     <Compile Include="IO\TLS\CompressionMethod.cs" />
     <Compile Include="IO\TLS\DefaultTlsNegotiation.cs" />
     <Compile Include="IO\TLS\ITlsNegotiation.cs" />
-    <Compile Include="IO\TLS\KeyExchange.cs" />
     <Compile Include="IO\TLS\KeyExchangeExtensions.cs" />
+    <Compile Include="IO\TLS\KeyExchange\DHEKeyExchange.cs" />
+    <Compile Include="IO\TLS\KeyExchange\KeyExchange.cs" />
+    <Compile Include="IO\TLS\KeyExchange\NullKeyExchange.cs" />
+    <Compile Include="IO\TLS\KeyExchange\RSAKeyExchange.cs" />
     <Compile Include="IO\TLS\Messages\AlertDescription.cs" />
     <Compile Include="IO\TLS\Messages\AlertLevel.cs" />
     <Compile Include="IO\TLS\Messages\AlertMessage.cs" />
@@ -98,6 +102,7 @@
     <Compile Include="IO\TLS\Messages\Handshake\HelloRequestMessage.cs" />
     <Compile Include="IO\TLS\Messages\Handshake\ServerHelloDoneMessage.cs" />
     <Compile Include="IO\TLS\Messages\Handshake\ServerHelloMessage.cs" />
+    <Compile Include="IO\TLS\Messages\Handshake\SignedKeyExchangeMessage.cs" />
     <Compile Include="IO\TLS\Messages\Message.cs" />
     <Compile Include="IO\TLS\Records\EndianBinaryReaderExtensions.cs" />
     <Compile Include="IO\TLS\Records\EndianBinaryWriterExtensions.cs" />

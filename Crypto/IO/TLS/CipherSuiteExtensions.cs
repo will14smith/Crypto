@@ -122,7 +122,7 @@ namespace Crypto.IO.TLS
             switch (suite)
             {
                 case CipherSuite.TLS_NULL_WITH_NULL_NULL:
-                    return KeyExchange.Null;
+                    return new NullKeyExchange();
 
                 case CipherSuite.TLS_RSA_WITH_NULL_MD5:
                 case CipherSuite.TLS_RSA_WITH_NULL_SHA:
@@ -134,35 +134,39 @@ namespace Crypto.IO.TLS
                 case CipherSuite.TLS_RSA_WITH_AES_256_CBC_SHA:
                 case CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA256:
                 case CipherSuite.TLS_RSA_WITH_AES_256_CBC_SHA256:
-                    return KeyExchange.RSA;
+                    return new RSAKeyExchange();
 
                 case CipherSuite.TLS_DH_DSS_WITH_3DES_EDE_CBC_SHA:
                 case CipherSuite.TLS_DH_DSS_WITH_AES_128_CBC_SHA:
                 case CipherSuite.TLS_DH_DSS_WITH_AES_256_CBC_SHA:
                 case CipherSuite.TLS_DH_DSS_WITH_AES_128_CBC_SHA256:
                 case CipherSuite.TLS_DH_DSS_WITH_AES_256_CBC_SHA256:
-                    return KeyExchange.DH_DSS;
+                    // DH_DSS
+                    throw new NotImplementedException();
 
                 case CipherSuite.TLS_DH_RSA_WITH_3DES_EDE_CBC_SHA:
                 case CipherSuite.TLS_DH_RSA_WITH_AES_128_CBC_SHA:
                 case CipherSuite.TLS_DH_RSA_WITH_AES_256_CBC_SHA:
                 case CipherSuite.TLS_DH_RSA_WITH_AES_128_CBC_SHA256:
                 case CipherSuite.TLS_DH_RSA_WITH_AES_256_CBC_SHA256:
-                    return KeyExchange.DH_RSA;
+                    // DH_RSA
+                    throw new NotImplementedException();
 
                 case CipherSuite.TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA:
                 case CipherSuite.TLS_DHE_DSS_WITH_AES_128_CBC_SHA:
                 case CipherSuite.TLS_DHE_DSS_WITH_AES_256_CBC_SHA:
                 case CipherSuite.TLS_DHE_DSS_WITH_AES_128_CBC_SHA256:
                 case CipherSuite.TLS_DHE_DSS_WITH_AES_256_CBC_SHA256:
-                    return KeyExchange.DHE_DSS;
+                    // DHE_DSS
+                    throw new NotImplementedException();
 
                 case CipherSuite.TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA:
                 case CipherSuite.TLS_DHE_RSA_WITH_AES_128_CBC_SHA:
                 case CipherSuite.TLS_DHE_RSA_WITH_AES_256_CBC_SHA:
                 case CipherSuite.TLS_DHE_RSA_WITH_AES_128_CBC_SHA256:
                 case CipherSuite.TLS_DHE_RSA_WITH_AES_256_CBC_SHA256:
-                    return KeyExchange.DHE_RSA;
+                    // DHE_RSA
+                    return new DHEKeyExchange(new RSAKeyExchange());
 
                 case CipherSuite.TLS_DH_anon_WITH_RC4_128_MD5:
                 case CipherSuite.TLS_DH_anon_WITH_3DES_EDE_CBC_SHA:
@@ -170,7 +174,8 @@ namespace Crypto.IO.TLS
                 case CipherSuite.TLS_DH_anon_WITH_AES_256_CBC_SHA:
                 case CipherSuite.TLS_DH_anon_WITH_AES_128_CBC_SHA256:
                 case CipherSuite.TLS_DH_anon_WITH_AES_256_CBC_SHA256:
-                    return KeyExchange.DH_anon;
+                    // DH_anon
+                    throw new NotImplementedException();
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(suite), suite, null);

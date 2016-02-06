@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Crypto.ASN1", "Crypto.ASN1\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Crypto.Utils", "Crypto.Utils\Crypto.Utils.csproj", "{01C34216-1249-4F84-A73C-046B5AED4B51}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Crypto.Tests", "Crypto.Tests\Crypto.Tests.csproj", "{1A477B1D-AB27-41AE-B8A6-46878D4D0780}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{01C34216-1249-4F84-A73C-046B5AED4B51}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{01C34216-1249-4F84-A73C-046B5AED4B51}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{01C34216-1249-4F84-A73C-046B5AED4B51}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1A477B1D-AB27-41AE-B8A6-46878D4D0780}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1A477B1D-AB27-41AE-B8A6-46878D4D0780}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1A477B1D-AB27-41AE-B8A6-46878D4D0780}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1A477B1D-AB27-41AE-B8A6-46878D4D0780}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

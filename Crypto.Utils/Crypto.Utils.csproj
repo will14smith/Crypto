@@ -50,6 +50,7 @@
     <Compile Include="EndianBitConverter.cs" />
     <Compile Include="Endianness.cs" />
     <Compile Include="HashCodeHelper.cs" />
+    <Compile Include="HexConverter.cs" />
     <Compile Include="IO\EndianBinaryReader.cs" />
     <Compile Include="IO\EndianBinaryWriter.cs" />
     <Compile Include="IO\StreamReader.cs" />

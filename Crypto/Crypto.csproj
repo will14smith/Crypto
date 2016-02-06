@@ -68,11 +68,11 @@
     <Compile Include="Encryption\RC4Cipher.cs" />
     <Compile Include="Encryption\ThreeDESCipher.cs" />
     <Compile Include="Encryption\ThreeDESKeyOptions.cs" />
-    <Compile Include="Hashing\IMACAlgorithm.cs" />
-    <Compile Include="Hashing\MD5MACAlgorithm.cs" />
-    <Compile Include="Hashing\NullMACAlgorithm.cs" />
-    <Compile Include="Hashing\SHA1MACAlgorithm.cs" />
-    <Compile Include="Hashing\SHA256MACAlgorithm.cs" />
+    <Compile Include="Hashing\IDigest.cs" />
+    <Compile Include="Hashing\MD5Digest.cs" />
+    <Compile Include="Hashing\NullDigest.cs" />
+    <Compile Include="Hashing\SHA1Digest.cs" />
+    <Compile Include="Hashing\SHA256Digest.cs" />
     <Compile Include="IO\Signing\SignedStream.cs" />
     <Compile Include="IO\TLS\CipherSuite.cs" />
     <Compile Include="IO\TLS\CipherSuiteExtensions.cs" />

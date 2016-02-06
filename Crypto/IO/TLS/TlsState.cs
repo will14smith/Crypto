@@ -5,6 +5,7 @@ using System.Numerics;
 using Crypto.Certificates;
 using Crypto.Encryption;
 using Crypto.Hashing;
+using Crypto.IO.Signing;
 using Crypto.IO.TLS.Messages;
 using Crypto.IO.TLS.Messages.Handshake;
 using Crypto.Utils;
@@ -48,8 +49,8 @@ namespace Crypto.IO.TLS
         private CipherSuite cipherSuite;
         private CompressionMethod compressionMethod;
 
-        public ICipher CipherAlgorithm { get; private set; }
-        private IMACAlgorithm macAlgorithm;
+        private ICipher cipherAlgorithm;
+        private IDigest macAlgorithm;
 
         private byte[] masterSecret;
         private byte[] clientRandom;
@@ -123,7 +124,7 @@ namespace Crypto.IO.TLS
 
             //TODO extensions
 
-            CipherAlgorithm = cipherSuite.GetCipher();
+            cipherAlgorithm = cipherSuite.GetCipher();
             macAlgorithm = cipherSuite.GetMACAlgorithm();
 
             cipherSuite.GetKeyExchange().InitialiseState(this);
@@ -151,5 +152,11 @@ namespace Crypto.IO.TLS
         }
 
         #endregion
+
+        public SignedStream GetSigningStream(Stream baseStream)
+        {
+            //TODO pass correct hash & sig algo
+            return new SignedStream(baseStream, cipherAlgorithm, macAlgorithm);
+        }
     }
 }

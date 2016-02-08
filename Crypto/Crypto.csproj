@@ -66,6 +66,7 @@
     <Compile Include="Encryption\ICipher.cs" />
     <Compile Include="Encryption\NullCipher.cs" />
     <Compile Include="Encryption\RC4Cipher.cs" />
+    <Compile Include="Encryption\RSA.cs" />
     <Compile Include="Encryption\ThreeDESCipher.cs" />
     <Compile Include="Encryption\ThreeDESKeyOptions.cs" />
     <Compile Include="Hashing\IDigest.cs" />
@@ -117,6 +118,7 @@
     <Compile Include="IO\TLS\TlsStream.cs" />
     <Compile Include="IO\TLS\TlsVersion.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RandomGenerator.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Crypto.ASN1\Crypto.ASN1.csproj">

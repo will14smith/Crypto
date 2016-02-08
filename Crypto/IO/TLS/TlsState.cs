@@ -115,9 +115,7 @@ namespace Crypto.IO.TLS
             cipherSuite = negotiator.DecideCipherSuite(clientCipherSuites);
             compressionMethod = negotiator.DecideCompression(clientCompressionMethods);
 
-            serverRandom = new byte[32];
-            // INSECURE RANDOM
-            new Random().NextBytes(serverRandom);
+            serverRandom = RandomGenerator.RandomBytes(32);
 
             //TODO sessionId
             sessionId = new byte[0];

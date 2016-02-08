@@ -52,6 +52,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="Encryption\RSATests.cs" />
     <Compile Include="Hashing\SHA1DigestTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

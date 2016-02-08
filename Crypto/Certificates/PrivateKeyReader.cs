@@ -1,11 +1,10 @@
 ﻿using System.IO;
 using Crypto.ASN1;
 using Crypto.Certificates.Keys;
-using Crypto.Utils;
 
 namespace Crypto.Certificates
 {
-    class PrivateKeyReader
+    public class PrivateKeyReader
     {
         private readonly byte[] input;
 

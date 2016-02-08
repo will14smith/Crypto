@@ -154,7 +154,10 @@ namespace Crypto.IO.TLS
         public SignedStream GetSigningStream(Stream baseStream)
         {
             //TODO pass correct hash & sig algo
-            return new SignedStream(baseStream, cipherAlgorithm, macAlgorithm);
+            var key = Certificates.GetPrivateKey(Certificate.SubjectPublicKey);
+            var signatureAlgo = new RSA(key);
+
+            return new SignedStream(baseStream, signatureAlgo, macAlgorithm);
         }
     }
 }

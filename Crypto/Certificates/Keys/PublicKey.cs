@@ -9,7 +9,7 @@ namespace Crypto.Certificates.Keys
         public override bool Equals(object obj)
         {
             var other = obj as PublicKey;
-            return other != null && Equals(other);
+            return other != null && Equal(other);
         }
 
         public override int GetHashCode()

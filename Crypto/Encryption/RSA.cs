@@ -7,7 +7,7 @@ using Crypto.Utils;
 namespace Crypto.Encryption
 {
     // Currently only supports PKCS1-v1_5 scheme, OAEP & PSS are unsupported
-    public class RSA
+    public class RSA : ICipher, ISignatureCipher
     {
         private readonly RSAPublicKey pub;
         private readonly RSAPrivateKey priv;

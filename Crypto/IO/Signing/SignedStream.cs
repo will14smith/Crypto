@@ -9,10 +9,10 @@ namespace Crypto.IO.Signing
     public class SignedStream : Stream
     {
         private readonly Stream inner;
-        private readonly ICipher signAlgo;
+        private readonly ISignatureCipher signAlgo;
         private readonly IDigest hashAlgo;
 
-        public SignedStream(Stream inner, ICipher signAlgo, IDigest hashAlgo)
+        public SignedStream(Stream inner, ISignatureCipher signAlgo, IDigest hashAlgo)
         {
             SecurityAssert.NotNull(inner);
             SecurityAssert.SAssert(inner.CanWrite);
@@ -35,8 +35,8 @@ namespace Crypto.IO.Signing
         public byte[] Sign()
         {
             var hash = hashAlgo.Digest();
-            
-            throw new NotImplementedException();
+
+            return signAlgo.Sign(hash);
         }
 
         //TODO probably should be an extension method
@@ -53,6 +53,7 @@ namespace Crypto.IO.Signing
             //   byte[] signature<0..2^16-1>;
             // } DigitallySigned;
 
+            // TODO
             byte hashAlgo = 0;
             byte sigAlgo = 0;
 

@@ -1,5 +1,6 @@
 ﻿using System.Numerics;
 using Crypto.IO.Signing;
+using Crypto.Utils;
 using Crypto.Utils.IO;
 
 namespace Crypto.IO.TLS.Messages
@@ -19,25 +20,28 @@ namespace Crypto.IO.TLS.Messages
             this.pub = pub;
         }
 
-        protected override void Write(EndianBinaryWriter writer)
+        protected override void Write(EndianBinaryWriter baseWriter)
         {
-            var innerStream = state.GetSigningStream(writer.BaseStream);
-            var innerWriter = new EndianBinaryWriter(writer.BitConverter, innerStream);
+            var stream = state.GetSignatureStream(baseWriter.BaseStream);
+            var writer = new EndianBinaryWriter(baseWriter.BitConverter, stream);
 
-            var pBuffer = p.ToByteArray();
-            innerWriter.Write((short)pBuffer.Length);
-            innerWriter.Write(pBuffer);
+            // signature needs these but the output doesn't
+            stream.HashAlgorithm.Update(state.ClientRandom, 0, 32);
+            stream.HashAlgorithm.Update(state.ServerRandom, 0, 32);
 
-            var gBuffer = g.ToByteArray();
-            innerWriter.Write((short)gBuffer.Length);
-            innerWriter.Write(gBuffer);
+            var pBuffer = p.ToTlsBytes();
+            var gBuffer = g.ToTlsBytes();
+            var pubBuffer = pub.ToTlsBytes();
 
-            var pubBuffer = pub.ToByteArray();
-            innerWriter.Write((short)pubBuffer.Length);
-            innerWriter.Write(pubBuffer);
+            writer.Write((short)pBuffer.Length);
+            writer.Write(pBuffer);
+            writer.Write((short)gBuffer.Length);
+            writer.Write(gBuffer);
+            writer.Write((short)pubBuffer.Length);
+            writer.Write(pubBuffer);
 
-            innerStream.Flush();
-            innerStream.WriteTlsSignature();
+            stream.Flush();
+            stream.WriteTlsSignature();
         }
     }
 }

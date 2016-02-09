@@ -1,12 +1,18 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Crypto.Hashing;
 
 namespace Crypto.Encryption
 {
-    class NullCipher : ICipher
+    class NullCipher : ICipher, ISignatureCipher
     {
+        public byte[] Sign(byte[] input, IDigest hash)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool Verify(byte[] input, byte[] signature, IDigest hash)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

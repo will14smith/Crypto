@@ -28,17 +28,22 @@ namespace Crypto.IO.TLS.Messages
 
         public static void WriteVariable(this EndianBinaryWriter writer, byte lengthSize, byte[] value)
         {
-            SecurityAssert.SAssert(lengthSize == 1 || lengthSize == 2);
+            SecurityAssert.SAssert(lengthSize > 0 && lengthSize <= 3);
 
-            if (lengthSize == 1)
+            switch (lengthSize)
             {
-                SecurityAssert.SAssert(value.Length <= 0xff);
-                writer.Write((byte) value.Length);
-            }
-            else
-            {
-                SecurityAssert.SAssert(value.Length <= 0xffff);
-                writer.Write((ushort)value.Length);
+                case 1:
+                    SecurityAssert.SAssert(value.Length <= 0xff);
+                    writer.Write((byte)value.Length);
+                    break;
+                case 2:
+                    SecurityAssert.SAssert(value.Length <= 0xffff);
+                    writer.Write((ushort)value.Length);
+                    break;
+                default:
+                    SecurityAssert.SAssert(value.Length <= 0xffffff);
+                    writer.WriteUInt24((uint)value.Length);
+                    break;
             }
 
             writer.Write(value);

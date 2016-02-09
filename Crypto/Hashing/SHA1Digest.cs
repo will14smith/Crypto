@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using Crypto.ASN1;
 using Crypto.Utils;
 
 namespace Crypto.Hashing
 {
     public class SHA1Digest : IDigest
     {
+        public ASN1ObjectIdentifier Id => new ASN1ObjectIdentifier("1.3.14.3.2.26");
+
         public const int ChunkSize = 64;
         public const int OutputSize = 20;
 

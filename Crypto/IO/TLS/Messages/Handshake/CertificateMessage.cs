@@ -21,12 +21,12 @@ namespace Crypto.IO.TLS.Messages
         protected override void Write(EndianBinaryWriter writer)
         {
             var certificates = Certificates.Select(GetBytes).ToArray();
-            var totalLength = certificates.Sum(x => x.Length + 2);
+            var totalLength = certificates.Sum(x => x.Length + 3);
 
-            writer.Write((ushort)totalLength);
+            writer.WriteUInt24((uint) totalLength);
             foreach (var cert in certificates)
             {
-                writer.WriteVariable(2, cert);
+                writer.WriteVariable(3, cert);
             }
         }
 

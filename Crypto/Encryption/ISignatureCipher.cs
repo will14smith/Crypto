@@ -1,8 +1,10 @@
-﻿namespace Crypto.Encryption
+﻿using Crypto.Hashing;
+
+namespace Crypto.Encryption
 {
     public interface ISignatureCipher
     {
-        byte[] Sign(byte[] input);
-        bool Verify(byte[] sig);
+        byte[] Sign(byte[] input, IDigest hash);
+        bool Verify(byte[] input, byte[] signature, IDigest hash);
     }
 }

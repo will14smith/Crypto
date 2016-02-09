@@ -114,6 +114,7 @@
     <Compile Include="IO\TLS\Records\RecordReader.cs" />
     <Compile Include="IO\TLS\Records\RecordType.cs" />
     <Compile Include="IO\TLS\Records\RecordWriter.cs" />
+    <Compile Include="IO\TLS\SignedStreamExtensions.cs" />
     <Compile Include="IO\TLS\TlsState.cs" />
     <Compile Include="IO\TLS\TlsStateType.cs" />
     <Compile Include="IO\TLS\TlsStream.cs" />

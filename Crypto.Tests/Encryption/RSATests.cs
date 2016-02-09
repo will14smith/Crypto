@@ -3,6 +3,8 @@ using System.Text;
 using Crypto.Certificates;
 using Crypto.Certificates.Keys;
 using Crypto.Encryption;
+using Crypto.Hashing;
+using Crypto.Utils;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Crypto.Tests.Encryption
@@ -23,6 +25,34 @@ namespace Crypto.Tests.Encryption
             var decrypted = rsa.Decrypt(encrypted);
 
             CollectionAssert.AreEqual(input, decrypted);
+        }
+
+        [TestMethod]
+        public void TestSignVerify()
+        {
+            var input = Encoding.UTF8.GetBytes("Hello World");
+
+            var rsa = new RSA(Key);
+
+            var signature = rsa.Sign(input, new SHA1Digest());
+
+            Assert.IsTrue(rsa.Verify(input, signature, new SHA1Digest()));
+            Assert.AreEqual("54eab8c1837f4ded1122e1fbf47d0225188148a092e180e83b489aba1f1dc7b5" +
+                            "241103ba8f136b393cf8c054a6a69e0c372453aa098e091a2dbe0310f0b653cb", HexConverter.ToHex(signature));
+        }
+
+        [TestMethod]
+        public void TestSignVerifyInvalid()
+        {
+            var input = Encoding.UTF8.GetBytes("Hello World");
+
+            var rsa = new RSA(Key);
+
+            var signature = rsa.Sign(input, new SHA1Digest());
+
+            signature[signature.Length - 1] ^= 1;
+
+            Assert.IsFalse(rsa.Verify(input, signature, new SHA1Digest()));
         }
     }
 }

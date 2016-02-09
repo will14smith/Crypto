@@ -53,8 +53,8 @@ namespace Crypto.IO.TLS
         private IDigest macAlgorithm;
 
         private byte[] masterSecret;
-        private byte[] clientRandom;
-        private byte[] serverRandom;
+        public byte[] ClientRandom { get; private set; }
+        public byte[] ServerRandom { get; private set; }
 
         // TODO extensions
 
@@ -82,7 +82,7 @@ namespace Crypto.IO.TLS
             clientCompressionMethods = message.CompressionMethods;
             clientExtensions = message.Extensions;
 
-            clientRandom = message.RandomBytes;
+            ClientRandom = message.RandomBytes;
 
             NegotiateParameters();
         }
@@ -94,7 +94,7 @@ namespace Crypto.IO.TLS
 
             var messages = new List<HandshakeMessage>();
             //TODO extensions
-            messages.Add(new ServerHelloMessage(Version, serverRandom, sessionId, new HelloExtension[0], cipherSuite, compressionMethod));
+            messages.Add(new ServerHelloMessage(Version, ServerRandom, sessionId, new HelloExtension[0], cipherSuite, compressionMethod));
 
             var keyExchange = cipherSuite.GetKeyExchange();
             messages.AddRange(keyExchange.GenerateHandshakeMessages(this));
@@ -115,7 +115,7 @@ namespace Crypto.IO.TLS
             cipherSuite = negotiator.DecideCipherSuite(clientCipherSuites);
             compressionMethod = negotiator.DecideCompression(clientCompressionMethods);
 
-            serverRandom = RandomGenerator.RandomBytes(32);
+            ServerRandom = RandomGenerator.RandomBytes(32);
 
             //TODO sessionId
             sessionId = new byte[0];
@@ -151,7 +151,7 @@ namespace Crypto.IO.TLS
 
         #endregion
 
-        public SignedStream GetSigningStream(Stream baseStream)
+        public SignedStream GetSignatureStream(Stream baseStream)
         {
             //TODO pass correct hash & sig algo
             var key = Certificates.GetPrivateKey(Certificate.SubjectPublicKey);

@@ -8,75 +8,47 @@ namespace Crypto.IO.Signing
 {
     public class SignedStream : Stream
     {
-        private readonly Stream inner;
-        private readonly ISignatureCipher signAlgo;
-        private readonly IDigest hashAlgo;
+        public Stream InnerStream { get; }
+        public ISignatureCipher SignatureAlgorithm { get; }
+        public IDigest HashAlgorithm { get; }
 
         public SignedStream(Stream inner, ISignatureCipher signAlgo, IDigest hashAlgo)
         {
             SecurityAssert.NotNull(inner);
             SecurityAssert.SAssert(inner.CanWrite);
-
-
+            
             SecurityAssert.NotNull(signAlgo);
             SecurityAssert.NotNull(hashAlgo);
 
-            this.inner = inner;
-            this.signAlgo = signAlgo;
-            this.hashAlgo = hashAlgo;
+            InnerStream = inner;
+            SignatureAlgorithm = signAlgo;
+            HashAlgorithm = hashAlgo;
         }
 
         public override void Write(byte[] buffer, int offset, int count)
         {
-            inner.Write(buffer, offset, count);
-            hashAlgo.Update(buffer, offset, count);
+            InnerStream.Write(buffer, offset, count);
+            HashAlgorithm.Update(buffer, offset, count);
         }
 
         public byte[] Sign()
         {
-            var hash = hashAlgo.Digest();
-
-            return signAlgo.Sign(hash);
-        }
-
-        //TODO probably should be an extension method
-        public void WriteTlsSignature()
-        {
-            // enum{ none(0), md5(1), sha1(2), sha224(3), sha256(4), sha384(5), sha512(6), (255) } HashAlgorithm;
-            // enum { anonymous(0), rsa(1), dsa(2), ecdsa(3), (255) } SignatureAlgorithm;
-
-            // struct { HashAlgorithm hash; SignatureAlgorithm signature; } SignatureAndHashAlgorithm;
-
-            // struct {
-            //   SignatureAndHashAlgorithm algorithm;
-            //   int16 signature.length
-            //   byte[] signature<0..2^16-1>;
-            // } DigitallySigned;
-
-            // TODO
-            byte hashAlgo = 0;
-            byte sigAlgo = 0;
-
-            inner.Write(new[] { hashAlgo, sigAlgo }, 0, 2);
-
-            var signature = Sign();
-
-            inner.Write(EndianBitConverter.Big.GetBytes((ushort)signature.Length), 0, 2);
-            inner.Write(signature, 0, signature.Length);
+            // not input because Write updates the HashAlgo
+            return SignatureAlgorithm.Sign(new byte[0], HashAlgorithm);
         }
 
         public override void Flush()
         {
-            inner.Flush();
+            InnerStream.Flush();
         }
 
         public override bool CanRead => false;
         public override bool CanSeek => false;
         public override bool CanWrite => true;
-        public override long Length => inner.Length;
+        public override long Length => InnerStream.Length;
         public override long Position
         {
-            get { return inner.Position; }
+            get { return InnerStream.Position; }
             set { throw new NotSupportedException(); }
         }
 
@@ -96,3 +68,4 @@ namespace Crypto.IO.Signing
         }
     }
 }
+

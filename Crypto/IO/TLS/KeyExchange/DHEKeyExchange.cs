@@ -69,7 +69,7 @@ namespace Crypto.IO.TLS
             SecurityAssert.SAssert(body.Length == length + 2);
 
             var param = new byte[length];
-            Array.Copy(param, 0, body, 2, length);
+            Array.Copy(body, 2, param, 0, length);
 
             return new ClientKeyExchangeMessage.DH(param);
         }

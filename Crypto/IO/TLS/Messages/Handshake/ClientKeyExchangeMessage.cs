@@ -6,7 +6,7 @@ using Crypto.Utils.IO;
 
 namespace Crypto.IO.TLS.Messages
 {
-    public abstract  class ClientKeyExchangeMessage : HandshakeMessage
+    public abstract class ClientKeyExchangeMessage : HandshakeMessage
     {
         protected ClientKeyExchangeMessage() : base(HandshakeType.ClientKeyExchange)
         {
@@ -23,7 +23,7 @@ namespace Crypto.IO.TLS.Messages
             {
                 SecurityAssert.NotNull(yc);
 
-                 Yc = BigIntegerExtensions.FromTlsBytes(yc);
+                Yc = BigIntegerExtensions.FromTlsBytes(yc);
             }
 
             public BigInteger Yc { get; }

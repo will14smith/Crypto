@@ -137,6 +137,8 @@ namespace Crypto.Hashing
         {
             base.Reset();
 
+            complete = false;
+
             h0 = 0x6a09e667;
             h1 = 0xbb67ae85;
             h2 = 0x3c6ef372;

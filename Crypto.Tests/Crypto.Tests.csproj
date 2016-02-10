@@ -53,6 +53,7 @@
   </Choose>
   <ItemGroup>
     <Compile Include="Encryption\RSATests.cs" />
+    <Compile Include="Hashing\HMACTests.cs" />
     <Compile Include="Hashing\SHA256DigestTests.cs" />
     <Compile Include="Hashing\SHA1DigestTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

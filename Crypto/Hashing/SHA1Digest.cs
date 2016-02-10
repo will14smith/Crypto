@@ -1,29 +1,20 @@
 ﻿using System;
-using System.Collections.Generic;
 using Crypto.ASN1;
 using Crypto.Utils;
 
 namespace Crypto.Hashing
 {
-    public class SHA1Digest : IDigest
+    public class SHA1Digest : BlockDigest
     {
-        public ASN1ObjectIdentifier Id => new ASN1ObjectIdentifier("1.3.14.3.2.26");
-        public int BlockSize => ChunkSize * 8;
-        public int HashSize => OutputSize * 8;
-
-        public const int ChunkSize = 64;
-        public const int OutputSize = 20;
+        public override ASN1ObjectIdentifier Id => new ASN1ObjectIdentifier("1.3.14.3.2.26");
+        public override int BlockSize => 512;
+        public override int HashSize => 160;
 
         private uint h0;
         private uint h1;
         private uint h2;
         private uint h3;
         private uint h4;
-
-        private long ml;
-
-        private int workBufferSize;
-        private readonly byte[] workBuffer = new byte[ChunkSize];
 
         private bool complete;
 
@@ -32,61 +23,34 @@ namespace Crypto.Hashing
             Reset();
         }
 
-        public void Reset()
+        public override void Reset()
         {
+            base.Reset();
+
             h0 = 0x67452301;
             h1 = 0xEFCDAB89;
             h2 = 0x98BADCFE;
             h3 = 0x10325476;
             h4 = 0xC3D2E1F0;
 
-            ml = 0;
-
-            workBufferSize = 0;
-            Array.Clear(workBuffer, 0, workBuffer.Length);
-
             complete = false;
         }
 
-        public void Update(byte[] buffer, int offset, int length)
+        public override void Update(byte[] buffer, int offset, int length)
         {
             SecurityAssert.SAssert(!complete);
 
-            SecurityAssert.NotNull(buffer);
-            SecurityAssert.SAssert(offset >= 0 && length >= 0);
-            SecurityAssert.SAssert(offset + length <= buffer.Length);
-
-            while (length > 0)
-            {
-                SecurityAssert.SAssert(workBufferSize < ChunkSize);
-
-                var lengthToTake = Math.Min(length, 64 - workBufferSize);
-
-                Array.Copy(buffer, offset, workBuffer, workBufferSize, lengthToTake);
-
-                length -= lengthToTake;
-                offset += lengthToTake;
-                workBufferSize += lengthToTake;
-
-                ml += lengthToTake * 8;
-
-                SecurityAssert.SAssert(workBufferSize <= ChunkSize);
-
-                if (workBufferSize == ChunkSize)
-                {
-                    UpdateChunk();
-                }
-            }
+            base.Update(buffer, offset, length);
         }
 
-        private void UpdateChunk()
+        protected override void UpdateBlock(byte[] buffer)
         {
-            SecurityAssert.SAssert(workBufferSize == ChunkSize);
+            SecurityAssert.SAssert(!complete);
 
             var w = new uint[80];
             for (var i = 0; i < 16; i++)
             {
-                w[i] = EndianBitConverter.Big.ToUInt32(workBuffer, i << 2);
+                w[i] = EndianBitConverter.Big.ToUInt32(buffer, i << 2);
             }
             for (var i = 16; i < 80; i++) { w[i] = LeftRotate(w[i - 3] ^ w[i - 8] ^ w[i - 14] ^ w[i - 16], 1); }
 
@@ -133,9 +97,6 @@ namespace Crypto.Hashing
             h2 += c;
             h3 += d;
             h4 += e;
-
-            workBufferSize = 0;
-            Array.Clear(workBuffer, 0, workBuffer.Length);
         }
 
         private uint LeftRotate(uint value, int amount)
@@ -148,20 +109,19 @@ namespace Crypto.Hashing
             return a | b;
         }
 
-        public byte[] Digest()
+        public override byte[] Digest()
         {
-            var paddingLength = 64 - ml / 8 % ChunkSize;
+            var paddingLength = 64 - (MessageSize % BlockSize) / 8;
             if (paddingLength <= 8) paddingLength += 64;
 
             var padding = new byte[paddingLength];
             // first bit is 1
             padding[0] = 0x80;
 
-            Array.Copy(EndianBitConverter.Big.GetBytes((uint)(ml >> 32)), 0, padding, paddingLength - 8, 4);
-            Array.Copy(EndianBitConverter.Big.GetBytes((uint)ml), 0, padding, paddingLength - 4, 4);
+            Array.Copy(EndianBitConverter.Big.GetBytes(MessageSize), 0, padding, paddingLength - 8, 8);
 
             Update(padding, 0, padding.Length);
-            SecurityAssert.SAssert(workBufferSize == 0);
+            SecurityAssert.SAssert(WorkBufferEmpty);
 
             complete = true;
 

@@ -70,6 +70,7 @@
     <Compile Include="Encryption\RSA.cs" />
     <Compile Include="Encryption\ThreeDESCipher.cs" />
     <Compile Include="Encryption\ThreeDESKeyOptions.cs" />
+    <Compile Include="Hashing\BlockDigest.cs" />
     <Compile Include="Hashing\HMAC.cs" />
     <Compile Include="Hashing\IDigest.cs" />
     <Compile Include="Hashing\MD5Digest.cs" />

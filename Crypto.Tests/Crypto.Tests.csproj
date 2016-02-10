@@ -53,6 +53,7 @@
   </Choose>
   <ItemGroup>
     <Compile Include="Encryption\RSATests.cs" />
+    <Compile Include="Hashing\SHA256DigestTests.cs" />
     <Compile Include="Hashing\SHA1DigestTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -72,6 +73,30 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="Hashing\TestVectors\SHA1ShortMsg.dat">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Hashing\TestVectors\SHA224LongMsg.dat">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Hashing\TestVectors\SHA224ShortMsg.dat">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Hashing\TestVectors\SHA256LongMsg.dat">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Hashing\TestVectors\SHA256ShortMsg.dat">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Hashing\TestVectors\SHA384LongMsg.dat">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Hashing\TestVectors\SHA384ShortMsg.dat">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Hashing\TestVectors\SHA512LongMsg.dat">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Hashing\TestVectors\SHA512ShortMsg.dat">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

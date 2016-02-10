@@ -86,6 +86,7 @@ namespace Crypto.IO.TLS
             var Z = BigInteger.ModPow(Yc, x, p);
             var preMasterSecret = Z.ToTlsBytes();
 
+            state.ComputeMasterSecret(preMasterSecret);
         }
     }
 }

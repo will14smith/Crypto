@@ -32,5 +32,10 @@ namespace Crypto.Utils
 
             return bytes.AsEnumerable().Reverse().ToArray();
         }
+
+        public static BigInteger FromTlsBytes(byte[] bytes)
+        {
+            return bytes.Aggregate(BigInteger.Zero, (current, b) => current * 256 + b);
+        }
     }
 }

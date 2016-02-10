@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Numerics;
 using Crypto.Certificates;
 using Crypto.Encryption;
@@ -111,6 +112,24 @@ namespace Crypto.IO.TLS
             //TODO update state
 
             KeyExchange.HandleClientKeyExchange(message);
+        }
+
+        public void ComputeMasterSecret(byte[] preMasterSecret)
+        {
+            var random = new byte[ClientRandom.Length + ServerRandom.Length];
+
+            Array.Copy(ClientRandom, 0, random, 0, ClientRandom.Length);
+            Array.Copy(ServerRandom, 0, random, ClientRandom.Length, ServerRandom.Length);
+
+            var prf = new PRF(new SHA256Digest());
+            
+            var secret = prf.Digest(preMasterSecret, "master secret", random).Take(48).ToArray();
+            SecurityAssert.SAssert(secret.Length == 48);
+
+            masterSecret = secret;
+
+            Console.WriteLine(HexConverter.ToHex(masterSecret));
+
         }
 
         private void NegotiateParameters()

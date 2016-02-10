@@ -8,6 +8,8 @@ namespace Crypto.Hashing
     public class SHA1Digest : IDigest
     {
         public ASN1ObjectIdentifier Id => new ASN1ObjectIdentifier("1.3.14.3.2.26");
+        public int BlockSize => ChunkSize * 8;
+        public int HashSize => OutputSize * 8;
 
         public const int ChunkSize = 64;
         public const int OutputSize = 20;

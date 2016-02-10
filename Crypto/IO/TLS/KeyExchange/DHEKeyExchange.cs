@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 using Crypto.IO.TLS.Messages;
 using Crypto.Utils;
 
@@ -11,10 +8,11 @@ namespace Crypto.IO.TLS
 {
     class DHEKeyExchange : KeyExchange
     {
-        public static readonly string PARAM_P = "DHE_p";
-        public static readonly string PARAM_G = "DHE_g";
-        public static readonly string PARAM_X = "DHE_X";
+        public static readonly string ParamP = "DHE_p";
+        public static readonly string ParamG = "DHE_g";
+        public static readonly string ParamX = "DHE_X";
 
+        private TlsState state;
         private readonly KeyExchange innerKeyExchange;
 
         public DHEKeyExchange(KeyExchange innerKeyExchange)
@@ -25,44 +23,69 @@ namespace Crypto.IO.TLS
             this.innerKeyExchange = innerKeyExchange;
         }
 
-        public override bool RequiresCertificate => innerKeyExchange.RequiresCertificate;
-        public override bool RequiresKeyExchange => true;
+        public bool RequiresCertificate => innerKeyExchange.RequiresCertificate;
+        public bool RequiresKeyExchange => true;
 
-        internal override void InitialiseState(TlsState state)
+        public void Init(TlsState state)
         {
-            innerKeyExchange.InitialiseState(state);
+            this.state = state;
+            innerKeyExchange.Init(state);
 
             // TODO find a decent source for sizes...
-            // TODO generate random numbers
 
-            // 2048-bit
-            var p = BigInteger.One;
-            // 256-bit
-            var g = BigInteger.One;
-            // 256-bit
-            var x = BigInteger.One;
+            // 2048-bit (prime)
+            // var p = RandomGenerator.RandomPrime(2048);
+            //TODO allow external specifcation of this (or generate if not)
+            var p = new BigInteger(Convert.FromBase64String("tU9bHsPUA77Tfndcz3qNV91mXBOU34MynSkioJqdOjehwulssAYMJS5vFv4ulCKSnM+jGPiZT9XLKYGasmMjNUQ/uw2QIKfWWjbkJMiFAwkGjwPL+iE/B3IUoYaFcXPKS+C67tkUAnsnzL7BtCoMRiV4kyNgWDsiALOae38gUejDGdnoyxUv8Y2Hoy1jfVNICFtgDd5PavKll+0leob8B3vW/ZpQJHsQSKGW2bUNv4NgUXMkv0QJc6/mQjMnCncGi5yyjX+49+PgUMQ9uZE9mNhqxCkS10c3zIrrauFH6D0qj00YWjIEqFqQRG5/zLoeqKlbvUZO87NUe8D1zI0BmAA="));
+            // static generator
+            var g = new BigInteger(2);
+            // 256-bit (server secret)
+            var x = RandomGenerator.RandomBig(256);
 
-            state.Params.Add(PARAM_P, p);
-            state.Params.Add(PARAM_G, g);
-            state.Params.Add(PARAM_X, x);
+            state.Params.Add(ParamP, p);
+            state.Params.Add(ParamG, g);
+            state.Params.Add(ParamX, x);
         }
 
-        internal override IEnumerable<HandshakeMessage> GenerateHandshakeMessages(TlsState state)
+        public IEnumerable<HandshakeMessage> GenerateHandshakeMessages()
         {
-            foreach (var message in innerKeyExchange.GenerateHandshakeMessages(state))
+            foreach (var message in innerKeyExchange.GenerateHandshakeMessages())
             {
                 yield return message;
             }
 
-            // TODO yield key exchange message
+            var p = state.Params[ParamP];
+            var g = state.Params[ParamG];
+            var x = state.Params[ParamX];
 
-            var p = state.Params[PARAM_P];
-            var g = state.Params[PARAM_P];
-            var x = state.Params[PARAM_X];
-
-            var Ys = (g ^ x) % p;
+            var Ys = BigInteger.ModPow(g, x, p);
 
             yield return new SignedKeyExchangeMessage(state, p, g, Ys);
+        }
+
+        public HandshakeMessage ReadClientKeyExchange(byte[] body)
+        {
+            var length = EndianBitConverter.Big.ToUInt16(body, 0);
+            SecurityAssert.SAssert(body.Length == length + 2);
+
+            var param = new byte[length];
+            Array.Copy(param, 0, body, 2, length);
+
+            return new ClientKeyExchangeMessage.DH(param);
+        }
+
+        public void HandleClientKeyExchange(ClientKeyExchangeMessage message)
+        {
+            var dhMessage = message as ClientKeyExchangeMessage.DH;
+            SecurityAssert.NotNull(dhMessage);
+
+            var p = state.Params[ParamP];
+            var x = state.Params[ParamX];
+            var Yc = dhMessage.Yc;
+
+            var Z = BigInteger.ModPow(Yc, x, p);
+            var preMasterSecret = Z.ToTlsBytes();
+
         }
     }
 }

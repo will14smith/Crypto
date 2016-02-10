@@ -12,7 +12,7 @@ using Crypto.Utils;
 
 namespace Crypto.IO.TLS
 {
-    internal class TlsState
+    public class TlsState
     {
         private readonly ITlsNegotiation negotiator = new DefaultTlsNegotiation();
 
@@ -49,6 +49,7 @@ namespace Crypto.IO.TLS
         private CipherSuite cipherSuite;
         private CompressionMethod compressionMethod;
 
+        public KeyExchange KeyExchange { get; private set; }
         private ICipher cipherAlgorithm;
         private IDigest macAlgorithm;
 
@@ -96,14 +97,20 @@ namespace Crypto.IO.TLS
             //TODO extensions
             messages.Add(new ServerHelloMessage(Version, ServerRandom, sessionId, new HelloExtension[0], cipherSuite, compressionMethod));
 
-            var keyExchange = cipherSuite.GetKeyExchange();
-            messages.AddRange(keyExchange.GenerateHandshakeMessages(this));
+            messages.AddRange(KeyExchange.GenerateHandshakeMessages());
 
             // TODO optionally ask for client certificate
 
             messages.Add(new ServerHelloDoneMessage());
 
             return messages;
+        }
+
+        public void HandleClientKeyExchange(ClientKeyExchangeMessage message)
+        {
+            //TODO update state
+
+            KeyExchange.HandleClientKeyExchange(message);
         }
 
         private void NegotiateParameters()
@@ -125,7 +132,8 @@ namespace Crypto.IO.TLS
             cipherAlgorithm = cipherSuite.GetCipher();
             macAlgorithm = cipherSuite.GetMACAlgorithm();
 
-            cipherSuite.GetKeyExchange().InitialiseState(this);
+            KeyExchange = cipherSuite.GetKeyExchange();
+            KeyExchange.Init(this);
         }
 
         #endregion

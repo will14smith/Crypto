@@ -94,7 +94,10 @@
     <Compile Include="IO\TLS\Messages\EndianBinaryReaderExtensions.cs" />
     <Compile Include="IO\TLS\Messages\EndianBinaryWriterExtensions.cs" />
     <Compile Include="IO\TLS\Messages\Handshake\CertificateMessage.cs" />
+    <Compile Include="IO\TLS\Messages\Handshake\CertificateVerifyMessage.cs" />
+    <Compile Include="IO\TLS\Messages\Handshake\FinishedHandshakeMessage.cs" />
     <Compile Include="IO\TLS\Messages\Handshake\ClientHelloMessage.cs" />
+    <Compile Include="IO\TLS\Messages\Handshake\ClientKeyExchangeMessage.cs" />
     <Compile Include="IO\TLS\Messages\Handshake\HandshakeMessage.cs" />
     <Compile Include="IO\TLS\Messages\Handshake\HandshakeReader.cs" />
     <Compile Include="IO\TLS\Messages\Handshake\HandshakeType.cs" />

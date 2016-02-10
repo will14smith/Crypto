@@ -141,14 +141,20 @@ namespace Crypto.Encryption
             SecurityAssert.SAssert(x.Sign >= 0);
             SecurityAssert.SAssert(x < BigInteger.Pow(256, length));
 
-            return x.ToTlsBytes();
+            var bytes = new List<byte>();
+
+            while (x != 0)
+            {
+                bytes.Add((byte)(x % 256));
+
+                x /= 256;
+            }
+
+            return bytes.AsEnumerable().Reverse().ToArray();
         }
         private static BigInteger OS2IP(IEnumerable<byte> x)
         {
-            BigInteger result = BigInteger.Zero;
-            foreach (var b in x)
-                result = result * 256 + b;
-            return result;
+            return x.Aggregate(BigInteger.Zero, (current, b) => current*256 + b);
         }
 
         private static byte[] EMSA_PKCS1_v1_5_Encode(byte[] input, int emLen, IDigest hash)

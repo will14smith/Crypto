@@ -5,16 +5,26 @@ namespace Crypto.IO.TLS
 {
     class NullKeyExchange : KeyExchange
     {
-        public override bool RequiresCertificate => false;
-        public override bool RequiresKeyExchange => false;
-        internal override void InitialiseState(TlsState state)
+        public bool RequiresCertificate => false;
+        public bool RequiresKeyExchange => false;
+        public void Init(TlsState state)
         {
             // nop
         }
 
-        internal override IEnumerable<HandshakeMessage> GenerateHandshakeMessages(TlsState state)
+        public IEnumerable<HandshakeMessage> GenerateHandshakeMessages()
         {
             yield break;
+        }
+
+        public HandshakeMessage ReadClientKeyExchange(byte[] body)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public void HandleClientKeyExchange(ClientKeyExchangeMessage message)
+        {
+            throw new System.NotImplementedException();
         }
     }
 }

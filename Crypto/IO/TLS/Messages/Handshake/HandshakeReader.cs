@@ -43,6 +43,8 @@ namespace Crypto.IO.TLS.Messages
             {
                 case HandshakeType.ClientHello:
                     return ClientHelloMessage.Read(state, body);
+                case HandshakeType.ClientKeyExchange:
+                    return state.KeyExchange.ReadClientKeyExchange(body);
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(type), type, null);

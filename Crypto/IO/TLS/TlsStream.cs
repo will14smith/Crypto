@@ -31,7 +31,7 @@ namespace Crypto.IO.TLS
             var writer = new HandshakeWriter(state);
 
             // Read ClientHello
-            var clientHello = (ClientHelloMessage) reader.Read();
+            var clientHello = (ClientHelloMessage)reader.Read();
             state.HandleClientHello(clientHello);
 
             // Send ServerHello
@@ -42,7 +42,31 @@ namespace Crypto.IO.TLS
             }
 
             // Read ClientResponse
-            var clientResponse = reader.Read();
+            while(true)
+            {
+                var clientResponse = reader.Read();
+
+                if (clientResponse is CertificateMessage)
+                {
+                    throw new NotImplementedException();
+                }
+                else if (clientResponse is ClientKeyExchangeMessage)
+                {
+                    state.HandleClientKeyExchange((ClientKeyExchangeMessage) clientResponse);
+                }
+                else if (clientResponse is CertificateVerifyMessage)
+                {
+                    throw new NotImplementedException();
+                }
+                else if (clientResponse is FinishedHandshakeMessage)
+                {
+                    break;
+                }
+                else
+                {
+                    throw new InvalidOperationException();
+                }
+            }
 
             throw new NotImplementedException();
         }

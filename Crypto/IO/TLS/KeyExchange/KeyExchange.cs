@@ -13,12 +13,15 @@ namespace Crypto.IO.TLS
         DH_anon
         */
 
-    public abstract class KeyExchange
+    public interface KeyExchange
     {
-        public abstract bool RequiresCertificate { get; }
-        public abstract bool RequiresKeyExchange { get; }
+        bool RequiresCertificate { get; }
+        bool RequiresKeyExchange { get; }
 
-        internal abstract void InitialiseState(TlsState state);
-        internal abstract IEnumerable<HandshakeMessage> GenerateHandshakeMessages(TlsState state);
+        void Init(TlsState state);
+        IEnumerable<HandshakeMessage> GenerateHandshakeMessages();
+
+        HandshakeMessage ReadClientKeyExchange(byte[] body);
+        void HandleClientKeyExchange(ClientKeyExchangeMessage message);
     }
 }

@@ -33,7 +33,7 @@ namespace Crypto.IO.Signing
 
         public byte[] Sign()
         {
-            // not input because Write updates the HashAlgo
+            // no input because Write updates the HashAlgo
             return SignatureAlgorithm.Sign(new byte[0], HashAlgorithm);
         }
 

@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.Collections.Generic;
 using Crypto.Encryption;
 using Crypto.Utils;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -9,26 +9,112 @@ namespace Crypto.Tests.Encryption
     public class AESCipherTests
     {
         [TestMethod]
+        public void TestAES128()
+        {
+            var tests = new[]
+            {
+                new [] { "6bc1bee22e409f96e93d7e117393172a", "3ad77bb40d7a3660a89ecaf32466ef97" },
+                new [] { "ae2d8a571e03ac9c9eb76fac45af8e51", "f5d3d58503b9699de785895a96fdbaaf" },
+                new [] { "30c81c46a35ce411e5fbc1191a0a52ef", "43b1cd7f598ece23881b00e3ed030688" },
+                new [] { "f69f2445df4f9b17ad2b417be66c3710", "7b0c785e27e8ad3f8223207104725dd4" },
+            };
+
+            var aes = new AESCipher(128) { Key = HexConverter.FromHex("2b7e151628aed2a6abf7158809cf4f3c") };
+
+            RunAESTests(tests, aes);
+        }
+        [TestMethod]
+        public void TestAES192()
+        {
+            var tests = new[]
+            {
+                new [] { "6bc1bee22e409f96e93d7e117393172a", "bd334f1d6e45f25ff712a214571fa5cc" },
+                new [] { "ae2d8a571e03ac9c9eb76fac45af8e51", "974104846d0ad3ad7734ecb3ecee4eef" },
+                new [] { "30c81c46a35ce411e5fbc1191a0a52ef", "ef7afd2270e2e60adce0ba2face6444e" },
+                new [] { "f69f2445df4f9b17ad2b417be66c3710", "9a4b41ba738d6c72fb16691603c18e0e" },
+            };
+
+            var aes = new AESCipher(192) { Key = HexConverter.FromHex("8e73b0f7da0e6452c810f32b809079e562f8ead2522c6b7b") };
+
+            RunAESTests(tests, aes);
+        }
+        [TestMethod]
+        public void TestAES256()
+        {
+            var tests = new[]
+            {
+                new [] { "6bc1bee22e409f96e93d7e117393172a", "f3eed1bdb5d2a03c064b5a7e3db181f8" },
+                new [] { "ae2d8a571e03ac9c9eb76fac45af8e51", "591ccb10d410ed26dc5ba74a31362870" },
+                new [] { "30c81c46a35ce411e5fbc1191a0a52ef", "b6ed21b99ca6f4f9f153e7b1beafed1d" },
+                new [] { "f69f2445df4f9b17ad2b417be66c3710", "23304b7a39f9f3ff067d8d8f9e24ecc7" },
+            };
+
+            var aes = new AESCipher(256) { Key = HexConverter.FromHex("603deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4") };
+
+            RunAESTests(tests, aes);
+        }
+
+        private static void RunAESTests(IEnumerable<string[]> tests, ICipher aes)
+        {
+            foreach (var test in tests)
+            {
+                var plain = test[0];
+                var cipher = test[1];
+
+                // encryption
+                var plainInput = HexConverter.FromHex(plain);
+                var actual = new byte[aes.BlockSize];
+
+                aes.EncryptBlock(plainInput, 0, actual, 0);
+
+                Assert.AreEqual(cipher, HexConverter.ToHex(actual));
+
+                // decryption
+                var cipherInput = HexConverter.FromHex(cipher);
+                actual = new byte[aes.BlockSize];
+                aes.DecryptBlock(cipherInput, 0, actual, 0);
+
+                Assert.AreEqual(plain, HexConverter.ToHex(actual));
+            }
+        }
+
+        [TestMethod]
+        public void TestShiftRows()
+        {
+            var input = HexConverter.FromHex("0102030405060708090a0b0c0d0e0f10");
+            var expected = "01060b10050a0f04090e03080d02070c";
+
+            var state = AESCipher.ToState(input, 0);
+            AESCipher.ShiftRows(state);
+            var output = new byte[16];
+            AESCipher.FromState(state, output, 0);
+
+            Assert.AreEqual(expected, HexConverter.ToHex(output));
+        }
+
+        [TestMethod]
         public void TestMixColumns()
         {
             var input = HexConverter.FromHex("dbf201c6130a01c6532201c6455c01c6");
-            var expected = "8e9f01c64ddc01c6a15801c6bc9d01c6";
+            var expected = "67e17a12ffc24aa907d22241a9384a05";
 
-            var state = ToState(input);
+            var state = AESCipher.ToState(input, 0);
             AESCipher.MixColumns(state);
-            var output = FromState(state);
+            var output = new byte[16];
+            AESCipher.FromState(state, output, 0);
 
             Assert.AreEqual(expected, HexConverter.ToHex(output));
         }
         [TestMethod]
         public void TestInvMixColumns()
         {
-            var input = HexConverter.FromHex("8e9f01c64ddc01c6a15801c6bc9d01c6");
+            var input = HexConverter.FromHex("67e17a12ffc24aa907d22241a9384a05");
             var expected = "dbf201c6130a01c6532201c6455c01c6";
 
-            var state = ToState(input);
+            var state = AESCipher.ToState(input, 0);
             AESCipher.InvMixColumns(state);
-            var output = FromState(state);
+            var output = new byte[16];
+            AESCipher.FromState(state, output, 0);
 
             Assert.AreEqual(expected, HexConverter.ToHex(output));
         }
@@ -95,32 +181,6 @@ namespace Crypto.Tests.Encryption
 
                 Assert.AreEqual(expected, HexConverter.ToHex(output));
             }
-        }
-
-        private byte[,] ToState(byte[] input)
-        {
-            var output = new byte[4, 4];
-
-            for (var i = 0; i < 16; i++)
-            {
-                output[i / 4, i % 4] = input[i];
-            }
-
-            return output;
-        }
-        private byte[] FromState(byte[,] input)
-        {
-            var output = new byte[16];
-
-            for (var i = 0; i < 4; i++)
-            {
-                for (var j = 0; j < 4; j++)
-                {
-                    output[i * 4 + j] = input[i, j];
-                }
-            }
-
-            return output;
         }
     }
 }

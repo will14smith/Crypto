@@ -14,10 +14,10 @@ namespace Crypto.Encryption
         {
             SecurityAssert.SAssert(keyLength == 128 || keyLength == 192 || keyLength == 256);
 
-            KeySize = keyLength/8;
+            KeySize = keyLength / 8;
 
             key = new byte[KeySize];
-            roundKeys = new byte[KeySize*4 + 112];
+            roundKeys = new byte[KeySize * 4 + 112];
         }
 
         public byte[] Key
@@ -43,26 +43,25 @@ namespace Crypto.Encryption
             SecurityAssert.NotNull(output);
             SecurityAssert.SAssert(outputOffset + BlockSize <= output.Length);
 
-            var rounds = KeySize/4 + 6;
+            var rounds = KeySize / 4 + 6;
 
-            var state = new byte[4, 4];
-            Array.Copy(input, inputOffset, state, 0, BlockSize);
-
+            var state = ToState(input, inputOffset);
+            
             AddRoundKey(state, 0);
 
-            for (var i = 1; i < rounds; i++)
+            for (var round = 1; round < rounds; round++)
             {
                 SubBytes(state);
                 ShiftRows(state);
                 MixColumns(state);
-                AddRoundKey(state, i);
+                AddRoundKey(state, round);
             }
 
             SubBytes(state);
             ShiftRows(state);
             AddRoundKey(state, rounds);
 
-            Array.Copy(state, 0, output, outputOffset, BlockSize);
+            FromState(state, output, outputOffset);
         }
 
         public void DecryptBlock(byte[] input, int inputOffset, byte[] output, int outputOffset)
@@ -72,26 +71,47 @@ namespace Crypto.Encryption
             SecurityAssert.NotNull(output);
             SecurityAssert.SAssert(outputOffset + BlockSize <= output.Length);
 
-            var rounds = KeySize/4 + 6;
+            var rounds = KeySize / 4 + 6;
 
-            var state = new byte[4, 4];
-            Array.Copy(input, inputOffset, state, 0, BlockSize);
+            var state = ToState(input, inputOffset);
 
             AddRoundKey(state, rounds);
-            InvShiftRows(state);
-            InvSubBytes(state);
 
-            for (var i = rounds - 1; i >= 0; i--)
+            for (var i = rounds - 1; i > 0; i--)
             {
-                AddRoundKey(state, i);
-                InvMixColumns(state);
                 InvShiftRows(state);
                 InvSubBytes(state);
+                AddRoundKey(state, i);
+                InvMixColumns(state);
             }
 
+            InvShiftRows(state);
+            InvSubBytes(state);
             AddRoundKey(state, 0);
 
-            Array.Copy(state, 0, output, outputOffset, BlockSize);
+            FromState(state, output, outputOffset);
+        }
+
+        public static byte[,] ToState(byte[] input, int offset)
+        {
+            var output = new byte[4, 4];
+
+            for (var i = 0; i < AESBlockSize; i++)
+            {
+                output[i / 4, i % 4] = input[offset + i];
+            }
+
+            return output;
+        }
+        public static void FromState(byte[,] input, byte[] output, int offset)
+        {
+            for (var i = 0; i < 4; i++)
+            {
+                for (var j = 0; j < 4; j++)
+                {
+                    output[offset + i * 4 + j] = input[i, j];
+                }
+            }
         }
 
         public static byte[] BuildRoundKeys(byte[] inputKey)
@@ -99,7 +119,7 @@ namespace Crypto.Encryption
             SecurityAssert.SAssert(inputKey.Length == 16 || inputKey.Length == 24 || inputKey.Length == 32);
 
             var n = inputKey.Length;
-            var b = n*4 + 112;
+            var b = n * 4 + 112;
             var arr = new byte[b];
 
             Array.Copy(inputKey, 0, arr, 0, n);
@@ -116,13 +136,13 @@ namespace Crypto.Encryption
                     t[a] = arr[a + c - 4];
                 }
                 // Every n-blocks do a complex calculation
-                if (c%n == 0)
+                if (c % n == 0)
                 {
                     ScheduleCore(t, i++);
                 }
 
                 // For 256-bit expansion, do an sbox
-                if (n == 32 && c%32 == 16)
+                if (n == 32 && c % 32 == 16)
                 {
                     for (var a = 0; a < 4; a++)
                     {
@@ -132,7 +152,7 @@ namespace Crypto.Encryption
 
                 for (var a = 0; a < 4; a++)
                 {
-                    arr[c] = (byte) (arr[c - n] ^ t[a]);
+                    arr[c] = (byte)(arr[c - n] ^ t[a]);
                     c++;
                 }
             }
@@ -171,14 +191,13 @@ namespace Crypto.Encryption
 
         public void AddRoundKey(byte[,] state, int round)
         {
-            var roundKey = new byte[16];
-            Array.Copy(roundKeys, round*16, roundKey, 0, 16);
+            SecurityAssert.SAssert(round * 16 + 16 <= roundKeys.Length);
 
             for (var x = 0; x < 4; x++)
             {
                 for (var y = 0; y < 4; y++)
                 {
-                    state[x, y] ^= roundKey[x*4 + y];
+                    state[x, y] ^= roundKeys[round * 16 + x * 4 + y];
                 }
             }
         }
@@ -235,29 +254,29 @@ namespace Crypto.Encryption
             arr[3] = a;
         }
 
-        private static void RotateLeft(byte[,] arr, int dim1)
+        private static void RotateLeft(byte[,] arr, int dim)
         {
-            var a = arr[dim1, 0];
+            var a = arr[0, dim];
 
-            arr[dim1, 0] = arr[dim1, 1];
-            arr[dim1, 1] = arr[dim1, 2];
-            arr[dim1, 2] = arr[dim1, 3];
-            arr[dim1, 3] = a;
+            arr[0, dim] = arr[1, dim];
+            arr[1, dim] = arr[2, dim];
+            arr[2, dim] = arr[3, dim];
+            arr[3, dim] = a;
         }
 
         public static void MixColumns(byte[,] state)
         {
             for (var c = 0; c < 4; c++)
             {
-                var c0 = state[0, c];
-                var c1 = state[1, c];
-                var c2 = state[2, c];
-                var c3 = state[3, c];
+                var c0 = state[c, 0];
+                var c1 = state[c, 1];
+                var c2 = state[c, 2];
+                var c3 = state[c, 3];
 
-                state[0, c] = (byte) (G2[c0] ^ G3[c1] ^ c2 ^ c3);
-                state[1, c] = (byte) (c0 ^ G2[c1] ^ G3[c2] ^ c3);
-                state[2, c] = (byte) (c0 ^ c1 ^ G2[c2] ^ G3[c3]);
-                state[3, c] = (byte) (G3[c0] ^ c1 ^ c2 ^ G2[c3]);
+                state[c, 0] = (byte)(G2[c0] ^ G3[c1] ^ c2 ^ c3);
+                state[c, 1] = (byte)(c0 ^ G2[c1] ^ G3[c2] ^ c3);
+                state[c, 2] = (byte)(c0 ^ c1 ^ G2[c2] ^ G3[c3]);
+                state[c, 3] = (byte)(G3[c0] ^ c1 ^ c2 ^ G2[c3]);
             }
         }
 
@@ -265,15 +284,15 @@ namespace Crypto.Encryption
         {
             for (var c = 0; c < 4; c++)
             {
-                var c0 = state[0, c];
-                var c1 = state[1, c];
-                var c2 = state[2, c];
-                var c3 = state[3, c];
+                var c0 = state[c, 0];
+                var c1 = state[c, 1];
+                var c2 = state[c, 2];
+                var c3 = state[c, 3];
 
-                state[0, c] = (byte) (G14[c0] ^ G11[c1] ^ G13[c2] ^ G9[c3]);
-                state[1, c] = (byte) (G9[c0] ^ G14[c1] ^ G11[c2] ^ G13[c3]);
-                state[2, c] = (byte) (G13[c0] ^ G9[c1] ^ G14[c2] ^ G11[c3]);
-                state[3, c] = (byte) (G11[c0] ^ G13[c1] ^ G9[c2] ^ G14[c3]);
+                state[c, 0] = (byte)(G14[c0] ^ G11[c1] ^ G13[c2] ^ G9[c3]);
+                state[c, 1] = (byte)(G9[c0] ^ G14[c1] ^ G11[c2] ^ G13[c3]);
+                state[c, 2] = (byte)(G13[c0] ^ G9[c1] ^ G14[c2] ^ G11[c3]);
+                state[c, 3] = (byte)(G11[c0] ^ G13[c1] ^ G9[c2] ^ G14[c3]);
             }
         }
 

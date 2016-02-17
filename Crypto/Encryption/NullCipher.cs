@@ -14,5 +14,17 @@ namespace Crypto.Encryption
         {
             throw new NotImplementedException();
         }
+
+        public int BlockSize { get; }
+        public int KeySize { get; }
+        public void EncryptBlock(byte[] input, int inputOffset, byte[] output, int outputOffset)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void DecryptBlock(byte[] input, int inputOffset, byte[] output, int outputOffset)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

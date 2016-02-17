@@ -42,7 +42,8 @@ namespace Crypto.IO.TLS
                 case CipherSuite.TLS_DHE_RSA_WITH_AES_128_CBC_SHA256:
                 case CipherSuite.TLS_DH_anon_WITH_AES_128_CBC_SHA:
                 case CipherSuite.TLS_DH_anon_WITH_AES_128_CBC_SHA256:
-                    return new AESCipher(128, CipherBlockMode.CBC);
+                    // TODO CBC
+                    return new AESCipher(128);
 
                 case CipherSuite.TLS_RSA_WITH_AES_256_CBC_SHA:
                 case CipherSuite.TLS_RSA_WITH_AES_256_CBC_SHA256:
@@ -56,7 +57,7 @@ namespace Crypto.IO.TLS
                 case CipherSuite.TLS_DHE_RSA_WITH_AES_256_CBC_SHA256:
                 case CipherSuite.TLS_DH_anon_WITH_AES_256_CBC_SHA:
                 case CipherSuite.TLS_DH_anon_WITH_AES_256_CBC_SHA256:
-                    return new AESCipher(256, CipherBlockMode.CBC);
+                    return new AESCipher(256);
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(suite), suite, null);

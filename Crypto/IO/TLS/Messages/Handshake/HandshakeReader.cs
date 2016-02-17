@@ -8,18 +8,14 @@ namespace Crypto.IO.TLS.Messages
     public class HandshakeReader
     {
         private readonly TlsState state;
-        private readonly RecordReader reader;
 
         internal HandshakeReader(TlsState state)
         {
             this.state = state;
-            reader = state.GetRecordReader();
         }
 
-        public HandshakeMessage Read()
+        public HandshakeMessage Read(Record record)
         {
-            var record = reader.ReadRecord();
-
             SecurityAssert.SAssert(record.Type == RecordType.Handshake);
 
             using (var ms = new MemoryStream(record.Data))

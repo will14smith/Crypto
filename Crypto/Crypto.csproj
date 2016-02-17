@@ -84,7 +84,6 @@
     <Compile Include="IO\TLS\CompressionMethod.cs" />
     <Compile Include="IO\TLS\DefaultTlsNegotiation.cs" />
     <Compile Include="IO\TLS\ITlsNegotiation.cs" />
-    <Compile Include="IO\TLS\KeyExchangeExtensions.cs" />
     <Compile Include="IO\TLS\KeyExchange\DHEKeyExchange.cs" />
     <Compile Include="IO\TLS\KeyExchange\KeyExchange.cs" />
     <Compile Include="IO\TLS\KeyExchange\NullKeyExchange.cs" />
@@ -114,13 +113,13 @@
     <Compile Include="IO\TLS\Messages\Message.cs" />
     <Compile Include="IO\TLS\Records\EndianBinaryReaderExtensions.cs" />
     <Compile Include="IO\TLS\Records\EndianBinaryWriterExtensions.cs" />
-    <Compile Include="IO\TLS\Records\PlaintextReader.cs" />
-    <Compile Include="IO\TLS\Records\PlaintextWriter.cs" />
     <Compile Include="IO\TLS\Records\Record.cs" />
     <Compile Include="IO\TLS\Records\RecordReader.cs" />
     <Compile Include="IO\TLS\Records\RecordType.cs" />
     <Compile Include="IO\TLS\Records\RecordWriter.cs" />
     <Compile Include="IO\TLS\SignedStreamExtensions.cs" />
+    <Compile Include="IO\TLS\TlsDispatcher.cs" />
+    <Compile Include="IO\TLS\TlsMode.cs" />
     <Compile Include="IO\TLS\TlsState.cs" />
     <Compile Include="IO\TLS\TlsStateType.cs" />
     <Compile Include="IO\TLS\TlsStream.cs" />

@@ -35,9 +35,31 @@ namespace Crypto.IO.TLS
 
         #endregion
 
-        #region connection properties
+        #region connection state
 
         private TlsStateType state;
+        public void SetMode(TlsMode mode)
+        {
+            SecurityAssert.SAssert(state == TlsStateType.Initial);
+
+            switch (mode)
+            {
+                case TlsMode.Client:
+                    state = TlsStateType.SendingClientHello;
+                    break;
+                case TlsMode.Server:
+                    state = TlsStateType.WaitingForClientHello;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(mode));
+            }
+        }
+
+        #endregion
+
+        #region connection properties
+
+        public bool Protected { get; private set; }
 
         public X509Certificate Certificate { get; private set; }
         public X509Certificate[] CertificateChain { get; private set; }
@@ -76,7 +98,7 @@ namespace Crypto.IO.TLS
 
         public void HandleClientHello(ClientHelloMessage message)
         {
-            SecurityAssert.SAssert(state == TlsStateType.Initial);
+            SecurityAssert.SAssert(state == TlsStateType.WaitingForClientHello);
             state = TlsStateType.RecievedClientHello;
 
             clientMaxVersion = message.Version;
@@ -92,26 +114,46 @@ namespace Crypto.IO.TLS
         public IEnumerable<HandshakeMessage> GenerateServerHello()
         {
             SecurityAssert.SAssert(state == TlsStateType.RecievedClientHello);
-            state = TlsStateType.SentServerHello;
+            state = TlsStateType.SendingServerHello;
 
-            var messages = new List<HandshakeMessage>();
             //TODO extensions
-            messages.Add(new ServerHelloMessage(Version, ServerRandom, sessionId, new HelloExtension[0], cipherSuite, compressionMethod));
+            yield return new ServerHelloMessage(Version, ServerRandom, sessionId, new HelloExtension[0], cipherSuite, compressionMethod);
 
-            messages.AddRange(KeyExchange.GenerateHandshakeMessages());
+            foreach (var message in KeyExchange.GenerateHandshakeMessages())
+            {
+                yield return message;
+            }
 
-            // TODO optionally ask for client certificate
+            yield return new ServerHelloDoneMessage();
+        }
 
-            messages.Add(new ServerHelloDoneMessage());
+        public void SentServerHello()
+        {
+            SecurityAssert.SAssert(state == TlsStateType.SendingServerHello);
 
-            return messages;
+            state = TlsStateType.SentServerHello;
         }
 
         public void HandleClientKeyExchange(ClientKeyExchangeMessage message)
         {
-            //TODO update state
+            SecurityAssert.SAssert(state == TlsStateType.SentServerHello);
+
+            state = TlsStateType.RecievedClientKeyExchange;
 
             KeyExchange.HandleClientKeyExchange(message);
+        }
+
+        public void ReceivedChangeCipherSpec()
+        {
+            SecurityAssert.SAssert(state == TlsStateType.RecievedClientKeyExchange);
+            SecurityAssert.SAssert(!Protected);
+
+            Protected = true;
+        }
+
+        public void SentChangeCipherSpec()
+        {
+            throw new NotImplementedException();
         }
 
         public void ComputeMasterSecret(byte[] preMasterSecret)
@@ -122,7 +164,7 @@ namespace Crypto.IO.TLS
             Array.Copy(ServerRandom, 0, random, ClientRandom.Length, ServerRandom.Length);
 
             var prf = new PRF(new SHA256Digest());
-            
+
             var secret = prf.Digest(preMasterSecret, "master secret", random).Take(48).ToArray();
             SecurityAssert.SAssert(secret.Length == 48);
 
@@ -163,12 +205,12 @@ namespace Crypto.IO.TLS
 
         public RecordReader GetRecordReader()
         {
-            return new PlaintextReader(stream);
+            return new RecordReader(this, stream);
         }
 
         public RecordWriter GetRecordWriter()
         {
-            return new PlaintextWriter(stream);
+            return new RecordWriter(this, stream);
         }
 
         public void Flush()

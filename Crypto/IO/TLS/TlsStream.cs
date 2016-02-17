@@ -10,6 +10,7 @@ namespace Crypto.IO.TLS
     public class TlsStream : Stream
     {
         private readonly TlsState state;
+        private readonly TlsDispatcher dispatcher;
 
         public TlsStream(Stream inner)
         {
@@ -18,6 +19,7 @@ namespace Crypto.IO.TLS
             SecurityAssert.SAssert(inner.CanWrite);
 
             state = new TlsState(inner);
+            dispatcher = new TlsDispatcher(state);
         }
 
         public CertificateManager Certificates => state.Certificates;
@@ -27,48 +29,7 @@ namespace Crypto.IO.TLS
 
         public void AuthenticateAsServer()
         {
-            var reader = new HandshakeReader(state);
-            var writer = new HandshakeWriter(state);
-
-            // Read ClientHello
-            var clientHello = (ClientHelloMessage)reader.Read();
-            state.HandleClientHello(clientHello);
-
-            // Send ServerHello
-            var serverHellos = state.GenerateServerHello();
-            foreach (var message in serverHellos)
-            {
-                writer.Write(message);
-            }
-
-            // Read ClientResponse
-            while(true)
-            {
-                var clientResponse = reader.Read();
-
-                if (clientResponse is CertificateMessage)
-                {
-                    throw new NotImplementedException();
-                }
-                else if (clientResponse is ClientKeyExchangeMessage)
-                {
-                    state.HandleClientKeyExchange((ClientKeyExchangeMessage) clientResponse);
-                }
-                else if (clientResponse is CertificateVerifyMessage)
-                {
-                    throw new NotImplementedException();
-                }
-                else if (clientResponse is FinishedHandshakeMessage)
-                {
-                    break;
-                }
-                else
-                {
-                    throw new InvalidOperationException();
-                }
-            }
-
-            throw new NotImplementedException();
+            dispatcher.AuthenticateAsServer();
         }
 
         public override int Read(byte[] buffer, int offset, int count)

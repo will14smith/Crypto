@@ -73,8 +73,6 @@ namespace Crypto.IO.TLS
         private CompressionMethod compressionMethod;
 
         public KeyExchange KeyExchange { get; private set; }
-        private ICipher cipherAlgorithm;
-        private IDigest macAlgorithm;
 
         private byte[] masterSecret;
         public byte[] ClientRandom { get; private set; }
@@ -190,9 +188,6 @@ namespace Crypto.IO.TLS
 
             //TODO extensions
 
-            cipherAlgorithm = cipherSuite.GetCipher();
-            macAlgorithm = cipherSuite.GetMACAlgorithm();
-
             KeyExchange = cipherSuite.GetKeyExchange();
             KeyExchange.Init(this);
         }
@@ -226,7 +221,19 @@ namespace Crypto.IO.TLS
             var key = Certificates.GetPrivateKey(Certificate.SubjectPublicKey);
             var signatureAlgo = new RSA(key);
 
-            return new SignedStream(baseStream, signatureAlgo, macAlgorithm);
+            return new SignedStream(baseStream, signatureAlgo, GetHMAC());
+        }
+
+        public ICipher GetCipher()
+        {
+            SecurityAssert.SAssert(Protected);
+
+            return cipherSuite.GetCipher();
+        }
+
+        public IDigest GetHMAC()
+        {
+            return cipherSuite.GetMACAlgorithm();
         }
     }
 }

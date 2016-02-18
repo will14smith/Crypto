@@ -62,9 +62,12 @@
     <Compile Include="Certificates\X509Validity.cs" />
     <Compile Include="Certificates\X509Writer.cs" />
     <Compile Include="Encryption\AESCipher.cs" />
-    <Compile Include="Encryption\CipherBlockMode.cs" />
     <Compile Include="Encryption\ICipher.cs" />
     <Compile Include="Encryption\ISignatureCipher.cs" />
+    <Compile Include="Encryption\Modes\BlockModeCipher.cs" />
+    <Compile Include="Encryption\Modes\CBCBlockMode.cs" />
+    <Compile Include="Encryption\Modes\ECBBlockMode.cs" />
+    <Compile Include="Encryption\Modes\IBlockMode.cs" />
     <Compile Include="Encryption\NullCipher.cs" />
     <Compile Include="Encryption\RC4Cipher.cs" />
     <Compile Include="Encryption\RSA.cs" />

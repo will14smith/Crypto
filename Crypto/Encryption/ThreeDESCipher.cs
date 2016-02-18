@@ -1,14 +1,12 @@
 ﻿namespace Crypto.Encryption
 {
-    class ThreeDESCipher : ICipher
+    class ThreeDESCipher : IBlockCipher
     {
         private readonly ThreeDESKeyOptions keyMode;
-        private readonly CipherBlockMode blockMode;
 
-        public ThreeDESCipher(ThreeDESKeyOptions keyMode, CipherBlockMode blockMode)
+        public ThreeDESCipher(ThreeDESKeyOptions keyMode)
         {
             this.keyMode = keyMode;
-            this.blockMode = blockMode;
         }
 
         public int BlockSize { get; }

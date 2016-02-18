@@ -3,7 +3,7 @@ using Crypto.Utils;
 
 namespace Crypto.Encryption
 {
-    public class AESCipher : ICipher
+    public class AESCipher : IBlockCipher
     {
         private const int AESBlockSize = 16;
 

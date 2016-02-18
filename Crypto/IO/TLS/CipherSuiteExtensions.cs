@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Security.Cryptography;
 using Crypto.Encryption;
+using Crypto.Encryption.Modes;
 using Crypto.Hashing;
 
 namespace Crypto.IO.TLS
@@ -28,7 +29,7 @@ namespace Crypto.IO.TLS
                 case CipherSuite.TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA:
                 case CipherSuite.TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA:
                 case CipherSuite.TLS_DH_anon_WITH_3DES_EDE_CBC_SHA:
-                    return new ThreeDESCipher(ThreeDESKeyOptions.Option1, CipherBlockMode.CBC);
+                    return new BlockModeCipher(new ThreeDESCipher(ThreeDESKeyOptions.Option1), new CBCBlockMode());
 
                 case CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA:
                 case CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA256:
@@ -42,8 +43,7 @@ namespace Crypto.IO.TLS
                 case CipherSuite.TLS_DHE_RSA_WITH_AES_128_CBC_SHA256:
                 case CipherSuite.TLS_DH_anon_WITH_AES_128_CBC_SHA:
                 case CipherSuite.TLS_DH_anon_WITH_AES_128_CBC_SHA256:
-                    // TODO CBC
-                    return new AESCipher(128);
+                    return new BlockModeCipher(new AESCipher(128), new CBCBlockMode());
 
                 case CipherSuite.TLS_RSA_WITH_AES_256_CBC_SHA:
                 case CipherSuite.TLS_RSA_WITH_AES_256_CBC_SHA256:
@@ -57,7 +57,7 @@ namespace Crypto.IO.TLS
                 case CipherSuite.TLS_DHE_RSA_WITH_AES_256_CBC_SHA256:
                 case CipherSuite.TLS_DH_anon_WITH_AES_256_CBC_SHA:
                 case CipherSuite.TLS_DH_anon_WITH_AES_256_CBC_SHA256:
-                    return new AESCipher(256);
+                    return new BlockModeCipher(new AESCipher(256), new CBCBlockMode());
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(suite), suite, null);

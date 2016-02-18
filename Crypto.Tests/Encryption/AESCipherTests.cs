@@ -54,7 +54,7 @@ namespace Crypto.Tests.Encryption
             RunAESTests(tests, aes);
         }
 
-        private static void RunAESTests(IEnumerable<string[]> tests, ICipher aes)
+        private static void RunAESTests(IEnumerable<string[]> tests, IBlockCipher aes)
         {
             foreach (var test in tests)
             {

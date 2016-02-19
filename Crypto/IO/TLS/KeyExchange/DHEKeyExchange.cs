@@ -6,7 +6,7 @@ using Crypto.Utils;
 
 namespace Crypto.IO.TLS
 {
-    class DHEKeyExchange : KeyExchange
+    public class DHEKeyExchange : KeyExchange
     {
         public static readonly string ParamP = "DHE_p";
         public static readonly string ParamG = "DHE_g";
@@ -18,7 +18,7 @@ namespace Crypto.IO.TLS
         public DHEKeyExchange(KeyExchange innerKeyExchange)
         {
             SecurityAssert.NotNull(innerKeyExchange);
-            SecurityAssert.SAssert(innerKeyExchange.RequiresCertificate && !innerKeyExchange.RequiresKeyExchange);
+            SecurityAssert.SAssert(!innerKeyExchange.RequiresKeyExchange);
 
             this.innerKeyExchange = innerKeyExchange;
         }
@@ -58,9 +58,9 @@ namespace Crypto.IO.TLS
             var g = state.Params[ParamG];
             var x = state.Params[ParamX];
 
-            var Ys = BigInteger.ModPow(g, x, p);
+            var serverY = BigInteger.ModPow(g, x, p);
 
-            yield return new SignedKeyExchangeMessage(state, p, g, Ys);
+            yield return new SignedKeyExchangeMessage(state, p, g, serverY);
         }
 
         public HandshakeMessage ReadClientKeyExchange(byte[] body)
@@ -81,12 +81,17 @@ namespace Crypto.IO.TLS
 
             var p = state.Params[ParamP];
             var x = state.Params[ParamX];
-            var Yc = dhMessage.Yc;
+            var clientY = dhMessage.Yc;
 
-            var Z = BigInteger.ModPow(Yc, x, p);
-            var preMasterSecret = Z.ToTlsBytes();
+            var sharedSecret = ComputeSharedSecret(clientY, x, p);
+            var preMasterSecret = sharedSecret.ToTlsBytes();
 
             state.ComputeMasterSecret(preMasterSecret);
+        }
+
+        public static BigInteger ComputeSharedSecret(BigInteger p, BigInteger priv, BigInteger pub)
+        {
+            return BigInteger.ModPow(pub, priv, p);
         }
     }
 }

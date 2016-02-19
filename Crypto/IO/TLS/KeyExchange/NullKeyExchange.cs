@@ -3,7 +3,7 @@ using Crypto.IO.TLS.Messages;
 
 namespace Crypto.IO.TLS
 {
-    class NullKeyExchange : KeyExchange
+    public class NullKeyExchange : KeyExchange
     {
         public bool RequiresCertificate => false;
         public bool RequiresKeyExchange => false;

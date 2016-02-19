@@ -1,23 +1,23 @@
 ﻿using System.Numerics;
-using Crypto.IO.Signing;
 using Crypto.Utils;
 using Crypto.Utils.IO;
 
 namespace Crypto.IO.TLS.Messages
 {
-    class SignedKeyExchangeMessage : HandshakeMessage
+    public class SignedKeyExchangeMessage : HandshakeMessage
     {
         private readonly TlsState state;
-        private readonly BigInteger p;
-        private readonly BigInteger g;
-        private readonly BigInteger pub;
+        public BigInteger P { get; }
+        public BigInteger G { get; }
+        public BigInteger Y { get; }
 
         public SignedKeyExchangeMessage(TlsState state, BigInteger p, BigInteger g, BigInteger pub) : base(HandshakeType.ServerKeyExchange)
         {
             this.state = state;
-            this.p = p;
-            this.g = g;
-            this.pub = pub;
+
+            P = p;
+            G = g;
+            Y = pub;
         }
 
         protected override void Write(EndianBinaryWriter baseWriter)
@@ -29,9 +29,9 @@ namespace Crypto.IO.TLS.Messages
             stream.HashAlgorithm.Update(state.ClientRandom, 0, 32);
             stream.HashAlgorithm.Update(state.ServerRandom, 0, 32);
 
-            var pBuffer = p.ToTlsBytes();
-            var gBuffer = g.ToTlsBytes();
-            var pubBuffer = pub.ToTlsBytes();
+            var pBuffer = P.ToTlsBytes();
+            var gBuffer = G.ToTlsBytes();
+            var pubBuffer = Y.ToTlsBytes();
 
             writer.Write((short)pBuffer.Length);
             writer.Write(pBuffer);

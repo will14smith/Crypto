@@ -36,6 +36,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.Numerics" />
   </ItemGroup>
   <Choose>
     <When Condition="('$(VisualStudioVersion)' == '10.0' or '$(VisualStudioVersion)' == '') and '$(TargetFrameworkVersion)' == 'v3.5'">
@@ -56,8 +57,10 @@
     <Compile Include="Encryption\RSATests.cs" />
     <Compile Include="Encryption\AESCipherTests.cs" />
     <Compile Include="Hashing\HMACTests.cs" />
+    <Compile Include="Hashing\PRFTests.cs" />
     <Compile Include="Hashing\SHA256DigestTests.cs" />
     <Compile Include="Hashing\SHA1DigestTests.cs" />
+    <Compile Include="IO\TLS\KeyExchange\DHEKeyExchangeTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup />

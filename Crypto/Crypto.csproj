@@ -61,18 +61,20 @@
     <Compile Include="Certificates\X509Certificate.cs" />
     <Compile Include="Certificates\X509Validity.cs" />
     <Compile Include="Certificates\X509Writer.cs" />
-    <Compile Include="Encryption\AESCipher.cs" />
+    <Compile Include="Encryption\BlockCipherAdapter.cs" />
+    <Compile Include="Encryption\Block\AESCipher.cs" />
     <Compile Include="Encryption\ICipher.cs" />
     <Compile Include="Encryption\ISignatureCipher.cs" />
-    <Compile Include="Encryption\Modes\BlockModeCipher.cs" />
-    <Compile Include="Encryption\Modes\CBCBlockMode.cs" />
-    <Compile Include="Encryption\Modes\ECBBlockMode.cs" />
-    <Compile Include="Encryption\Modes\IBlockMode.cs" />
+    <Compile Include="Encryption\Modes\CBCBlockCipher.cs" />
+    <Compile Include="Encryption\Modes\ECBBlockCipher.cs" />
     <Compile Include="Encryption\NullCipher.cs" />
+    <Compile Include="Encryption\Parameters\ICipherParameters.cs" />
+    <Compile Include="Encryption\Parameters\IVParameter.cs" />
+    <Compile Include="Encryption\Parameters\KeyParameter.cs" />
     <Compile Include="Encryption\RC4Cipher.cs" />
     <Compile Include="Encryption\RSA.cs" />
-    <Compile Include="Encryption\ThreeDESCipher.cs" />
-    <Compile Include="Encryption\ThreeDESKeyOptions.cs" />
+    <Compile Include="Encryption\Block\ThreeDESCipher.cs" />
+    <Compile Include="Encryption\Block\ThreeDESKeyOptions.cs" />
     <Compile Include="Hashing\BlockDigest.cs" />
     <Compile Include="Hashing\HMAC.cs" />
     <Compile Include="Hashing\IDigest.cs" />
@@ -143,6 +145,7 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

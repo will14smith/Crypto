@@ -5,6 +5,7 @@ using System.Linq;
 using System.Numerics;
 using Crypto.Certificates;
 using Crypto.Encryption;
+using Crypto.Encryption.Parameters;
 using Crypto.Hashing;
 using Crypto.IO.Signing;
 using Crypto.IO.TLS.Messages;
@@ -37,10 +38,15 @@ namespace Crypto.IO.TLS
 
         #region connection state
 
+        public TlsMode Mode { get; private set; }
+    
+
         private TlsStateType state;
         public void SetMode(TlsMode mode)
         {
             SecurityAssert.SAssert(state == TlsStateType.Initial);
+
+            Mode = mode;
 
             switch (mode)
             {
@@ -77,6 +83,12 @@ namespace Crypto.IO.TLS
         private byte[] masterSecret;
         public byte[] ClientRandom { get; private set; }
         public byte[] ServerRandom { get; private set; }
+
+        private byte[] clientMACKey;
+        private byte[] serverMACKey;
+        private byte[] clientKey;
+        private byte[] serverKey;
+
 
         // TODO extensions
 
@@ -170,6 +182,37 @@ namespace Crypto.IO.TLS
 
             Console.WriteLine(HexConverter.ToHex(masterSecret));
 
+            ComputeKeys();
+        }
+
+        private void ComputeKeys()
+        {
+            var cipher = cipherSuite.GetCipher();
+            var mac = cipherSuite.GetMACAlgorithm();
+
+            // assuming server
+            var prf = new PRF(new SHA256Digest());
+
+            var random = new byte[ServerRandom.Length + ClientRandom.Length];
+
+            Array.Copy(ServerRandom, 0, random, 0, ServerRandom.Length);
+            Array.Copy(ClientRandom, 0, random, ServerRandom.Length, ClientRandom.Length);
+
+            var keyBlock = prf.Digest(masterSecret, "key expansion", random);
+
+            var macKeyLength = mac.HashSize;
+            var encKeyLength = cipher.KeySize;
+
+            // ReSharper disable PossibleMultipleEnumeration
+            // This multiple enumerable effect is desired
+
+            clientMACKey = keyBlock.Take(macKeyLength).ToArray();
+            serverMACKey = keyBlock.Take(macKeyLength).ToArray();
+            clientKey = keyBlock.Take(encKeyLength).ToArray();
+            serverKey = keyBlock.Take(encKeyLength).ToArray();
+            //TODO get iv (for AEAD)
+
+            // ReSharper enable PossibleMultipleEnumeration
         }
 
         private void NegotiateParameters()
@@ -217,11 +260,11 @@ namespace Crypto.IO.TLS
 
         public SignedStream GetSignatureStream(Stream baseStream)
         {
-            //TODO pass correct hash & sig algo
+            //TODO pass correct sig algo
             var key = Certificates.GetPrivateKey(Certificate.SubjectPublicKey);
             var signatureAlgo = new RSA(key);
 
-            return new SignedStream(baseStream, signatureAlgo, GetHMAC());
+            return new SignedStream(baseStream, signatureAlgo, GetMAC());
         }
 
         public ICipher GetCipher()
@@ -231,9 +274,14 @@ namespace Crypto.IO.TLS
             return cipherSuite.GetCipher();
         }
 
-        public IDigest GetHMAC()
+        public IDigest GetMAC()
         {
             return cipherSuite.GetMACAlgorithm();
+        }
+
+        public ICipherParameters GetBlockCipherParameters(bool server)
+        {
+            return server ? new KeyParameter(serverKey) : new KeyParameter(clientKey);
         }
     }
 }

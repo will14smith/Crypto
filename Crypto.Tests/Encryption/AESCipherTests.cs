@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using Crypto.Encryption;
+using Crypto.Encryption.Block;
+using Crypto.Encryption.Parameters;
 using Crypto.Utils;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -19,7 +21,8 @@ namespace Crypto.Tests.Encryption
                 new [] { "f69f2445df4f9b17ad2b417be66c3710", "7b0c785e27e8ad3f8223207104725dd4" },
             };
 
-            var aes = new AESCipher(128) { Key = HexConverter.FromHex("2b7e151628aed2a6abf7158809cf4f3c") };
+            var aes = new AESCipher(128);
+            aes.Init(new KeyParameter(HexConverter.FromHex("2b7e151628aed2a6abf7158809cf4f3c")));
 
             RunAESTests(tests, aes);
         }
@@ -34,7 +37,8 @@ namespace Crypto.Tests.Encryption
                 new [] { "f69f2445df4f9b17ad2b417be66c3710", "9a4b41ba738d6c72fb16691603c18e0e" },
             };
 
-            var aes = new AESCipher(192) { Key = HexConverter.FromHex("8e73b0f7da0e6452c810f32b809079e562f8ead2522c6b7b") };
+            var aes = new AESCipher(192);
+            aes.Init(new KeyParameter(HexConverter.FromHex("8e73b0f7da0e6452c810f32b809079e562f8ead2522c6b7b")));
 
             RunAESTests(tests, aes);
         }
@@ -49,7 +53,8 @@ namespace Crypto.Tests.Encryption
                 new [] { "f69f2445df4f9b17ad2b417be66c3710", "23304b7a39f9f3ff067d8d8f9e24ecc7" },
             };
 
-            var aes = new AESCipher(256) { Key = HexConverter.FromHex("603deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4") };
+            var aes = new AESCipher(256);
+            aes.Init(new KeyParameter(HexConverter.FromHex("603deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4")));
 
             RunAESTests(tests, aes);
         }

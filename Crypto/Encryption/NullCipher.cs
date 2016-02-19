@@ -1,4 +1,5 @@
 ﻿using System;
+using Crypto.Encryption.Parameters;
 using Crypto.Hashing;
 
 namespace Crypto.Encryption
@@ -11,6 +12,13 @@ namespace Crypto.Encryption
         }
 
         public bool Verify(byte[] input, byte[] signature, IDigest hash)
+        {
+            throw new NotImplementedException();
+        }
+
+        public int KeySize { get; }
+
+        public void Init(ICipherParameters parameters)
         {
             throw new NotImplementedException();
         }

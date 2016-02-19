@@ -2,6 +2,7 @@
 using System.IO;
 using Crypto.Encryption;
 using Crypto.Encryption.Modes;
+using Crypto.Encryption.Parameters;
 using Crypto.IO.TLS.Messages;
 using Crypto.Utils;
 using StreamReader = Crypto.Utils.IO.StreamReader;
@@ -30,9 +31,9 @@ namespace Crypto.IO.TLS
             byte[] data;
 
             var cipher = state.GetCipher();
-            if (cipher is BlockModeCipher)
+            if (cipher is BlockCipherAdapter)
             {
-                data = ReadBlockCipher((BlockModeCipher)cipher, length);
+                data = ReadBlockCipher((BlockCipherAdapter)cipher, length);
             }
             else
             {
@@ -42,15 +43,13 @@ namespace Crypto.IO.TLS
             return new Record(type, version, data);
         }
 
-        private byte[] ReadBlockCipher(BlockModeCipher cipher, ushort length)
+        private byte[] ReadBlockCipher(BlockCipherAdapter cipher, ushort length)
         {
-            var blockSize = cipher.Cipher.BlockSize;
+            var blockSize = cipher.BlockCipher.BlockSize;
             var iv = Reader.ReadBytes(blockSize);
 
-            cipher.Mode.IV = iv;
-
-            var hmac = state.GetHMAC();
-
+            cipher.Init(new IVParameter(state.GetBlockCipherParameters(state.Mode != TlsMode.Server), iv));
+            
             var payload = Reader.ReadBytes(length - blockSize);
             var plaintext = new byte[payload.Length];
 

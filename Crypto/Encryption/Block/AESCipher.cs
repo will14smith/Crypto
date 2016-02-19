@@ -1,12 +1,14 @@
 ﻿using System;
+using Crypto.Encryption.Parameters;
 using Crypto.Utils;
 
-namespace Crypto.Encryption
+namespace Crypto.Encryption.Block
 {
     public class AESCipher : IBlockCipher
     {
         private const int AESBlockSize = 16;
 
+        private bool keyInitialised;
         private readonly byte[] key;
         private readonly byte[] roundKeys;
 
@@ -20,33 +22,41 @@ namespace Crypto.Encryption
             roundKeys = new byte[KeySize * 4 + 112];
         }
 
-        public byte[] Key
-        {
-            set
-            {
-                SecurityAssert.NotNull(value);
-                SecurityAssert.SAssert(value.Length == KeySize);
-                Array.Copy(value, key, KeySize);
-
-                var tmp = BuildRoundKeys(key);
-                Array.Copy(tmp, roundKeys, roundKeys.Length);
-            }
-        }
 
         public int BlockSize => AESBlockSize;
         public int KeySize { get; }
 
+        public void Init(ICipherParameters parameters)
+        {
+            var keyParams = parameters as KeyParameter;
+
+            if (keyParams == null)
+            {
+                throw new InvalidCastException();
+            }
+
+            var keyParam = keyParams.Key;
+
+            SecurityAssert.NotNull(keyParam);
+            SecurityAssert.SAssert(keyParam.Length == KeySize);
+            Array.Copy(keyParam, key, KeySize);
+
+            var tmp = BuildRoundKeys(key);
+            Array.Copy(tmp, roundKeys, roundKeys.Length);
+
+            keyInitialised = true;
+        }
+
         public void EncryptBlock(byte[] input, int inputOffset, byte[] output, int outputOffset)
         {
-            SecurityAssert.NotNull(input);
-            SecurityAssert.SAssert(inputOffset + BlockSize <= input.Length);
-            SecurityAssert.NotNull(output);
-            SecurityAssert.SAssert(outputOffset + BlockSize <= output.Length);
+            SecurityAssert.SAssert(keyInitialised);
+            SecurityBufferAssert.AssertBuffer(input, inputOffset, BlockSize);
+            SecurityBufferAssert.AssertBuffer(output, outputOffset, BlockSize);
 
             var rounds = KeySize / 4 + 6;
 
             var state = ToState(input, inputOffset);
-            
+
             AddRoundKey(state, 0);
 
             for (var round = 1; round < rounds; round++)
@@ -66,10 +76,9 @@ namespace Crypto.Encryption
 
         public void DecryptBlock(byte[] input, int inputOffset, byte[] output, int outputOffset)
         {
-            SecurityAssert.NotNull(input);
-            SecurityAssert.SAssert(inputOffset + BlockSize <= input.Length);
-            SecurityAssert.NotNull(output);
-            SecurityAssert.SAssert(outputOffset + BlockSize <= output.Length);
+            SecurityAssert.SAssert(keyInitialised); 
+            SecurityBufferAssert.AssertBuffer(input, inputOffset, BlockSize);
+            SecurityBufferAssert.AssertBuffer(output, outputOffset, BlockSize);
 
             var rounds = KeySize / 4 + 6;
 

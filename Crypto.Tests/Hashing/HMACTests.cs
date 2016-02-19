@@ -56,6 +56,19 @@ namespace Crypto.Tests.Hashing
 
             AssertOutput(32, "f7bc83f430538424b13298e6aa6fb143ef4d59a14946175997479dbc2d1a3cd8", output);
         }
+        [TestMethod]
+        public void GivesCorrectOutputSHA256LongKey()
+        {
+            var key = Encoding.UTF8.GetBytes("Hello World Hello World Hello World Hello World Hello World Hello World Hello World Hello World Hello World Hello World Hello World Hello World Hello World Hello World Hello World Hello World");
+            var hmac = new HMAC(new SHA256Digest(), key);
+
+            var message = Encoding.UTF8.GetBytes("The quick brown fox jumps over the lazy dog");
+
+            hmac.Update(message, 0, message.Length);
+            var output = hmac.Digest();
+
+            AssertOutput(32, "bcac0ae627a2be9e3ae2eb2ff367a54b15706af61f33aea3d6a0faa2ba68feef", output);
+        }
 
         private void AssertOutput(int length, string expected, byte[] actual)
         {

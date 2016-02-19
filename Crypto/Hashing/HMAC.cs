@@ -25,7 +25,9 @@ namespace Crypto.Hashing
             SecurityAssert.NotNull(key);
 
             this.digest = digest;
-            this.key = ProcessInputKey(key);
+            this.key = new byte[digest.BlockSize / 8];
+
+            ProcessInputKey(key);
 
             state = HMACState.ProcessedKey;
 
@@ -71,10 +73,9 @@ namespace Crypto.Hashing
             state = HMACState.InnerHashing;
         }
 
-        private byte[] ProcessInputKey(byte[] bytes)
+        private void ProcessInputKey(byte[] bytes)
         {
             var blockLength = digest.BlockSize / 8;
-            var key = new byte[blockLength];
 
             if (bytes.Length > blockLength)
             {
@@ -82,14 +83,15 @@ namespace Crypto.Hashing
 
                 digest.Reset();
                 digest.Update(bytes, 0, bytes.Length);
-                key = digest.Digest();
+                var keyHash = digest.Digest();
+
+                Array.Copy(keyHash, key, keyHash.Length);
             }
             else
             {
                 Array.Copy(bytes, key, bytes.Length);
             }
 
-            return key;
         }
         private byte[] XorKey(byte[] bytes, byte param)
         {

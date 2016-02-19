@@ -49,13 +49,29 @@ namespace Crypto.IO.TLS
             var iv = Reader.ReadBytes(blockSize);
 
             cipher.Init(new IVParameter(state.GetBlockCipherParameters(state.Mode != TlsMode.Server), iv));
-            
+
             var payload = Reader.ReadBytes(length - blockSize);
             var plaintext = new byte[payload.Length];
 
             cipher.Decrypt(payload, 0, plaintext, 0, payload.Length);
 
-            throw new NotImplementedException();
+            var paddingLength = plaintext[plaintext.Length - 1];
+            for (var i = plaintext.Length - 1; i > plaintext.Length - paddingLength; i--)
+            {
+                SecurityAssert.SAssert(plaintext[i] == paddingLength);
+            }
+
+            var macAlgo = state.GetMAC(state.Mode != TlsMode.Server);
+            var macLength = macAlgo.HashSize / 8;
+            var mac = new byte[macLength];
+            Array.Copy(plaintext, plaintext.Length - paddingLength - macLength, mac, 0, macLength);
+
+            var content = new byte[plaintext.Length - paddingLength - macLength];
+            Array.Copy(plaintext, content, content.Length);
+
+            //TODO verify MAC
+
+            return content;
         }
 
         private Record ReadPlainText()

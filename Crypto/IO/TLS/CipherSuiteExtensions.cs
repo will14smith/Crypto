@@ -65,7 +65,7 @@ namespace Crypto.IO.TLS
             }
         }
 
-        public static IDigest GetMACAlgorithm(this CipherSuite suite)
+        public static IDigest GetDigestAlgorithm(this CipherSuite suite)
         {
             switch (suite)
             {

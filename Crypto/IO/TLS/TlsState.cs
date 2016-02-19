@@ -188,7 +188,7 @@ namespace Crypto.IO.TLS
         private void ComputeKeys()
         {
             var cipher = cipherSuite.GetCipher();
-            var mac = cipherSuite.GetMACAlgorithm();
+            var mac = cipherSuite.GetDigestAlgorithm();
 
             // assuming server
             var prf = new PRF(new SHA256Digest());
@@ -275,7 +275,7 @@ namespace Crypto.IO.TLS
             var key = Certificates.GetPrivateKey(Certificate.SubjectPublicKey);
             var signatureAlgo = new RSA(key);
 
-            return new SignedStream(baseStream, signatureAlgo, GetMAC());
+            return new SignedStream(baseStream, signatureAlgo, GetDigest());
         }
 
         public ICipher GetCipher()
@@ -284,14 +284,24 @@ namespace Crypto.IO.TLS
 
             return cipherSuite.GetCipher();
         }
-
-        public IDigest GetMAC()
+        public IDigest GetDigest()
         {
-            return cipherSuite.GetMACAlgorithm();
+            return cipherSuite.GetDigestAlgorithm();
+        }
+
+        public IDigest GetMAC(bool server)
+        {
+            SecurityAssert.SAssert(Protected);
+
+            var digest = GetDigest();
+
+            return new HMAC(digest, server ? serverMACKey : clientMACKey);
         }
 
         public ICipherParameters GetBlockCipherParameters(bool server)
         {
+            SecurityAssert.SAssert(Protected);
+
             return server ? new KeyParameter(serverKey) : new KeyParameter(clientKey);
         }
     }

@@ -39,7 +39,7 @@ namespace Crypto.IO.TLS
         #region connection state
 
         public TlsMode Mode { get; private set; }
-    
+
 
         private TlsStateType state;
         public void SetMode(TlsMode mode)
@@ -198,21 +198,32 @@ namespace Crypto.IO.TLS
             Array.Copy(ServerRandom, 0, random, 0, ServerRandom.Length);
             Array.Copy(ClientRandom, 0, random, ServerRandom.Length, ClientRandom.Length);
 
-            var keyBlock = prf.Digest(masterSecret, "key expansion", random);
+            var macKeyLength = mac.HashSize / 8;
+            var encKeyLength = cipher.KeyLength;
 
-            var macKeyLength = mac.HashSize;
-            var encKeyLength = cipher.KeySize;
+            var keyBlockLength = 2 * macKeyLength + 2 * encKeyLength;
 
-            // ReSharper disable PossibleMultipleEnumeration
-            // This multiple enumerable effect is desired
+            var keyBlock = prf.Digest(masterSecret, "key expansion", random).Take(keyBlockLength).ToArray();
 
-            clientMACKey = keyBlock.Take(macKeyLength).ToArray();
-            serverMACKey = keyBlock.Take(macKeyLength).ToArray();
-            clientKey = keyBlock.Take(encKeyLength).ToArray();
-            serverKey = keyBlock.Take(encKeyLength).ToArray();
+            int offset = 0;
+
+            clientMACKey = new byte[macKeyLength];
+            Array.Copy(keyBlock, offset, clientMACKey, 0, macKeyLength);
+            offset += macKeyLength;
+
+            serverMACKey = new byte[macKeyLength];
+            Array.Copy(keyBlock, offset, serverMACKey, 0, macKeyLength);
+            offset += macKeyLength;
+
+            clientKey = new byte[encKeyLength];
+            Array.Copy(keyBlock, offset, clientKey, 0, encKeyLength);
+            offset += encKeyLength;
+
+            serverKey = new byte[encKeyLength];
+            Array.Copy(keyBlock, offset, serverKey, 0, encKeyLength);
+            // offset += encKeyLength;
+
             //TODO get iv (for AEAD)
-
-            // ReSharper enable PossibleMultipleEnumeration
         }
 
         private void NegotiateParameters()

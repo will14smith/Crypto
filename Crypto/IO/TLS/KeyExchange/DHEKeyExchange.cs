@@ -81,9 +81,8 @@ namespace Crypto.IO.TLS
 
             var p = state.Params[ParamP];
             var x = state.Params[ParamX];
-            var clientY = dhMessage.Yc;
 
-            var sharedSecret = ComputeSharedSecret(clientY, x, p);
+            var sharedSecret = ComputeSharedSecret(p, x, dhMessage.Yc);
             var preMasterSecret = sharedSecret.ToTlsBytes();
 
             state.ComputeMasterSecret(preMasterSecret);

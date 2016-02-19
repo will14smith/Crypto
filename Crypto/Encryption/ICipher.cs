@@ -4,7 +4,7 @@ namespace Crypto.Encryption
 {
     public interface ICipher
     {
-        int KeySize { get; }
+        int KeyLength { get; }
 
         void Init(ICipherParameters parameters);
 

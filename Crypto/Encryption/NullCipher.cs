@@ -16,7 +16,7 @@ namespace Crypto.Encryption
             throw new NotImplementedException();
         }
 
-        public int KeySize { get; }
+        public int KeyLength { get; }
 
         public void Init(ICipherParameters parameters)
         {

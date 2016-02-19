@@ -11,7 +11,7 @@ namespace Crypto.Encryption
             this.keySize = keySize;
         }
 
-        public int KeySize { get; }
+        public int KeyLength { get; }
 
         public void Init(ICipherParameters parameters)
         {

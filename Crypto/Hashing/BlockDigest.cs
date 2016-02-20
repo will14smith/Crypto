@@ -25,6 +25,14 @@ namespace Crypto.Hashing
             workBuffer = new byte[BlockSize / 8];
         }
 
+        protected BlockDigest(BlockDigest source) : this()
+        {
+            MessageSize = source.MessageSize;
+
+            workBufferLength = source.workBufferLength;
+            Array.Copy(source.workBuffer, workBuffer, workBufferLength);
+        }
+
         public virtual void Update(byte[] buffer, int offset, int length)
         {
             SecurityAssert.NotNull(buffer);
@@ -65,6 +73,8 @@ namespace Crypto.Hashing
             workBufferLength = 0;
             Array.Clear(workBuffer, 0, workBuffer.Length);
         }
+
+        public abstract IDigest Clone();
 
         protected abstract void UpdateBlock(byte[] buffer);
     }

@@ -73,6 +73,11 @@ namespace Crypto.Hashing
             state = HMACState.InnerHashing;
         }
 
+        public IDigest Clone()
+        {
+            throw new NotImplementedException();
+        }
+
         private void ProcessInputKey(byte[] bytes)
         {
             var blockLength = digest.BlockSize / 8;

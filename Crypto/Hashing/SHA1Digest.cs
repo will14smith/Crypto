@@ -23,6 +23,18 @@ namespace Crypto.Hashing
             Reset();
         }
 
+        private SHA1Digest(SHA1Digest source)
+            : base(source)
+        {
+            h0 = source.h0;
+            h1 = source.h1;
+            h2 = source.h2;
+            h3 = source.h3;
+            h4 = source.h4;
+
+            complete = source.complete;
+        }
+
         public override void Reset()
         {
             base.Reset();
@@ -34,6 +46,11 @@ namespace Crypto.Hashing
             h4 = 0xC3D2E1F0;
 
             complete = false;
+        }
+
+        public override IDigest Clone()
+        {
+            return new SHA1Digest(this);
         }
 
         public override void Update(byte[] buffer, int offset, int length)

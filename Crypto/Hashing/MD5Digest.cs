@@ -23,5 +23,10 @@ namespace Crypto.Hashing
         {
             throw new NotImplementedException();
         }
+
+        public IDigest Clone()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

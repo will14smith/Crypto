@@ -13,5 +13,7 @@ namespace Crypto.Hashing
         byte[] Digest();
 
         void Reset();
+
+        IDigest Clone();
     }
 }

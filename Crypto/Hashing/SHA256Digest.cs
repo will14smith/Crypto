@@ -11,11 +11,6 @@ namespace Crypto.Hashing
         public override int BlockSize => 512;
         public override int HashSize => 256;
 
-        public SHA256Digest()
-        {
-            Reset();
-        }
-
         private uint h0;
         private uint h1;
         private uint h2;
@@ -25,7 +20,7 @@ namespace Crypto.Hashing
         private uint h6;
         private uint h7;
 
-        private readonly uint[] k = {
+        private static readonly uint[] K = {
             0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
             0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
             0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
@@ -38,11 +33,36 @@ namespace Crypto.Hashing
 
         private bool complete;
 
+        public SHA256Digest()
+        {
+            Reset();
+        }
+
+        private SHA256Digest(SHA256Digest source)
+            : base(source)
+        {
+            h0 = source.h0;
+            h1 = source.h1;
+            h2 = source.h2;
+            h3 = source.h3;
+            h4 = source.h4;
+            h5 = source.h5;
+            h6 = source.h6;
+            h7 = source.h7;
+
+            complete = source.complete;
+        }
+
         public override void Update(byte[] buffer, int offset, int length)
         {
             SecurityAssert.SAssert(!complete);
 
             base.Update(buffer, offset, length);
+        }
+
+        public override IDigest Clone()
+        {
+            return new SHA256Digest(this);
         }
 
         protected override void UpdateBlock(byte[] buffer)
@@ -75,7 +95,7 @@ namespace Crypto.Hashing
             {
                 var s1 = RightRotate(e, 6) ^ RightRotate(e, 11) ^ RightRotate(e, 25);
                 var ch = (e & f) ^ (~e & g);
-                var temp1 = h + s1 + ch + k[i] + w[i];
+                var temp1 = h + s1 + ch + K[i] + w[i];
                 var s0 = RightRotate(a, 2) ^ RightRotate(a, 13) ^ RightRotate(a, 22);
                 var maj = (a & b) ^ (a & c) ^ (b & c);
                 var temp2 = s0 + maj;

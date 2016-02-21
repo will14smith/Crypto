@@ -13,3 +13,12 @@ Implement a TLS1.2 steam wrapper without using any cryptography libraries
       Encryption/   Asymmetric & symmetric encryption / decryption
       Hashing/      One way hash functions
       IO/           TLS functionality
+
+## TODO
+
+* Read / Write application records
+* Handle & generate alerts 
+* Implement more ciphers, digests, keyexchanges, etc
+* Client
+* Client certificate
+* Extensions (HashAndSignature, SAN)

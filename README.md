@@ -16,7 +16,6 @@ Implement a TLS1.2 steam wrapper without using any cryptography libraries
 
 ## TODO
 
-* Read / Write application records
 * Handle & generate alerts 
 * Implement more ciphers, digests, keyexchanges, etc
 * Client

@@ -34,12 +34,12 @@ namespace Crypto.IO.TLS
 
         public override int Read(byte[] buffer, int offset, int count)
         {
-            throw new NotImplementedException();
+            return dispatcher.ReadApplicationData(buffer, offset, count);
         }
 
         public override void Write(byte[] buffer, int offset, int count)
         {
-            throw new NotImplementedException();
+            dispatcher.WriteApplicationData(buffer, offset, count);
         }
 
         public override void Flush()

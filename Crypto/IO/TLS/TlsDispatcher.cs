@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Crypto.IO.TLS.Messages;
 using Crypto.Utils;
 
@@ -7,6 +8,7 @@ namespace Crypto.IO.TLS
     public class TlsDispatcher
     {
         private readonly TlsState state;
+        private Queue<byte> applicationBuffer = new Queue<byte>();
 
         public TlsDispatcher(TlsState state)
         {
@@ -21,23 +23,63 @@ namespace Crypto.IO.TLS
             {
                 var record = state.RecordReader.ReadRecord();
 
-                switch (record.Type)
-                {
-                    case RecordType.Handshake:
-                        HandleHandshake(record);
-                        break;
-                    case RecordType.ChangeCipherSpec:
-                        HandleChangeCipherSpec(record);
-                        break;
-                    default:
-                        throw new NotImplementedException();
-                }
+                HandleRecord(record);
 
                 //TODO is this the correct check?
                 if (state.ReadProtected && state.WriteProtected)
                 {
                     return;
                 }
+            }
+        }
+
+        public int ReadApplicationData(byte[] buffer, int offset, int count)
+        {
+            while (applicationBuffer.Count == 0)
+            {
+                var record = state.RecordReader.ReadRecord();
+
+                HandleRecord(record);
+            }
+
+            var length = Math.Min(count, applicationBuffer.Count);
+
+            for (var i = 0; i < length; i++)
+            {
+                buffer[offset + i] = applicationBuffer.Dequeue();
+            }
+
+            return length;
+        }
+
+        public void WriteApplicationData(byte[] buffer, int offset, int count)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void HandleRecord(Record record)
+        {
+            switch (record.Type)
+            {
+                case RecordType.Handshake:
+                    HandleHandshake(record);
+                    break;
+                case RecordType.ChangeCipherSpec:
+                    HandleChangeCipherSpec(record);
+                    break;
+                case RecordType.Application:
+                    HandleAppliction(record);
+                    break;
+                default:
+                    throw new NotImplementedException();
+            }
+        }
+
+        private void HandleAppliction(Record record)
+        {
+            foreach (var b in record.Data)
+            {
+                applicationBuffer.Enqueue(b);
             }
         }
 

@@ -31,6 +31,10 @@ namespace Crypto.Client
                 Console.WriteLine("Starting TLS connection");
                 tlsStream.AuthenticateAsServer();
 
+                var reader = new StreamReader(tlsStream);
+
+                Console.WriteLine(reader.ReadLine());
+
                 client.Close();
             }
         }

@@ -8,7 +8,7 @@ namespace Crypto.IO.TLS
     public class TlsDispatcher
     {
         private readonly TlsState state;
-        private Queue<byte> applicationBuffer = new Queue<byte>();
+        private readonly Queue<byte> applicationBuffer = new Queue<byte>();
 
         public TlsDispatcher(TlsState state)
         {
@@ -54,7 +54,14 @@ namespace Crypto.IO.TLS
 
         public void WriteApplicationData(byte[] buffer, int offset, int count)
         {
-            throw new NotImplementedException();
+            SecurityBufferAssert.AssertBuffer(buffer, offset, count);
+
+            var data = new byte[count];
+            Array.Copy(buffer, offset, data, 0, count);
+
+            var record = new Record(RecordType.Application, state.Version, data);
+
+            state.RecordWriter.WriteRecord(record);
         }
 
         private void HandleRecord(Record record)

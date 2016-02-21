@@ -32,8 +32,11 @@ namespace Crypto.Client
                 tlsStream.AuthenticateAsServer();
 
                 var reader = new StreamReader(tlsStream);
+                var writer = new StreamWriter(tlsStream);
 
-                Console.WriteLine(reader.ReadLine());
+                // Console.WriteLine(reader.ReadLine());
+                writer.WriteLine("World");
+                writer.Flush();
 
                 client.Close();
             }

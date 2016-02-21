@@ -19,7 +19,7 @@ namespace Crypto.IO.TLS
 
             while (true)
             {
-                var record = state.GetRecordReader().ReadRecord();
+                var record = state.RecordReader.ReadRecord();
 
                 switch (record.Type)
                 {
@@ -31,6 +31,12 @@ namespace Crypto.IO.TLS
                         break;
                     default:
                         throw new NotImplementedException();
+                }
+
+                //TODO is this the correct check?
+                if (state.ReadProtected && state.WriteProtected)
+                {
+                    return;
                 }
             }
         }
@@ -59,9 +65,28 @@ namespace Crypto.IO.TLS
                 case HandshakeType.ClientKeyExchange:
                     state.HandleClientKeyExchange((ClientKeyExchangeMessage)message);
                     break;
+                case HandshakeType.Finished:
+                    HandleHandshakeFinished(message, handshakeWriter);
+                    break;
                 default:
                     throw new NotImplementedException();
             }
+        }
+
+        private void HandleHandshakeFinished(HandshakeMessage message, HandshakeWriter handshakeWriter)
+        {
+            state.VerifyFinished((FinishedHandshakeMessage)message);
+            if (state.Mode != TlsMode.Server)
+            {
+                return;
+            }
+
+            // send ChangeCipherSpec & Finished
+
+            state.RecordWriter.WriteRecord(new Record(RecordType.ChangeCipherSpec, state.Version, new byte[] { 1 }));
+            state.SentChangeCipherSpec();
+
+            handshakeWriter.Write(state.GenerateFinishedMessage());
         }
 
         private void HandleChangeCipherSpec(Record record)

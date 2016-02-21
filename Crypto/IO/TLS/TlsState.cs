@@ -22,7 +22,12 @@ namespace Crypto.IO.TLS
         {
             this.stream = stream;
 
+            RecordReader = new RecordReader(this, stream);
+            RecordWriter = new RecordWriter(this, stream);
+
             state = TlsStateType.Initial;
+
+            handshakeVerify = GetPRFDigest();
         }
 
         public CertificateManager Certificates { get; } = new CertificateManager();
@@ -65,7 +70,11 @@ namespace Crypto.IO.TLS
 
         #region connection properties
 
-        public bool Protected { get; private set; }
+        public bool ReadProtected { get; private set; }
+        public bool WriteProtected { get; private set; }
+
+        public RecordReader RecordReader { get; }
+        public RecordWriter RecordWriter { get; }
 
         public X509Certificate Certificate { get; private set; }
         public X509Certificate[] CertificateChain { get; private set; }
@@ -89,8 +98,22 @@ namespace Crypto.IO.TLS
         private byte[] clientKey;
         private byte[] serverKey;
 
-
         // TODO extensions
+
+        private readonly IDigest handshakeVerify;
+        private byte[] expectedHandshakeVerifyData;
+
+        public void UpdateHandshakeVerify(byte[] buffer, int offset, int length)
+        {
+            handshakeVerify.Update(buffer, offset, length);
+        }
+        public void ComputeHandshakeVerify()
+        {
+            SecurityAssert.SAssert(state == TlsStateType.WaitingForClientFinished);
+            SecurityAssert.SAssert(ReadProtected);
+
+            expectedHandshakeVerifyData = handshakeVerify.Clone().Digest();
+        }
 
         public void SetCertificates(X509Certificate cert, X509Certificate[] chain)
         {
@@ -156,14 +179,45 @@ namespace Crypto.IO.TLS
         public void ReceivedChangeCipherSpec()
         {
             SecurityAssert.SAssert(state == TlsStateType.RecievedClientKeyExchange);
-            SecurityAssert.SAssert(!Protected);
+            SecurityAssert.SAssert(!ReadProtected && !WriteProtected);
 
-            Protected = true;
+            ReadProtected = true;
+            state = TlsStateType.WaitingForClientFinished;
         }
-
         public void SentChangeCipherSpec()
         {
-            throw new NotImplementedException();
+            SecurityAssert.SAssert(state == TlsStateType.Active);
+            SecurityAssert.SAssert(!WriteProtected);
+
+            WriteProtected = true;
+        }
+
+        public void VerifyFinished(FinishedHandshakeMessage message)
+        {
+            SecurityAssert.SAssert(state == TlsStateType.WaitingForClientFinished);
+            SecurityAssert.SAssert(ReadProtected);
+            SecurityAssert.SAssert(!WriteProtected);
+
+            var prf = new PRF(GetPRFDigest());
+
+            var finishedLabel = Mode != TlsMode.Server ? "server finished" : "client finished";
+            var expectedData = prf.Digest(masterSecret, finishedLabel, expectedHandshakeVerifyData).Take(FinishedHandshakeMessage.VerifyDataLength).ToArray();
+
+            SecurityAssert.HashAssert(message.VerifyData, expectedData);
+
+            state = TlsStateType.Active;
+        }
+
+        public FinishedHandshakeMessage GenerateFinishedMessage()
+        {
+            var prf = new PRF(GetPRFDigest());
+
+            var handshakeVerifyHash = handshakeVerify.Clone().Digest();
+            var finishedLabel = Mode == TlsMode.Server ? "server finished" : "client finished";
+
+            var verifyData = prf.Digest(masterSecret, finishedLabel, handshakeVerifyHash).Take(FinishedHandshakeMessage.VerifyDataLength).ToArray();
+
+            return new FinishedHandshakeMessage(verifyData);
         }
 
         public void ComputeMasterSecret(byte[] preMasterSecret)
@@ -173,7 +227,7 @@ namespace Crypto.IO.TLS
             Array.Copy(ClientRandom, 0, random, 0, ClientRandom.Length);
             Array.Copy(ServerRandom, 0, random, ClientRandom.Length, ServerRandom.Length);
 
-            var prf = new PRF(new SHA256Digest());
+            var prf = new PRF(GetPRFDigest());
 
             var secret = prf.Digest(preMasterSecret, "master secret", random).Take(48).ToArray();
             SecurityAssert.SAssert(secret.Length == 48);
@@ -191,7 +245,7 @@ namespace Crypto.IO.TLS
             var mac = cipherSuite.GetDigestAlgorithm();
 
             // assuming server
-            var prf = new PRF(new SHA256Digest());
+            var prf = new PRF(GetPRFDigest());
 
             var random = new byte[ServerRandom.Length + ClientRandom.Length];
 
@@ -252,16 +306,6 @@ namespace Crypto.IO.TLS
 
         private readonly Stream stream;
 
-        public RecordReader GetRecordReader()
-        {
-            return new RecordReader(this, stream);
-        }
-
-        public RecordWriter GetRecordWriter()
-        {
-            return new RecordWriter(this, stream);
-        }
-
         public void Flush()
         {
             stream.Flush();
@@ -280,8 +324,6 @@ namespace Crypto.IO.TLS
 
         public ICipher GetCipher()
         {
-            SecurityAssert.SAssert(Protected);
-
             return cipherSuite.GetCipher();
         }
         public IDigest GetDigest()
@@ -289,20 +331,36 @@ namespace Crypto.IO.TLS
             return cipherSuite.GetDigestAlgorithm();
         }
 
-        public IDigest GetMAC(bool server)
+        public IDigest GetPRFDigest()
         {
-            SecurityAssert.SAssert(Protected);
+            return new SHA256Digest();
+        }
+
+
+        public IDigest GetMAC(bool reader)
+        {
+            SecurityAssert.SAssert(ReadProtected || !reader);
+            SecurityAssert.SAssert(WriteProtected || reader);
 
             var digest = GetDigest();
 
-            return new HMAC(digest, server ? serverMACKey : clientMACKey);
+            var key = reader
+                ? (Mode == TlsMode.Server ? clientMACKey : serverMACKey)
+                : (Mode == TlsMode.Server ? serverMACKey : clientMACKey);
+
+            return new HMAC(digest, key);
         }
 
-        public ICipherParameters GetBlockCipherParameters(bool server)
+        public ICipherParameters GetBlockCipherParameters(bool reader)
         {
-            SecurityAssert.SAssert(Protected);
+            SecurityAssert.SAssert(ReadProtected || !reader);
+            SecurityAssert.SAssert(WriteProtected || reader);
 
-            return server ? new KeyParameter(serverKey) : new KeyParameter(clientKey);
+            var key = reader
+                ? (Mode == TlsMode.Server ? clientKey : serverKey)
+                : (Mode == TlsMode.Server ? serverKey : clientKey);
+            
+            return new KeyParameter(key);
         }
     }
 }

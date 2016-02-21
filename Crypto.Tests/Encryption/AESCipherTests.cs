@@ -68,7 +68,7 @@ namespace Crypto.Tests.Encryption
 
                 // encryption
                 var plainInput = HexConverter.FromHex(plain);
-                var actual = new byte[aes.BlockSize];
+                var actual = new byte[aes.BlockLength];
 
                 aes.EncryptBlock(plainInput, 0, actual, 0);
 
@@ -76,7 +76,7 @@ namespace Crypto.Tests.Encryption
 
                 // decryption
                 var cipherInput = HexConverter.FromHex(cipher);
-                actual = new byte[aes.BlockSize];
+                actual = new byte[aes.BlockLength];
                 aes.DecryptBlock(cipherInput, 0, actual, 0);
 
                 Assert.AreEqual(plain, HexConverter.ToHex(actual));

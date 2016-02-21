@@ -13,7 +13,7 @@ namespace Crypto.Encryption.Modes
             Cipher = cipher;
         }
 
-        public int BlockSize => Cipher.BlockSize;
+        public int BlockLength => Cipher.BlockLength;
         public int KeySize => Cipher.KeySize;
 
         public void Init(ICipherParameters parameters)

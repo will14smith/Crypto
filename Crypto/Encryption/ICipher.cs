@@ -13,7 +13,7 @@ namespace Crypto.Encryption
     }
     public interface IBlockCipher
     {
-        int BlockSize { get; }
+        int BlockLength { get; }
         int KeySize { get; }
 
         void Init(ICipherParameters parameters);

@@ -6,7 +6,7 @@ namespace Crypto.Encryption.Block
 {
     public class AESCipher : IBlockCipher
     {
-        private const int AESBlockSize = 16;
+        private const int AESBlockLength = 16;
 
         private bool keyInitialised;
         private readonly byte[] key;
@@ -23,7 +23,7 @@ namespace Crypto.Encryption.Block
         }
 
 
-        public int BlockSize => AESBlockSize;
+        public int BlockLength => AESBlockLength;
         public int KeySize { get; }
 
         public void Init(ICipherParameters parameters)
@@ -50,8 +50,8 @@ namespace Crypto.Encryption.Block
         public void EncryptBlock(byte[] input, int inputOffset, byte[] output, int outputOffset)
         {
             SecurityAssert.SAssert(keyInitialised);
-            SecurityBufferAssert.AssertBuffer(input, inputOffset, BlockSize);
-            SecurityBufferAssert.AssertBuffer(output, outputOffset, BlockSize);
+            SecurityBufferAssert.AssertBuffer(input, inputOffset, BlockLength);
+            SecurityBufferAssert.AssertBuffer(output, outputOffset, BlockLength);
 
             var rounds = KeySize / 4 + 6;
 
@@ -77,8 +77,8 @@ namespace Crypto.Encryption.Block
         public void DecryptBlock(byte[] input, int inputOffset, byte[] output, int outputOffset)
         {
             SecurityAssert.SAssert(keyInitialised); 
-            SecurityBufferAssert.AssertBuffer(input, inputOffset, BlockSize);
-            SecurityBufferAssert.AssertBuffer(output, outputOffset, BlockSize);
+            SecurityBufferAssert.AssertBuffer(input, inputOffset, BlockLength);
+            SecurityBufferAssert.AssertBuffer(output, outputOffset, BlockLength);
 
             var rounds = KeySize / 4 + 6;
 
@@ -105,7 +105,7 @@ namespace Crypto.Encryption.Block
         {
             var output = new byte[4, 4];
 
-            for (var i = 0; i < AESBlockSize; i++)
+            for (var i = 0; i < AESBlockLength; i++)
             {
                 output[i / 4, i % 4] = input[offset + i];
             }

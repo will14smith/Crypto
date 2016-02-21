@@ -15,6 +15,7 @@ namespace Crypto.Encryption
         }
 
         public int KeyLength => BlockCipher.KeySize;
+        public int BlockLength => BlockCipher.BlockLength;
 
         public void Init(ICipherParameters parameters)
         {
@@ -26,7 +27,7 @@ namespace Crypto.Encryption
             SecurityBufferAssert.AssertBuffer(input, inputOffset, length);
             SecurityBufferAssert.AssertBuffer(output, outputOffset, length);
 
-            for (var i = 0; i < length; i += BlockCipher.BlockSize)
+            for (var i = 0; i < length; i += BlockCipher.BlockLength)
             {
                 BlockCipher.EncryptBlock(input, inputOffset + i, output, outputOffset + i);
             }
@@ -37,7 +38,7 @@ namespace Crypto.Encryption
             SecurityBufferAssert.AssertBuffer(input, inputOffset, length);
             SecurityBufferAssert.AssertBuffer(output, outputOffset, length);
 
-            for (var i = 0; i < length; i += BlockCipher.BlockSize)
+            for (var i = 0; i < length; i += BlockCipher.BlockLength)
             {
                 BlockCipher.DecryptBlock(input, inputOffset + i, output, outputOffset + i);
             }

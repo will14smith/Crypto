@@ -11,7 +11,7 @@ namespace Crypto.Encryption
             this.keyMode = keyMode;
         }
 
-        public int BlockSize { get; }
+        public int BlockLength { get; }
         public int KeySize { get; }
         public void Init(ICipherParameters parameters)
         {

@@ -1,9 +1,8 @@
 ﻿using System;
 using System.IO;
 using Crypto.Encryption;
-using Crypto.Encryption.Modes;
 using Crypto.Encryption.Parameters;
-using Crypto.IO.TLS.Messages;
+using Crypto.Hashing;
 using Crypto.Utils;
 using StreamReader = Crypto.Utils.IO.StreamReader;
 
@@ -12,6 +11,7 @@ namespace Crypto.IO.TLS
     public class RecordReader : StreamReader
     {
         private readonly TlsState state;
+        private long seqNum;
 
         public RecordReader(TlsState state, Stream stream) : base(stream)
         {
@@ -20,7 +20,7 @@ namespace Crypto.IO.TLS
 
         public Record ReadRecord()
         {
-            return state.Protected ? ReadCipherText() : ReadPlainText();
+            return state.ReadProtected ? ReadCipherText() : ReadPlainText();
         }
 
         private Record ReadCipherText()
@@ -33,7 +33,7 @@ namespace Crypto.IO.TLS
             var cipher = state.GetCipher();
             if (cipher is BlockCipherAdapter)
             {
-                data = ReadBlockCipher((BlockCipherAdapter)cipher, length);
+                data = ReadBlockCipher((BlockCipherAdapter)cipher, type, version, length);
             }
             else
             {
@@ -43,35 +43,53 @@ namespace Crypto.IO.TLS
             return new Record(type, version, data);
         }
 
-        private byte[] ReadBlockCipher(BlockCipherAdapter cipher, ushort length)
+        private byte[] ReadBlockCipher(BlockCipherAdapter cipher, RecordType type, TlsVersion version, ushort length)
         {
-            var blockSize = cipher.BlockCipher.BlockSize;
+            var blockSize = cipher.BlockLength;
             var iv = Reader.ReadBytes(blockSize);
 
-            cipher.Init(new IVParameter(state.GetBlockCipherParameters(state.Mode != TlsMode.Server), iv));
+            cipher.Init(new IVParameter(state.GetBlockCipherParameters(true), iv));
 
             var payload = Reader.ReadBytes(length - blockSize);
             var plaintext = new byte[payload.Length];
 
             cipher.Decrypt(payload, 0, plaintext, 0, payload.Length);
 
+            var macAlgo = state.GetMAC(true);
+            var macLength = macAlgo.HashSize / 8;
             var paddingLength = plaintext[plaintext.Length - 1];
+            var contentLength = plaintext.Length - paddingLength - macLength - 1;
+            SecurityAssert.SAssert(contentLength >= 0);
+
+            //TODO constant time
             for (var i = plaintext.Length - 1; i > plaintext.Length - paddingLength; i--)
             {
                 SecurityAssert.SAssert(plaintext[i] == paddingLength);
             }
 
-            var macAlgo = state.GetMAC(state.Mode != TlsMode.Server);
-            var macLength = macAlgo.HashSize / 8;
             var mac = new byte[macLength];
-            Array.Copy(plaintext, plaintext.Length - paddingLength - macLength, mac, 0, macLength);
+            Array.Copy(plaintext, contentLength, mac, 0, macLength);
 
-            var content = new byte[plaintext.Length - paddingLength - macLength];
-            Array.Copy(plaintext, content, content.Length);
+            var content = new byte[contentLength];
+            Array.Copy(plaintext, 0, content, 0, content.Length);
 
-            //TODO verify MAC
+            var computedMac = ComputeMAC(macAlgo, seqNum, type, version, content);
+
+            SecurityAssert.HashAssert(mac, computedMac);
+
+            seqNum++;
 
             return content;
+        }
+
+        private byte[] ComputeMAC(IDigest macAlgo, long seqNum, RecordType type, TlsVersion version, byte[] content)
+        {
+            macAlgo.Update(EndianBitConverter.Big.GetBytes(seqNum), 0, sizeof(long));
+            macAlgo.Update(new[] { (byte)type, version.Major, version.Major }, 0, 3);
+            macAlgo.Update(EndianBitConverter.Big.GetBytes((ushort)content.Length), 0, sizeof(ushort));
+            macAlgo.Update(content, 0, content.Length);
+
+            return macAlgo.Digest();
         }
 
         private Record ReadPlainText()

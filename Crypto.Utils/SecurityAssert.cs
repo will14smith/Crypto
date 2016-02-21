@@ -31,5 +31,25 @@ namespace Crypto.Utils
 
             throw new SecurityException($"Failed security assertion in '{callerName}' - {callerFile}:{callerLine}");
         }
+
+        [AssertionMethod]
+        public static void HashAssert(byte[] a, byte[] b)
+        {
+            NotNull(a);
+            NotNull(b);
+
+            if (a.Length != b.Length)
+            {
+                SAssert(false);
+            }
+
+            var result = 0;
+            for (var i = 0; i < a.Length; i++)
+            {
+                result |= a[i] ^ b[i];
+            }
+
+            SAssert(result == 0);
+        }
     }
 }

@@ -11,10 +11,11 @@ namespace Crypto.Encryption
         void Encrypt(byte[] input, int inputOffset, byte[] output, int outputOffset, int length);
         void Decrypt(byte[] input, int inputOffset, byte[] output, int outputOffset, int length);
     }
+
     public interface IBlockCipher
     {
         int BlockLength { get; }
-        int KeySize { get; }
+        int KeyLength { get; }
 
         void Init(ICipherParameters parameters);
 

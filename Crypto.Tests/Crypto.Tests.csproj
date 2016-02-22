@@ -53,9 +53,11 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="Encryption\AEAD\GCMCipherTests.cs" />
     <Compile Include="Encryption\Modes\CBCBlockModeTests.cs" />
     <Compile Include="Encryption\RSATests.cs" />
     <Compile Include="Encryption\AESCipherTests.cs" />
+    <Compile Include="Hashing\GHashTests.cs" />
     <Compile Include="Hashing\HMACTests.cs" />
     <Compile Include="Hashing\PRFTests.cs" />
     <Compile Include="Hashing\SHA256DigestTests.cs" />

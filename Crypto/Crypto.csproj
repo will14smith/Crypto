@@ -61,6 +61,7 @@
     <Compile Include="Certificates\X509Certificate.cs" />
     <Compile Include="Certificates\X509Validity.cs" />
     <Compile Include="Certificates\X509Writer.cs" />
+    <Compile Include="Encryption\AEAD\IAEADBlockCipher.cs" />
     <Compile Include="Encryption\BlockCipherAdapter.cs" />
     <Compile Include="Encryption\Block\AESCipher.cs" />
     <Compile Include="Encryption\ICipher.cs" />
@@ -68,7 +69,10 @@
     <Compile Include="Encryption\Modes\CBCBlockCipher.cs" />
     <Compile Include="Encryption\Modes\CTRBlockCipher.cs" />
     <Compile Include="Encryption\Modes\ECBBlockCipher.cs" />
+    <Compile Include="Encryption\AEAD\GCMCipher.cs" />
+    <Compile Include="Encryption\Modes\IVBlockCipher.cs" />
     <Compile Include="Encryption\NullCipher.cs" />
+    <Compile Include="Encryption\Parameters\AADParameter.cs" />
     <Compile Include="Encryption\Parameters\ICipherParameters.cs" />
     <Compile Include="Encryption\Parameters\IVParameter.cs" />
     <Compile Include="Encryption\Parameters\KeyParameter.cs" />
@@ -77,6 +81,7 @@
     <Compile Include="Encryption\Block\ThreeDESCipher.cs" />
     <Compile Include="Encryption\Block\ThreeDESKeyOptions.cs" />
     <Compile Include="Hashing\BlockDigest.cs" />
+    <Compile Include="Hashing\GHash.cs" />
     <Compile Include="Hashing\HMAC.cs" />
     <Compile Include="Hashing\IDigest.cs" />
     <Compile Include="Hashing\MD5Digest.cs" />

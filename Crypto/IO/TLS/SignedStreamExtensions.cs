@@ -26,6 +26,7 @@ namespace Crypto.IO.TLS
             if (digest is NullDigest) return 0;
             if (digest is MD5Digest) return 1;
             if (digest is SHA1Digest) return 2;
+            if (digest is SHA256Digest) return 4;
 
             throw new NotSupportedException();
         }

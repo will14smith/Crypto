@@ -12,7 +12,7 @@ namespace Crypto.Encryption
         }
 
         public int BlockLength { get; }
-        public int KeySize { get; }
+        public int KeyLength { get; }
         public void Init(ICipherParameters parameters)
         {
             throw new System.NotImplementedException();

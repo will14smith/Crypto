@@ -43,7 +43,7 @@ namespace Crypto.Hashing
             {
                 SecurityAssert.SAssert(workBufferLength < BlockSize / 8);
 
-                var lengthToTake = Math.Min(length, 64 - workBufferLength);
+                var lengthToTake = Math.Min(length, workBuffer.Length - workBufferLength);
 
                 Array.Copy(buffer, offset, workBuffer, workBufferLength, lengthToTake);
 

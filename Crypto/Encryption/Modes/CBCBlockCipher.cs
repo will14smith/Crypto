@@ -1,63 +1,27 @@
 ﻿using System;
-using Crypto.Encryption.Parameters;
 using Crypto.Utils;
 
 namespace Crypto.Encryption.Modes
 {
-    public class CBCBlockCipher : IBlockCipher
+    public class CBCBlockCipher : IVBlockCipher
     {
-        public IBlockCipher Cipher { get; }
-
-        private bool ivInitialised;
-        private readonly byte[] iv;
-
         private byte[] workingIV;
 
-        public CBCBlockCipher(IBlockCipher cipher)
+        public CBCBlockCipher(IBlockCipher cipher) : base(cipher)
         {
-            Cipher = cipher;
-
-            iv = new byte[BlockLength];
         }
 
-        public int BlockLength => Cipher.BlockLength;
-        public int KeySize => Cipher.KeySize;
-
-        public void Init(ICipherParameters parameters)
+        protected override void Reset()
         {
-            var ivParams = parameters as IVParameter;
-            if (ivParams == null)
-            {
-                Cipher.Init(parameters);
-                return;
-            }
-
-            var ivParam = ivParams.IV;
-            SecurityAssert.NotNull(ivParam);
-            SecurityAssert.SAssert(ivParam.Length == BlockLength);
-
-            Array.Copy(ivParam, iv, BlockLength);
-            ivInitialised = true;
-
-            if (ivParams.Parameters != null)
-            {
-                Cipher.Init(ivParams.Parameters);
-            }
-
-            Reset();
-        }
-
-        private void Reset()
-        {
-            SecurityAssert.SAssert(ivInitialised);
+            SecurityAssert.SAssert(IVInitialised);
 
             workingIV = new byte[BlockLength];
-            Array.Copy(iv, workingIV, BlockLength);
+            Array.Copy(IV, workingIV, BlockLength);
         }
 
-        public void EncryptBlock(byte[] input, int inputOffset, byte[] output, int outputOffset)
+        public override void EncryptBlock(byte[] input, int inputOffset, byte[] output, int outputOffset)
         {
-            SecurityAssert.SAssert(ivInitialised);
+            SecurityAssert.SAssert(IVInitialised);
             SecurityBufferAssert.AssertBuffer(input, inputOffset, BlockLength);
             SecurityBufferAssert.AssertBuffer(output, outputOffset, BlockLength);
 
@@ -71,9 +35,9 @@ namespace Crypto.Encryption.Modes
             Array.Copy(output, outputOffset, workingIV, 0, BlockLength);
         }
 
-        public void DecryptBlock(byte[] input, int inputOffset, byte[] output, int outputOffset)
+        public override void DecryptBlock(byte[] input, int inputOffset, byte[] output, int outputOffset)
         {
-            SecurityAssert.SAssert(ivInitialised);
+            SecurityAssert.SAssert(IVInitialised);
             SecurityBufferAssert.AssertBuffer(input, inputOffset, BlockLength);
             SecurityBufferAssert.AssertBuffer(output, outputOffset, BlockLength);
 

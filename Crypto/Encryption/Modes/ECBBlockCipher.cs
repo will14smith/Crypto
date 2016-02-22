@@ -14,7 +14,7 @@ namespace Crypto.Encryption.Modes
         }
 
         public int BlockLength => Cipher.BlockLength;
-        public int KeySize => Cipher.KeySize;
+        public int KeyLength => Cipher.KeyLength;
 
         public void Init(ICipherParameters parameters)
         {

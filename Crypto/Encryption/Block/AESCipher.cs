@@ -12,19 +12,19 @@ namespace Crypto.Encryption.Block
         private readonly byte[] key;
         private readonly byte[] roundKeys;
 
-        public AESCipher(int keyLength)
+        public AESCipher(int keySize)
         {
-            SecurityAssert.SAssert(keyLength == 128 || keyLength == 192 || keyLength == 256);
+            SecurityAssert.SAssert(keySize == 128 || keySize == 192 || keySize == 256);
 
-            KeySize = keyLength / 8;
+            KeyLength = keySize / 8;
 
-            key = new byte[KeySize];
-            roundKeys = new byte[KeySize * 4 + 112];
+            key = new byte[KeyLength];
+            roundKeys = new byte[KeyLength * 4 + 112];
         }
 
 
         public int BlockLength => AESBlockLength;
-        public int KeySize { get; }
+        public int KeyLength { get; }
 
         public void Init(ICipherParameters parameters)
         {
@@ -38,8 +38,8 @@ namespace Crypto.Encryption.Block
             var keyParam = keyParams.Key;
 
             SecurityAssert.NotNull(keyParam);
-            SecurityAssert.SAssert(keyParam.Length == KeySize);
-            Array.Copy(keyParam, key, KeySize);
+            SecurityAssert.SAssert(keyParam.Length == KeyLength);
+            Array.Copy(keyParam, key, KeyLength);
 
             var tmp = BuildRoundKeys(key);
             Array.Copy(tmp, roundKeys, roundKeys.Length);
@@ -53,7 +53,7 @@ namespace Crypto.Encryption.Block
             SecurityBufferAssert.AssertBuffer(input, inputOffset, BlockLength);
             SecurityBufferAssert.AssertBuffer(output, outputOffset, BlockLength);
 
-            var rounds = KeySize / 4 + 6;
+            var rounds = KeyLength / 4 + 6;
 
             var state = ToState(input, inputOffset);
 
@@ -80,7 +80,7 @@ namespace Crypto.Encryption.Block
             SecurityBufferAssert.AssertBuffer(input, inputOffset, BlockLength);
             SecurityBufferAssert.AssertBuffer(output, outputOffset, BlockLength);
 
-            var rounds = KeySize / 4 + 6;
+            var rounds = KeyLength / 4 + 6;
 
             var state = ToState(input, inputOffset);
 

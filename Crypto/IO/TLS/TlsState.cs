@@ -277,7 +277,7 @@ namespace Crypto.IO.TLS
             Array.Copy(keyBlock, offset, serverKey, 0, encKeyLength);
             // offset += encKeyLength;
 
-            //TODO get iv (for AEAD)
+            //TODO get IV (for AEAD)
         }
 
         private void NegotiateParameters()

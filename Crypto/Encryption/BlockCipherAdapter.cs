@@ -14,7 +14,7 @@ namespace Crypto.Encryption
             BlockCipher = blockCipher;
         }
 
-        public int KeyLength => BlockCipher.KeyLength;
+        public int KeySize => BlockCipher.KeyLength;
         public int BlockLength => BlockCipher.BlockLength;
 
         public void Init(ICipherParameters parameters)

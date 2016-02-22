@@ -35,6 +35,10 @@ namespace Crypto.IO.TLS
             {
                 data = ReadBlockCipher((BlockCipherAdapter)cipher, type, version, length);
             }
+            else if (cipher is AEADCipherAdapter)
+            {
+                data = ReadAEADCipher((AEADCipherAdapter)cipher, type, version, length);
+            }
             else
             {
                 throw new NotImplementedException();
@@ -45,12 +49,12 @@ namespace Crypto.IO.TLS
 
         private byte[] ReadBlockCipher(BlockCipherAdapter cipher, RecordType type, TlsVersion version, ushort length)
         {
-            var blockSize = cipher.BlockLength;
-            var iv = Reader.ReadBytes(blockSize);
+            var blockLength = cipher.BlockLength;
+            var iv = Reader.ReadBytes(blockLength);
 
             cipher.Init(new IVParameter(state.GetBlockCipherParameters(true), iv));
 
-            var payload = Reader.ReadBytes(length - blockSize);
+            var payload = Reader.ReadBytes(length - blockLength);
             var plaintext = new byte[payload.Length];
 
             cipher.Decrypt(payload, 0, plaintext, 0, payload.Length);
@@ -90,6 +94,32 @@ namespace Crypto.IO.TLS
             macAlgo.Update(content, 0, content.Length);
 
             return macAlgo.Digest();
+        }
+
+        private byte[] ReadAEADCipher(AEADCipherAdapter cipher, RecordType type, TlsVersion version, ushort length)
+        {
+            // TODO parametrised from CipherSpec
+            var explicitNonceLength = 8;
+
+            var nonce = Reader.ReadBytes(explicitNonceLength);
+            var payload = Reader.ReadBytes(length - explicitNonceLength);
+
+            var aad = new byte[13];
+            Array.Copy(EndianBitConverter.Big.GetBytes(seqNum), 0, aad, 0, 8);
+            Array.Copy(new[] { (byte)type, version.Major, version.Major }, 0, aad, 8, 3);
+            Array.Copy(EndianBitConverter.Big.GetBytes((ushort)(length - explicitNonceLength - cipher.TagLength)), 0, aad, 11, 2);
+
+            cipher.Init(state.GetAEADParameters(true, aad, nonce));
+
+            var plaintext = new byte[payload.Length];
+            var plaintextLength = cipher.Cipher.Decrypt(payload, 0, plaintext, 0, payload.Length);
+            plaintextLength += cipher.Cipher.DecryptFinal(plaintext, plaintextLength);
+
+            Array.Resize(ref plaintext, plaintextLength);
+
+            seqNum++;
+
+            return plaintext;
         }
 
         private Record ReadPlainText()

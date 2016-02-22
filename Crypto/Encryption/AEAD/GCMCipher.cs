@@ -29,6 +29,7 @@ namespace Crypto.Encryption.AEAD
 
         public int BlockLength => Cipher.BlockLength;
         public int KeySize => Cipher.KeyLength;
+        public int TagLength => 16;
 
         public void Init(ICipherParameters parameters)
         {
@@ -171,7 +172,7 @@ namespace Crypto.Encryption.AEAD
         private void DecryptBlock(byte[] output, int outputOffset)
         {
             // encrypt block
-            ctr.EncryptBlock(buffer, 0, output, outputOffset);
+            ctr.DecryptBlock(buffer, 0, output, outputOffset);
 
             // update tag hash
             tagHash.Update(buffer, 0, BlockLength);

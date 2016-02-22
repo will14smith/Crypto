@@ -61,6 +61,7 @@
     <Compile Include="Certificates\X509Certificate.cs" />
     <Compile Include="Certificates\X509Validity.cs" />
     <Compile Include="Certificates\X509Writer.cs" />
+    <Compile Include="Encryption\AEADCipherAdapter.cs" />
     <Compile Include="Encryption\AEAD\IAEADBlockCipher.cs" />
     <Compile Include="Encryption\BlockCipherAdapter.cs" />
     <Compile Include="Encryption\Block\AESCipher.cs" />

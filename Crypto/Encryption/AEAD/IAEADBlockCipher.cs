@@ -6,6 +6,7 @@ namespace Crypto.Encryption.AEAD
     {
         int BlockLength { get; }
         int KeySize { get; }
+        int TagLength { get; }
 
         void Init(ICipherParameters parameters);
 

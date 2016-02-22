@@ -27,7 +27,13 @@ namespace Crypto.IO.TLS
             //TODO fragmentation
             if (state.WriteProtected)
             {
-                Writer.Write(GetCipherTextBuffer(record));
+                Writer.Write(record.Type);
+                Writer.Write(record.Version);
+
+                var cipherTextBuffer = GetCipherTextBuffer(record);
+
+                Writer.Write((ushort)(cipherTextBuffer.Length));
+                Writer.Write(cipherTextBuffer);
             }
             else
             {
@@ -42,6 +48,10 @@ namespace Crypto.IO.TLS
             {
                 return GetBlockCipherBuffer((BlockCipherAdapter)cipher, record);
             }
+            else if (cipher is AEADCipherAdapter)
+            {
+                return GetAEADCipherBuffer((AEADCipherAdapter)cipher, record);
+            }
             else
             {
                 throw new NotImplementedException();
@@ -53,6 +63,8 @@ namespace Crypto.IO.TLS
             var macAlgo = state.GetMAC(false);
             var mac = CreateMAC(macAlgo, seqNum, record);
 
+            var iv = RandomGenerator.RandomBytes(cipher.BlockLength);
+
             var payloadLength = record.Data.Length + macAlgo.HashSize / 8;
 
             var padding = (byte)(cipher.BlockLength - 1 - payloadLength % cipher.BlockLength);
@@ -60,40 +72,29 @@ namespace Crypto.IO.TLS
 
             payloadLength += padding + 1;
 
-            var payload = new byte[payloadLength];
-            var ciphertext = new byte[payloadLength];
+            var plaintext = new byte[payloadLength];
+            var payload = new byte[iv.Length + payloadLength];
+            Array.Copy(iv, payload, iv.Length);
 
             var offset = 0;
 
-            Array.Copy(record.Data, 0, payload, offset, record.Data.Length);
+            Array.Copy(record.Data, 0, plaintext, offset, record.Data.Length);
             offset += record.Data.Length;
 
-            Array.Copy(mac, 0, payload, offset, mac.Length);
+            Array.Copy(mac, 0, plaintext, offset, mac.Length);
             offset += mac.Length;
 
             for (; offset < payloadLength; offset++)
             {
-                payload[offset] = padding;
+                plaintext[offset] = padding;
             }
 
-            var iv = RandomGenerator.RandomBytes(cipher.BlockLength);
-
             cipher.Init(new IVParameter(state.GetBlockCipherParameters(false), iv));
-            cipher.Encrypt(payload, 0, ciphertext, 0, payload.Length);
+            cipher.Encrypt(plaintext, 0, payload, iv.Length, plaintext.Length);
 
             seqNum++;
 
-            using (var ms = new MemoryStream())
-            using (var msWriter = new EndianBinaryWriter(EndianBitConverter.Big, ms))
-            {
-                msWriter.Write(record.Type);
-                msWriter.Write(record.Version);
-                msWriter.Write((ushort)(iv.Length + ciphertext.Length));
-                msWriter.Write(iv, 0, iv.Length);
-                msWriter.Write(ciphertext, 0, ciphertext.Length);
-
-                return ms.ToArray();
-            }
+            return payload;
         }
 
         private byte[] CreateMAC(IDigest macAlgo, long seqNum, Record record)
@@ -104,6 +105,26 @@ namespace Crypto.IO.TLS
             macAlgo.Update(record.Data, 0, record.Length);
 
             return macAlgo.Digest();
+        }
+
+        private byte[] GetAEADCipherBuffer(AEADCipherAdapter cipher, Record record)
+        {
+            // TODO parametrised from CipherSpec
+            var explicitNonceLength = 8;
+            var nonce = RandomGenerator.RandomBytes(explicitNonceLength);
+
+            var aad = new byte[13];
+            Array.Copy(EndianBitConverter.Big.GetBytes(seqNum), 0, aad, 0, 8);
+            Array.Copy(new[] { (byte)record.Type, record.Version.Major, record.Version.Major }, 0, aad, 8, 3);
+            Array.Copy(EndianBitConverter.Big.GetBytes((ushort)record.Length), 0, aad, 11, 2);
+
+            var payload = new byte[8 + record.Length + cipher.BlockLength];
+            Array.Copy(nonce, payload, explicitNonceLength);
+
+            cipher.Init(state.GetAEADParameters(false, aad, nonce));
+            cipher.Encrypt(record.Data, 0, payload, explicitNonceLength, record.Data.Length);
+
+            return payload;
         }
 
         private byte[] GetPlainTextBuffer(Record record)

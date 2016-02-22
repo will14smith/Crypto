@@ -97,6 +97,8 @@ namespace Crypto.IO.TLS
         private byte[] serverMACKey;
         private byte[] clientKey;
         private byte[] serverKey;
+        private byte[] clientIV;
+        private byte[] serverIV;
 
         // TODO extensions
 
@@ -253,21 +255,26 @@ namespace Crypto.IO.TLS
             Array.Copy(ClientRandom, 0, random, ServerRandom.Length, ClientRandom.Length);
 
             var macKeyLength = mac.HashSize / 8;
-            var encKeyLength = cipher.KeyLength;
+            var encKeyLength = cipher.KeySize;
+            // for AEAD - TODO is it constant?
+            var implicitIVLength = 4;
 
-            var keyBlockLength = 2 * macKeyLength + 2 * encKeyLength;
+            var keyBlockLength = 2 * macKeyLength + 2 * encKeyLength + 2 * implicitIVLength;
 
             var keyBlock = prf.Digest(masterSecret, "key expansion", random).Take(keyBlockLength).ToArray();
 
             int offset = 0;
 
-            clientMACKey = new byte[macKeyLength];
-            Array.Copy(keyBlock, offset, clientMACKey, 0, macKeyLength);
-            offset += macKeyLength;
+            if (cipherSuite.IsBlock())
+            {
+                clientMACKey = new byte[macKeyLength];
+                Array.Copy(keyBlock, offset, clientMACKey, 0, macKeyLength);
+                offset += macKeyLength;
 
-            serverMACKey = new byte[macKeyLength];
-            Array.Copy(keyBlock, offset, serverMACKey, 0, macKeyLength);
-            offset += macKeyLength;
+                serverMACKey = new byte[macKeyLength];
+                Array.Copy(keyBlock, offset, serverMACKey, 0, macKeyLength);
+                offset += macKeyLength;
+            }
 
             clientKey = new byte[encKeyLength];
             Array.Copy(keyBlock, offset, clientKey, 0, encKeyLength);
@@ -275,9 +282,17 @@ namespace Crypto.IO.TLS
 
             serverKey = new byte[encKeyLength];
             Array.Copy(keyBlock, offset, serverKey, 0, encKeyLength);
-            // offset += encKeyLength;
+            offset += encKeyLength;
 
-            //TODO get IV (for AEAD)
+            if (cipherSuite.IsAEAD())
+            {
+                clientIV = new byte[implicitIVLength];
+                Array.Copy(keyBlock, offset, clientIV, 0, implicitIVLength);
+                offset += implicitIVLength;
+
+                serverIV = new byte[implicitIVLength];
+                Array.Copy(keyBlock, offset, serverIV, 0, implicitIVLength);
+            }
         }
 
         private void NegotiateParameters()
@@ -359,8 +374,48 @@ namespace Crypto.IO.TLS
             var key = reader
                 ? (Mode == TlsMode.Server ? clientKey : serverKey)
                 : (Mode == TlsMode.Server ? serverKey : clientKey);
-            
+
             return new KeyParameter(key);
+        }
+
+        public ICipherParameters GetAEADParameters(bool reader, byte[] aad, byte[] nonceExplicit)
+        {
+            SecurityAssert.SAssert(ReadProtected || !reader);
+            SecurityAssert.SAssert(WriteProtected || reader);
+
+            byte[] key, nonceImplicit;
+            if (reader)
+            {
+                if (Mode == TlsMode.Server)
+                {
+                    key = clientKey;
+                    nonceImplicit = clientIV;
+                }
+                else
+                {
+                    key = serverKey;
+                    nonceImplicit = serverIV;
+                }
+            }
+            else
+            {
+                if (Mode == TlsMode.Server)
+                {
+                    key = serverKey;
+                    nonceImplicit = serverIV;
+                }
+                else
+                {
+                    key = clientKey;
+                    nonceImplicit = clientIV;
+                }
+            }
+
+            var nonce = new byte[nonceImplicit.Length + nonceExplicit.Length];
+            Array.Copy(nonceImplicit, 0, nonce, 0, nonceImplicit.Length);
+            Array.Copy(nonceExplicit, 0, nonce, nonceImplicit.Length, nonceExplicit.Length);
+
+            return new AADParameter(new IVParameter(new KeyParameter(key), nonce), aad);
         }
     }
 }

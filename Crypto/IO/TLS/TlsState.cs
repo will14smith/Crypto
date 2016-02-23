@@ -8,6 +8,7 @@ using Crypto.Encryption;
 using Crypto.Encryption.Parameters;
 using Crypto.Hashing;
 using Crypto.IO.Signing;
+using Crypto.IO.TLS.Extensions;
 using Crypto.IO.TLS.Messages;
 using Crypto.IO.TLS.Messages.Handshake;
 using Crypto.Utils;
@@ -16,6 +17,11 @@ namespace Crypto.IO.TLS
 {
     public class TlsState
     {
+        static TlsState()
+        {
+            TlsExtensionManager.RegisterExtension(new SignatureAlgorithmExtensionConfiguration());
+        }
+
         public TlsState(Stream stream)
         {
             this.stream = stream;
@@ -34,11 +40,10 @@ namespace Crypto.IO.TLS
         private TlsVersion clientMaxVersion;
         private CipherSuite[] clientCipherSuites;
         private CompressionMethod[] clientCompressionMethods;
-        private HelloExtension[] clientExtensions;
 
         #endregion
 
-        #region connection State
+        #region connection state
 
         public ConnectionEnd ConnectionEnd { get; private set; }
 
@@ -251,7 +256,32 @@ namespace Crypto.IO.TLS
 
         #region extensions
 
-        // TODO extensions
+        private readonly Dictionary<int, ITlsExtension> extensions
+            = new Dictionary<int, ITlsExtension>();
+
+        private void HandleClientExtensions(IEnumerable<HelloExtension> clientExtensions)
+        {
+            foreach (var clientExtension in clientExtensions)
+            {
+                var extensionFactory = TlsExtensionManager.LookupFactory(clientExtension.Type);
+                if (extensionFactory != null)
+                {
+                    extensions.Add(clientExtension.Type, extensionFactory(this, clientExtension.Data));
+                }
+            }
+        }
+        private IEnumerable<HelloExtension> GenerateExtensionsHello()
+        {
+            foreach (var extension in extensions)
+            {
+                var hello = extension.Value.GenerateHello();
+
+                if (hello != null)
+                {
+                    yield return hello;
+                }
+            }
+        }
 
         #endregion
 
@@ -286,7 +316,7 @@ namespace Crypto.IO.TLS
             clientMaxVersion = message.Version;
             clientCipherSuites = message.CipherSuites;
             clientCompressionMethods = message.CompressionMethods;
-            clientExtensions = message.Extensions;
+            HandleClientExtensions(message.Extensions);
 
             ClientRandom = message.RandomBytes;
 
@@ -298,10 +328,8 @@ namespace Crypto.IO.TLS
             SecurityAssert.SAssert(state == TlsStateType.RecievedClientHello);
             state = TlsStateType.SendingServerHello;
 
-            //TODO extensions
-            yield return
-                new ServerHelloMessage(Version, ServerRandom, sessionId, new HelloExtension[0], cipherSuite,
-                    compressionMethod);
+            var helloExtensions = GenerateExtensionsHello().ToArray();
+            yield return new ServerHelloMessage(Version, ServerRandom, sessionId, helloExtensions, cipherSuite, compressionMethod);
 
             foreach (var message in KeyExchange.GenerateHandshakeMessages())
             {
@@ -378,7 +406,7 @@ namespace Crypto.IO.TLS
 
             return new FinishedHandshakeMessage(verifyData);
         }
-        
+
         private void NegotiateParameters()
         {
             SecurityAssert.SAssert(state == TlsStateType.RecievedClientHello);

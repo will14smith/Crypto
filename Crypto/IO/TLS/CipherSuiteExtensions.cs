@@ -9,235 +9,93 @@ namespace Crypto.IO.TLS
 {
     internal static class CipherSuiteExtensions
     {
-        private static readonly Dictionary<CipherSuite, Func<ICipher>> CipherFactories
-            = new Dictionary<CipherSuite, Func<ICipher>>();
-        private static readonly Dictionary<CipherSuite, Func<IDigest>> DigestFactories
-            = new Dictionary<CipherSuite, Func<IDigest>>();
-        private static readonly Dictionary<CipherSuite, Func<ISignatureCipher>> SignatureFactories
-            = new Dictionary<CipherSuite, Func<ISignatureCipher>>();
-        private static readonly Dictionary<CipherSuite, Func<IKeyExchange>> KeyExchangeFactories
-            = new Dictionary<CipherSuite, Func<IKeyExchange>>();
-
         private static readonly ISet<CipherSuite> Suites = new HashSet<CipherSuite>();
+        private static readonly Dictionary<CipherSuite, Func<ICipher>> CipherFactories = new Dictionary<CipherSuite, Func<ICipher>>();
+        private static readonly Dictionary<CipherSuite, TlsHashAlgorithm> DigestMapping = new Dictionary<CipherSuite, TlsHashAlgorithm>();
+        private static readonly Dictionary<CipherSuite, TlsSignatureAlgorithm> SignatureMapping = new Dictionary<CipherSuite, TlsSignatureAlgorithm>();
+        private static readonly Dictionary<CipherSuite, TlsKeyExchange> KeyExchangeMapping = new Dictionary<CipherSuite, TlsKeyExchange>();
+
+        private static readonly ISet<TlsHashAlgorithm> HashAlgorithms = new HashSet<TlsHashAlgorithm>();
+        private static readonly Dictionary<TlsHashAlgorithm, Func<IDigest>> DigestFactories = new Dictionary<TlsHashAlgorithm, Func<IDigest>>();
+
+        private static readonly ISet<TlsSignatureAlgorithm> SignatureAlgorithms = new HashSet<TlsSignatureAlgorithm>();
+        private static readonly Dictionary<TlsSignatureAlgorithm, Func<ISignatureCipher>> SignatureFactories = new Dictionary<TlsSignatureAlgorithm, Func<ISignatureCipher>>();
+
+        private static readonly ISet<TlsKeyExchange> KeyExchanges = new HashSet<TlsKeyExchange>();
+        private static readonly Dictionary<TlsKeyExchange, Func<IKeyExchange>> KeyExchangeFactories = new Dictionary<TlsKeyExchange, Func<IKeyExchange>>();
+
+        // 
 
         static CipherSuiteExtensions()
         {
             // ciphers
-            RegisterCiphers(new[]
-            {
-                CipherSuite.TLS_NULL_WITH_NULL_NULL
-                , CipherSuite.TLS_RSA_WITH_NULL_MD5
-                , CipherSuite.TLS_RSA_WITH_NULL_SHA
-                , CipherSuite.TLS_RSA_WITH_NULL_SHA256
-            }, () => new NullCipher());
+            Func<ICipher> nullCipher = () => new NullCipher();
+            Func<ICipher> rc4 = () => new RC4Cipher(128);
+            Func<ICipher> threeDes = () => new BlockCipherAdapter(new ThreeDESCipher(ThreeDESKeyOptions.Option1));
+            Func<ICipher> aes128 = () => new BlockCipherAdapter(new CBCBlockCipher(new AESCipher(128)));
+            Func<ICipher> aes256 = () => new BlockCipherAdapter(new CBCBlockCipher(new AESCipher(256)));
 
-            RegisterCiphers(new[]
-            {
-                CipherSuite.TLS_RSA_WITH_RC4_128_MD5,
-                CipherSuite.TLS_RSA_WITH_RC4_128_SHA,
-                CipherSuite.TLS_DH_anon_WITH_RC4_128_MD5
-            }, () => new RC4Cipher(128));
-
-            RegisterCiphers(new[]
-            {
-                CipherSuite.TLS_RSA_WITH_3DES_EDE_CBC_SHA,
-                CipherSuite.TLS_DH_DSS_WITH_3DES_EDE_CBC_SHA,
-                CipherSuite.TLS_DH_RSA_WITH_3DES_EDE_CBC_SHA,
-                CipherSuite.TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA,
-                CipherSuite.TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA,
-                CipherSuite.TLS_DH_anon_WITH_3DES_EDE_CBC_SHA
-            }, () => new BlockCipherAdapter(new CBCBlockCipher(new ThreeDESCipher(ThreeDESKeyOptions.Option1))));
-
-            RegisterCiphers(new[]
-            {
-                CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA,
-                CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA256,
-                CipherSuite.TLS_DH_DSS_WITH_AES_128_CBC_SHA,
-                CipherSuite.TLS_DH_RSA_WITH_AES_128_CBC_SHA,
-                CipherSuite.TLS_DHE_DSS_WITH_AES_128_CBC_SHA,
-                CipherSuite.TLS_DHE_RSA_WITH_AES_128_CBC_SHA,
-                CipherSuite.TLS_DH_DSS_WITH_AES_128_CBC_SHA256,
-                CipherSuite.TLS_DH_RSA_WITH_AES_128_CBC_SHA256,
-                CipherSuite.TLS_DHE_DSS_WITH_AES_128_CBC_SHA256,
-                CipherSuite.TLS_DHE_RSA_WITH_AES_128_CBC_SHA256,
-                CipherSuite.TLS_DH_anon_WITH_AES_128_CBC_SHA,
-                CipherSuite.TLS_DH_anon_WITH_AES_128_CBC_SHA256
-            }, () => new BlockCipherAdapter(new CBCBlockCipher(new AESCipher(128))));
-
-            RegisterCiphers(new[]
-            {
-                CipherSuite.TLS_RSA_WITH_AES_256_CBC_SHA,
-                CipherSuite.TLS_RSA_WITH_AES_256_CBC_SHA256,
-                CipherSuite.TLS_DH_DSS_WITH_AES_256_CBC_SHA,
-                CipherSuite.TLS_DH_RSA_WITH_AES_256_CBC_SHA,
-                CipherSuite.TLS_DHE_DSS_WITH_AES_256_CBC_SHA,
-                CipherSuite.TLS_DHE_RSA_WITH_AES_256_CBC_SHA,
-                CipherSuite.TLS_DH_DSS_WITH_AES_256_CBC_SHA256,
-                CipherSuite.TLS_DH_RSA_WITH_AES_256_CBC_SHA256,
-                CipherSuite.TLS_DHE_DSS_WITH_AES_256_CBC_SHA256,
-                CipherSuite.TLS_DHE_RSA_WITH_AES_256_CBC_SHA256,
-                CipherSuite.TLS_DH_anon_WITH_AES_256_CBC_SHA,
-                CipherSuite.TLS_DH_anon_WITH_AES_256_CBC_SHA256
-            }, () => new BlockCipherAdapter(new CBCBlockCipher(new AESCipher(256))));
-
-            // digests
-            RegisterDigests(new[]
-            {
-                CipherSuite.TLS_NULL_WITH_NULL_NULL
-            }, () => new NullDigest());
-
-            RegisterDigests(new[]
-            {
-                CipherSuite.TLS_RSA_WITH_NULL_MD5,
-                CipherSuite.TLS_RSA_WITH_RC4_128_MD5,
-                CipherSuite.TLS_DH_anon_WITH_RC4_128_MD5
-            }, () => new MD5Digest());
-
-            RegisterDigests(new[]
-            {
-                CipherSuite.TLS_RSA_WITH_NULL_SHA,
-                CipherSuite.TLS_RSA_WITH_RC4_128_SHA,
-                CipherSuite.TLS_RSA_WITH_3DES_EDE_CBC_SHA,
-                CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA,
-                CipherSuite.TLS_RSA_WITH_AES_256_CBC_SHA,
-                CipherSuite.TLS_DH_DSS_WITH_3DES_EDE_CBC_SHA,
-                CipherSuite.TLS_DH_RSA_WITH_3DES_EDE_CBC_SHA,
-                CipherSuite.TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA,
-                CipherSuite.TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA,
-                CipherSuite.TLS_DH_DSS_WITH_AES_128_CBC_SHA,
-                CipherSuite.TLS_DH_RSA_WITH_AES_128_CBC_SHA,
-                CipherSuite.TLS_DHE_DSS_WITH_AES_128_CBC_SHA,
-                CipherSuite.TLS_DHE_RSA_WITH_AES_128_CBC_SHA,
-                CipherSuite.TLS_DH_DSS_WITH_AES_256_CBC_SHA,
-                CipherSuite.TLS_DH_RSA_WITH_AES_256_CBC_SHA,
-                CipherSuite.TLS_DHE_DSS_WITH_AES_256_CBC_SHA,
-                CipherSuite.TLS_DHE_RSA_WITH_AES_256_CBC_SHA,
-                CipherSuite.TLS_DH_anon_WITH_3DES_EDE_CBC_SHA,
-                CipherSuite.TLS_DH_anon_WITH_AES_128_CBC_SHA,
-                CipherSuite.TLS_DH_anon_WITH_AES_256_CBC_SHA
-            }, () => new SHA1Digest());
-
-            RegisterDigests(new[]
-            {
-                CipherSuite.TLS_RSA_WITH_NULL_SHA256,
-                CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA256,
-                CipherSuite.TLS_RSA_WITH_AES_256_CBC_SHA256,
-                CipherSuite.TLS_DH_DSS_WITH_AES_128_CBC_SHA256,
-                CipherSuite.TLS_DH_RSA_WITH_AES_128_CBC_SHA256,
-                CipherSuite.TLS_DHE_DSS_WITH_AES_128_CBC_SHA256,
-                CipherSuite.TLS_DHE_RSA_WITH_AES_128_CBC_SHA256,
-                CipherSuite.TLS_DH_DSS_WITH_AES_256_CBC_SHA256,
-                CipherSuite.TLS_DH_RSA_WITH_AES_256_CBC_SHA256,
-                CipherSuite.TLS_DHE_DSS_WITH_AES_256_CBC_SHA256,
-                CipherSuite.TLS_DHE_RSA_WITH_AES_256_CBC_SHA256,
-                CipherSuite.TLS_DH_anon_WITH_AES_128_CBC_SHA256,
-                CipherSuite.TLS_DH_anon_WITH_AES_256_CBC_SHA256,
-            }, () => new SHA256Digest());
+            // hashes
+            RegisterHash(TlsHashAlgorithm.None, () => new NullDigest());
+            RegisterHash(TlsHashAlgorithm.MD5, () => { throw new NotImplementedException(); });
+            RegisterHash(TlsHashAlgorithm.SHA1, () => new SHA1Digest());
+            RegisterHash(TlsHashAlgorithm.SHA224, () => { throw new NotImplementedException(); });
+            RegisterHash(TlsHashAlgorithm.SHA256, () => new SHA256Digest());
+            RegisterHash(TlsHashAlgorithm.SHA384, () => { throw new NotImplementedException(); });
+            RegisterHash(TlsHashAlgorithm.SHA512, () => { throw new NotImplementedException(); });
 
             // signatures
-            RegisterSignatures(new[]
-            {
-                CipherSuite.TLS_RSA_WITH_NULL_MD5,
-                CipherSuite.TLS_RSA_WITH_NULL_SHA,
-                CipherSuite.TLS_RSA_WITH_NULL_SHA256,
-                CipherSuite.TLS_RSA_WITH_RC4_128_MD5,
-                CipherSuite.TLS_RSA_WITH_RC4_128_SHA,
-                CipherSuite.TLS_RSA_WITH_3DES_EDE_CBC_SHA,
-                CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA,
-                CipherSuite.TLS_RSA_WITH_AES_256_CBC_SHA,
-                CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA256,
-                CipherSuite.TLS_RSA_WITH_AES_256_CBC_SHA256,
-                CipherSuite.TLS_DH_RSA_WITH_3DES_EDE_CBC_SHA,
-                CipherSuite.TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA,
-                CipherSuite.TLS_DH_RSA_WITH_AES_128_CBC_SHA,
-                CipherSuite.TLS_DHE_RSA_WITH_AES_128_CBC_SHA,
-                CipherSuite.TLS_DH_RSA_WITH_AES_256_CBC_SHA,
-                CipherSuite.TLS_DHE_RSA_WITH_AES_256_CBC_SHA,
-                CipherSuite.TLS_DH_RSA_WITH_AES_128_CBC_SHA256,
-                CipherSuite.TLS_DHE_RSA_WITH_AES_128_CBC_SHA256,
-                CipherSuite.TLS_DH_RSA_WITH_AES_256_CBC_SHA256,
-                CipherSuite.TLS_DHE_RSA_WITH_AES_256_CBC_SHA256
-            }, () => new RSA());
-
-            RegisterSignatures(new[]
-            {
-                CipherSuite.TLS_DH_DSS_WITH_3DES_EDE_CBC_SHA,
-                CipherSuite.TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA,
-                CipherSuite.TLS_DH_DSS_WITH_AES_128_CBC_SHA,
-                CipherSuite.TLS_DHE_DSS_WITH_AES_128_CBC_SHA,
-                CipherSuite.TLS_DH_DSS_WITH_AES_256_CBC_SHA,
-                CipherSuite.TLS_DHE_DSS_WITH_AES_256_CBC_SHA,
-                CipherSuite.TLS_DH_DSS_WITH_AES_128_CBC_SHA256,
-                CipherSuite.TLS_DHE_DSS_WITH_AES_128_CBC_SHA256,
-                CipherSuite.TLS_DH_DSS_WITH_AES_256_CBC_SHA256,
-                CipherSuite.TLS_DHE_DSS_WITH_AES_256_CBC_SHA256
-            }, () => { throw new NotImplementedException(); });
+            RegisterSignature(TlsSignatureAlgorithm.Anonymous, () => new NullCipher());
+            RegisterSignature(TlsSignatureAlgorithm.RSA, () => new RSA());
+            RegisterSignature(TlsSignatureAlgorithm.DSA, () => { throw new NotImplementedException(); });
 
             // key exchanges
-            RegisterKeyExchanges(new[]
-            {
-                CipherSuite.TLS_NULL_WITH_NULL_NULL
-            }, () => new NullKeyExchange());
+            RegisterKeyExchange(TlsKeyExchange.Null, () => new NullKeyExchange());
+            RegisterKeyExchange(TlsKeyExchange.RSA, () => new RSAKeyExchange());
+            RegisterKeyExchange(TlsKeyExchange.DH_DSS, () => { throw new NotImplementedException(); });
+            RegisterKeyExchange(TlsKeyExchange.DH_RSA, () => new DHKeyExchange(new RSAKeyExchange()));
+            RegisterKeyExchange(TlsKeyExchange.DHE_DSS, () => { throw new NotImplementedException(); });
+            RegisterKeyExchange(TlsKeyExchange.DHE_RSA, () => new DHEKeyExchange(new RSAKeyExchange()));
+            RegisterKeyExchange(TlsKeyExchange.DH_anon, () => { throw new NotImplementedException(); });
 
-            RegisterKeyExchanges(new[]
-            {
-                CipherSuite.TLS_RSA_WITH_NULL_MD5,
-                CipherSuite.TLS_RSA_WITH_NULL_SHA,
-                CipherSuite.TLS_RSA_WITH_NULL_SHA256,
-                CipherSuite.TLS_RSA_WITH_RC4_128_MD5,
-                CipherSuite.TLS_RSA_WITH_RC4_128_SHA,
-                CipherSuite.TLS_RSA_WITH_3DES_EDE_CBC_SHA,
-                CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA,
-                CipherSuite.TLS_RSA_WITH_AES_256_CBC_SHA,
-                CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA256,
-                CipherSuite.TLS_RSA_WITH_AES_256_CBC_SHA256,
-            }, () => new RSAKeyExchange());
-            RegisterKeyExchanges(new[]
-            {
-                CipherSuite.TLS_DH_DSS_WITH_3DES_EDE_CBC_SHA,
-                CipherSuite.TLS_DH_DSS_WITH_AES_128_CBC_SHA,
-                CipherSuite.TLS_DH_DSS_WITH_AES_256_CBC_SHA,
-                CipherSuite.TLS_DH_DSS_WITH_AES_128_CBC_SHA256,
-                CipherSuite.TLS_DH_DSS_WITH_AES_256_CBC_SHA256,
-                // DH_DSS
-            }, () => { throw new NotImplementedException(); });
-            RegisterKeyExchanges(new[]
-            {
-                CipherSuite.TLS_DH_RSA_WITH_3DES_EDE_CBC_SHA,
-                CipherSuite.TLS_DH_RSA_WITH_AES_128_CBC_SHA,
-                CipherSuite.TLS_DH_RSA_WITH_AES_256_CBC_SHA,
-                CipherSuite.TLS_DH_RSA_WITH_AES_128_CBC_SHA256,
-                CipherSuite.TLS_DH_RSA_WITH_AES_256_CBC_SHA256,
-                // DH_RSA
-            }, () => new DHKeyExchange(new RSAKeyExchange()));
-            RegisterKeyExchanges(new[]
-            {
-                CipherSuite.TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA,
-                CipherSuite.TLS_DHE_DSS_WITH_AES_128_CBC_SHA,
-                CipherSuite.TLS_DHE_DSS_WITH_AES_256_CBC_SHA,
-                CipherSuite.TLS_DHE_DSS_WITH_AES_128_CBC_SHA256,
-                CipherSuite.TLS_DHE_DSS_WITH_AES_256_CBC_SHA256,
-                // DHE_DSS
-            }, () => { throw new NotImplementedException(); });
-            RegisterKeyExchanges(new[]
-            {
-                CipherSuite.TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA,
-                CipherSuite.TLS_DHE_RSA_WITH_AES_128_CBC_SHA,
-                CipherSuite.TLS_DHE_RSA_WITH_AES_256_CBC_SHA,
-                CipherSuite.TLS_DHE_RSA_WITH_AES_128_CBC_SHA256,
-                CipherSuite.TLS_DHE_RSA_WITH_AES_256_CBC_SHA256,
-                // DHE_RSA
-            }, () => new DHEKeyExchange(new RSAKeyExchange()));
-            RegisterKeyExchanges(new[]
-            {
-                CipherSuite.TLS_DH_anon_WITH_RC4_128_MD5,
-                CipherSuite.TLS_DH_anon_WITH_3DES_EDE_CBC_SHA,
-                CipherSuite.TLS_DH_anon_WITH_AES_128_CBC_SHA,
-                CipherSuite.TLS_DH_anon_WITH_AES_256_CBC_SHA,
-                CipherSuite.TLS_DH_anon_WITH_AES_128_CBC_SHA256,
-                CipherSuite.TLS_DH_anon_WITH_AES_256_CBC_SHA256,
-                // DH_anon
-            }, () => { throw new NotImplementedException(); });
+            // suites
+            RegisterSuite(CipherSuite.TLS_NULL_WITH_NULL_NULL, nullCipher, TlsHashAlgorithm.None, TlsSignatureAlgorithm.Anonymous, TlsKeyExchange.Null);
+            RegisterSuite(CipherSuite.TLS_RSA_WITH_NULL_MD5, nullCipher, TlsHashAlgorithm.MD5, TlsSignatureAlgorithm.RSA, TlsKeyExchange.RSA);
+            RegisterSuite(CipherSuite.TLS_RSA_WITH_NULL_SHA, nullCipher, TlsHashAlgorithm.SHA1, TlsSignatureAlgorithm.RSA, TlsKeyExchange.RSA);
+            RegisterSuite(CipherSuite.TLS_RSA_WITH_NULL_SHA256, nullCipher, TlsHashAlgorithm.SHA256, TlsSignatureAlgorithm.RSA, TlsKeyExchange.RSA);
+            RegisterSuite(CipherSuite.TLS_RSA_WITH_RC4_128_MD5, rc4, TlsHashAlgorithm.MD5, TlsSignatureAlgorithm.RSA, TlsKeyExchange.RSA);
+            RegisterSuite(CipherSuite.TLS_RSA_WITH_RC4_128_SHA, rc4, TlsHashAlgorithm.SHA1, TlsSignatureAlgorithm.RSA, TlsKeyExchange.RSA);
+            RegisterSuite(CipherSuite.TLS_RSA_WITH_3DES_EDE_CBC_SHA, threeDes, TlsHashAlgorithm.SHA1, TlsSignatureAlgorithm.RSA, TlsKeyExchange.RSA);
+            RegisterSuite(CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA, aes128, TlsHashAlgorithm.SHA1, TlsSignatureAlgorithm.RSA, TlsKeyExchange.RSA);
+            RegisterSuite(CipherSuite.TLS_RSA_WITH_AES_256_CBC_SHA, aes256, TlsHashAlgorithm.SHA1, TlsSignatureAlgorithm.RSA, TlsKeyExchange.RSA);
+            RegisterSuite(CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA256, aes128, TlsHashAlgorithm.SHA256, TlsSignatureAlgorithm.RSA, TlsKeyExchange.RSA);
+            RegisterSuite(CipherSuite.TLS_RSA_WITH_AES_256_CBC_SHA256, aes256, TlsHashAlgorithm.SHA256, TlsSignatureAlgorithm.RSA, TlsKeyExchange.RSA);
+            RegisterSuite(CipherSuite.TLS_DH_DSS_WITH_3DES_EDE_CBC_SHA, threeDes, TlsHashAlgorithm.SHA1, TlsSignatureAlgorithm.DSA, TlsKeyExchange.DH_DSS);
+            RegisterSuite(CipherSuite.TLS_DH_RSA_WITH_3DES_EDE_CBC_SHA, threeDes, TlsHashAlgorithm.SHA1, TlsSignatureAlgorithm.RSA, TlsKeyExchange.DH_RSA);
+            RegisterSuite(CipherSuite.TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA, threeDes, TlsHashAlgorithm.SHA1, TlsSignatureAlgorithm.DSA, TlsKeyExchange.DHE_DSS);
+            RegisterSuite(CipherSuite.TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA, threeDes, TlsHashAlgorithm.SHA1, TlsSignatureAlgorithm.RSA, TlsKeyExchange.DHE_RSA);
+            RegisterSuite(CipherSuite.TLS_DH_DSS_WITH_AES_128_CBC_SHA, aes128, TlsHashAlgorithm.SHA1, TlsSignatureAlgorithm.DSA, TlsKeyExchange.DH_DSS);
+            RegisterSuite(CipherSuite.TLS_DH_RSA_WITH_AES_128_CBC_SHA, aes128, TlsHashAlgorithm.SHA1, TlsSignatureAlgorithm.RSA, TlsKeyExchange.DH_RSA);
+            RegisterSuite(CipherSuite.TLS_DHE_DSS_WITH_AES_128_CBC_SHA, aes128, TlsHashAlgorithm.SHA1, TlsSignatureAlgorithm.DSA, TlsKeyExchange.DHE_DSS);
+            RegisterSuite(CipherSuite.TLS_DHE_RSA_WITH_AES_128_CBC_SHA, aes128, TlsHashAlgorithm.SHA1, TlsSignatureAlgorithm.RSA, TlsKeyExchange.DHE_RSA);
+            RegisterSuite(CipherSuite.TLS_DH_DSS_WITH_AES_256_CBC_SHA, aes256, TlsHashAlgorithm.SHA1, TlsSignatureAlgorithm.DSA, TlsKeyExchange.DH_DSS);
+            RegisterSuite(CipherSuite.TLS_DH_RSA_WITH_AES_256_CBC_SHA, aes256, TlsHashAlgorithm.SHA1, TlsSignatureAlgorithm.RSA, TlsKeyExchange.DH_RSA);
+            RegisterSuite(CipherSuite.TLS_DHE_DSS_WITH_AES_256_CBC_SHA, aes256, TlsHashAlgorithm.SHA1, TlsSignatureAlgorithm.DSA, TlsKeyExchange.DHE_DSS);
+            RegisterSuite(CipherSuite.TLS_DHE_RSA_WITH_AES_256_CBC_SHA, aes256, TlsHashAlgorithm.SHA1, TlsSignatureAlgorithm.RSA, TlsKeyExchange.DHE_RSA);
+            RegisterSuite(CipherSuite.TLS_DH_DSS_WITH_AES_128_CBC_SHA256, aes128, TlsHashAlgorithm.SHA256, TlsSignatureAlgorithm.DSA, TlsKeyExchange.DH_DSS);
+            RegisterSuite(CipherSuite.TLS_DH_RSA_WITH_AES_128_CBC_SHA256, aes128, TlsHashAlgorithm.SHA256, TlsSignatureAlgorithm.RSA, TlsKeyExchange.DH_RSA);
+            RegisterSuite(CipherSuite.TLS_DHE_DSS_WITH_AES_128_CBC_SHA256, aes128, TlsHashAlgorithm.SHA256, TlsSignatureAlgorithm.DSA, TlsKeyExchange.DHE_DSS);
+            RegisterSuite(CipherSuite.TLS_DHE_RSA_WITH_AES_128_CBC_SHA256, aes128, TlsHashAlgorithm.SHA256, TlsSignatureAlgorithm.RSA, TlsKeyExchange.DHE_RSA);
+            RegisterSuite(CipherSuite.TLS_DH_DSS_WITH_AES_256_CBC_SHA256, aes256, TlsHashAlgorithm.SHA256, TlsSignatureAlgorithm.DSA, TlsKeyExchange.DH_DSS);
+            RegisterSuite(CipherSuite.TLS_DH_RSA_WITH_AES_256_CBC_SHA256, aes256, TlsHashAlgorithm.SHA256, TlsSignatureAlgorithm.RSA, TlsKeyExchange.DH_RSA);
+            RegisterSuite(CipherSuite.TLS_DHE_DSS_WITH_AES_256_CBC_SHA256, aes256, TlsHashAlgorithm.SHA256, TlsSignatureAlgorithm.DSA, TlsKeyExchange.DHE_DSS);
+            RegisterSuite(CipherSuite.TLS_DHE_RSA_WITH_AES_256_CBC_SHA256, aes256, TlsHashAlgorithm.SHA256, TlsSignatureAlgorithm.RSA, TlsKeyExchange.DHE_RSA);
+            RegisterSuite(CipherSuite.TLS_DH_anon_WITH_RC4_128_MD5, rc4, TlsHashAlgorithm.MD5, TlsSignatureAlgorithm.Anonymous, TlsKeyExchange.DH_anon);
+            RegisterSuite(CipherSuite.TLS_DH_anon_WITH_3DES_EDE_CBC_SHA, threeDes, TlsHashAlgorithm.SHA1, TlsSignatureAlgorithm.Anonymous, TlsKeyExchange.DH_anon);
+            RegisterSuite(CipherSuite.TLS_DH_anon_WITH_AES_128_CBC_SHA, aes128, TlsHashAlgorithm.SHA1, TlsSignatureAlgorithm.Anonymous, TlsKeyExchange.DH_anon);
+            RegisterSuite(CipherSuite.TLS_DH_anon_WITH_AES_256_CBC_SHA, aes256, TlsHashAlgorithm.SHA1, TlsSignatureAlgorithm.Anonymous, TlsKeyExchange.DH_anon);
+            RegisterSuite(CipherSuite.TLS_DH_anon_WITH_AES_128_CBC_SHA256, aes128, TlsHashAlgorithm.SHA256, TlsSignatureAlgorithm.Anonymous, TlsKeyExchange.DH_anon);
+            RegisterSuite(CipherSuite.TLS_DH_anon_WITH_AES_256_CBC_SHA256, aes256, TlsHashAlgorithm.SHA256, TlsSignatureAlgorithm.Anonymous, TlsKeyExchange.DH_anon);
         }
 
         #region helpers
@@ -252,49 +110,44 @@ namespace Crypto.IO.TLS
         #endregion
 
         #region registration
-        internal static void RegisterSuite(CipherSuite cipherSuite, Func<ICipher> cipher, Func<IDigest> digest,
-            Func<ISignatureCipher> signature, Func<IKeyExchange> exchange)
+        internal static void RegisterSuite(CipherSuite suite, Func<ICipher> cipher, TlsHashAlgorithm digest, TlsSignatureAlgorithm signature, TlsKeyExchange exchange)
         {
-            RegisterCiphers(new[] { cipherSuite }, cipher);
-            RegisterDigests(new[] { cipherSuite }, digest);
-            RegisterSignatures(new[] { cipherSuite }, signature);
-            RegisterKeyExchanges(new[] { cipherSuite }, exchange);
+            Suites.Add(suite);
+
+            CipherFactories.Add(suite, cipher);
+            DigestMapping.Add(suite, digest);
+            SignatureMapping.Add(suite, signature);
+            KeyExchangeMapping.Add(suite, exchange);
         }
 
-        internal static void RegisterCiphers(CipherSuite[] cipherSuites, Func<ICipher> func)
+        internal static void RegisterHash(TlsHashAlgorithm algo, Func<IDigest> factory)
         {
-            foreach (var suite in cipherSuites)
+            if (!HashAlgorithms.Add(algo))
             {
-                Suites.Add(suite);
-                CipherFactories.Add(suite, func);
+                throw new InvalidOperationException("Algorithm already registered");
             }
+
+            DigestFactories.Add(algo, factory);
         }
 
-        internal static void RegisterDigests(CipherSuite[] cipherSuites, Func<IDigest> func)
+        internal static void RegisterSignature(TlsSignatureAlgorithm algo, Func<ISignatureCipher> factory)
         {
-            foreach (var suite in cipherSuites)
+            if (!SignatureAlgorithms.Add(algo))
             {
-                Suites.Add(suite);
-                DigestFactories.Add(suite, func);
+                throw new InvalidOperationException("Algorithm already registered");
             }
+
+            SignatureFactories.Add(algo, factory);
         }
 
-        internal static void RegisterSignatures(CipherSuite[] cipherSuites, Func<ISignatureCipher> func)
+        internal static void RegisterKeyExchange(TlsKeyExchange algo, Func<IKeyExchange> factory)
         {
-            foreach (var suite in cipherSuites)
+            if (!KeyExchanges.Add(algo))
             {
-                Suites.Add(suite);
-                SignatureFactories.Add(suite, func);
+                throw new InvalidOperationException("Algorithm already registered");
             }
-        }
 
-        internal static void RegisterKeyExchanges(CipherSuite[] cipherSuites, Func<IKeyExchange> func)
-        {
-            foreach (var suite in cipherSuites)
-            {
-                Suites.Add(suite);
-                KeyExchangeFactories.Add(suite, func);
-            }
+            KeyExchangeFactories.Add(algo, factory);
         }
         #endregion
 
@@ -306,17 +159,17 @@ namespace Crypto.IO.TLS
 
         public static IDigest GetDigestAlgorithm(this CipherSuite suite)
         {
-            return DigestFactories[suite]();
+            return DigestFactories[DigestMapping[suite]]();
         }
 
         public static ISignatureCipher GetSignatureAlgorithm(this CipherSuite suite)
         {
-            return SignatureFactories[suite]();
+            return SignatureFactories[SignatureMapping[suite]]();
         }
 
         public static IKeyExchange GetKeyExchange(this CipherSuite suite)
         {
-            return KeyExchangeFactories[suite]();
+            return KeyExchangeFactories[KeyExchangeMapping[suite]]();
         }
         #endregion
 

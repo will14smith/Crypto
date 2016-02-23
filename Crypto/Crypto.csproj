@@ -95,6 +95,7 @@
     <Compile Include="IO\TLS\CipherSuiteExtensions.cs" />
     <Compile Include="IO\TLS\CompressionMethod.cs" />
     <Compile Include="IO\TLS\DefaultTlsNegotiation.cs" />
+    <Compile Include="IO\TLS\Extensions\SignatureAlgorithmExtensionConfiguration.cs" />
     <Compile Include="IO\TLS\ITlsNegotiation.cs" />
     <Compile Include="IO\TLS\KeyExchange\DHEKeyExchange.cs" />
     <Compile Include="IO\TLS\KeyExchange\DHKeyExchange.cs" />
@@ -138,8 +139,12 @@
     <Compile Include="IO\TLS\SignedStreamExtensions.cs" />
     <Compile Include="IO\TLS\TlsDispatcher.cs" />
     <Compile Include="IO\TLS\ConnectionEnd.cs" />
-    <Compile Include="IO\TLS\TlsExtension.cs" />
-    <Compile Include="IO\TLS\TlsExtensionManager.cs" />
+    <Compile Include="IO\TLS\Extensions\TlsExtensionConfiguration.cs" />
+    <Compile Include="IO\TLS\Extensions\TlsExtensionManager.cs" />
+    <Compile Include="IO\TLS\Extensions\ITlsExtension.cs" />
+    <Compile Include="IO\TLS\TlsHashAlgorithm.cs" />
+    <Compile Include="IO\TLS\TlsKeyExchange.cs" />
+    <Compile Include="IO\TLS\TlsSignatureAlgorithm.cs" />
     <Compile Include="IO\TLS\TlsState.cs" />
     <Compile Include="IO\TLS\TlsStateType.cs" />
     <Compile Include="IO\TLS\TlsStream.cs" />

@@ -42,7 +42,7 @@
   <ItemGroup>
     <Compile Include="GCMCipher.cs" />
     <Compile Include="GCMCipherSuites.cs" />
-    <Compile Include="GCMExtension.cs" />
+    <Compile Include="GCMExtensionConfiguration.cs" />
     <Compile Include="GHash.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

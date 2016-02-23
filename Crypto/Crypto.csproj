@@ -136,7 +136,7 @@
     <Compile Include="IO\TLS\Records\RecordWriter.cs" />
     <Compile Include="IO\TLS\SignedStreamExtensions.cs" />
     <Compile Include="IO\TLS\TlsDispatcher.cs" />
-    <Compile Include="IO\TLS\TlsMode.cs" />
+    <Compile Include="IO\TLS\ConnectionEnd.cs" />
     <Compile Include="IO\TLS\TlsState.cs" />
     <Compile Include="IO\TLS\TlsStateType.cs" />
     <Compile Include="IO\TLS\TlsStream.cs" />

@@ -17,7 +17,7 @@ namespace Crypto.IO.TLS
 
         public void AuthenticateAsServer()
         {
-            state.SetMode(TlsMode.Server);
+            state.SetMode(ConnectionEnd.Server);
 
             while (true)
             {
@@ -125,7 +125,7 @@ namespace Crypto.IO.TLS
         private void HandleHandshakeFinished(HandshakeMessage message, HandshakeWriter handshakeWriter)
         {
             state.VerifyFinished((FinishedHandshakeMessage)message);
-            if (state.Mode != TlsMode.Server)
+            if (state.ConnectionEnd != ConnectionEnd.Server)
             {
                 return;
             }

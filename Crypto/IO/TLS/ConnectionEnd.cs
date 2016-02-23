@@ -1,6 +1,6 @@
 namespace Crypto.IO.TLS
 {
-    public enum TlsMode
+    public enum ConnectionEnd
     {
         Client,
         Server

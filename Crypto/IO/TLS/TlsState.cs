@@ -16,8 +16,6 @@ namespace Crypto.IO.TLS
 {
     public class TlsState
     {
-        private readonly ITlsNegotiation negotiator = new DefaultTlsNegotiation();
-
         public TlsState(Stream stream)
         {
             this.stream = stream;
@@ -31,8 +29,6 @@ namespace Crypto.IO.TLS
             RecordStrategy = GetRecordStrategy();
         }
 
-        public CertificateManager Certificates { get; } = new CertificateManager();
-
         #region client capabilities
 
         private TlsVersion clientMaxVersion;
@@ -44,32 +40,53 @@ namespace Crypto.IO.TLS
 
         #region connection State
 
-        public TlsMode Mode { get; private set; }
+        public ConnectionEnd ConnectionEnd { get; private set; }
 
 
         private TlsStateType state;
-        public void SetMode(TlsMode mode)
+
+        public void SetMode(ConnectionEnd connectionEnd)
         {
             SecurityAssert.SAssert(state == TlsStateType.Initial);
 
-            Mode = mode;
+            ConnectionEnd = connectionEnd;
 
-            switch (mode)
+            switch (connectionEnd)
             {
-                case TlsMode.Client:
+                case ConnectionEnd.Client:
                     state = TlsStateType.SendingClientHello;
                     break;
-                case TlsMode.Server:
+                case ConnectionEnd.Server:
                     state = TlsStateType.WaitingForClientHello;
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(mode));
+                    throw new ArgumentOutOfRangeException(nameof(connectionEnd));
             }
         }
 
         #endregion
 
-        #region connection properties
+        #region handshake verification
+
+        private readonly IDigest handshakeVerify;
+        private byte[] expectedHandshakeVerifyData;
+
+        public void UpdateHandshakeVerify(byte[] buffer, int offset, int length)
+        {
+            handshakeVerify.Update(buffer, offset, length);
+        }
+
+        public void ComputeHandshakeVerify()
+        {
+            SecurityAssert.SAssert(state == TlsStateType.WaitingForClientFinished);
+            SecurityAssert.SAssert(ReadProtected);
+
+            expectedHandshakeVerifyData = handshakeVerify.Clone().Digest();
+        }
+
+        #endregion
+
+        #region record properties
 
         public bool ReadProtected { get; private set; }
         public bool WriteProtected { get; private set; }
@@ -83,10 +100,12 @@ namespace Crypto.IO.TLS
         {
             SetProtection(true, WriteProtected);
         }
+
         private void EnableWriteProtection()
         {
             SetProtection(ReadProtected, true);
         }
+
         private void SetProtection(bool read, bool write)
         {
             ReadProtected = read;
@@ -95,8 +114,44 @@ namespace Crypto.IO.TLS
             RecordStrategy = GetRecordStrategy();
         }
 
-        public X509Certificate Certificate { get; private set; }
-        public X509Certificate[] CertificateChain { get; private set; }
+        private IRecordStrategy GetRecordStrategy()
+        {
+            if (!ReadProtected && !WriteProtected)
+            {
+                return new PlaintextStrategy(this, stream);
+            }
+
+            RecordStrategy strategy;
+            var cipher = GetCipher();
+            if (cipher is BlockCipherAdapter)
+            {
+                strategy = new BlockCipherStrategy(this, stream);
+            }
+            else if (cipher is AEADCipherAdapter)
+            {
+                strategy = new AEADCipherStrategy(this, stream);
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
+
+
+            if (ReadProtected && WriteProtected)
+            {
+                return strategy;
+            }
+
+            var plainText = new PlaintextStrategy(this, stream);
+
+            return new CompositeRecordStrategy(
+                ReadProtected ? strategy : plainText,
+                WriteProtected ? strategy : plainText);
+        }
+
+        #endregion
+
+        #region security parameters
 
         public IDictionary<string, BigInteger> Params { get; } = new Dictionary<string, BigInteger>();
 
@@ -119,22 +174,91 @@ namespace Crypto.IO.TLS
         private byte[] clientIV;
         private byte[] serverIV;
 
+        public void ComputeMasterSecret(byte[] preMasterSecret)
+        {
+            var random = new byte[ClientRandom.Length + ServerRandom.Length];
+
+            Array.Copy(ClientRandom, 0, random, 0, ClientRandom.Length);
+            Array.Copy(ServerRandom, 0, random, ClientRandom.Length, ServerRandom.Length);
+
+            var prf = new PRF(GetPRFDigest());
+
+            var secret = prf.Digest(preMasterSecret, "master secret", random).Take(48).ToArray();
+
+            masterSecret = secret;
+
+            ComputeKeys();
+        }
+
+        private void ComputeKeys()
+        {
+            var cipher = cipherSuite.GetCipher();
+            var mac = cipherSuite.GetDigestAlgorithm();
+
+            // assuming server
+            var prf = new PRF(GetPRFDigest());
+
+            var random = new byte[ServerRandom.Length + ClientRandom.Length];
+
+            Array.Copy(ServerRandom, 0, random, 0, ServerRandom.Length);
+            Array.Copy(ClientRandom, 0, random, ServerRandom.Length, ClientRandom.Length);
+
+            var macKeyLength = mac.HashSize / 8;
+            var encKeyLength = cipher.KeySize;
+            // for AEAD - TODO is it constant?
+            var implicitIVLength = 4;
+
+            var keyBlockLength = 2 * macKeyLength + 2 * encKeyLength + 2 * implicitIVLength;
+
+            var keyBlock = prf.Digest(masterSecret, "key expansion", random).Take(keyBlockLength).ToArray();
+
+            var offset = 0;
+
+            if (cipherSuite.IsBlock())
+            {
+                clientMACKey = new byte[macKeyLength];
+                Array.Copy(keyBlock, offset, clientMACKey, 0, macKeyLength);
+                offset += macKeyLength;
+
+                serverMACKey = new byte[macKeyLength];
+                Array.Copy(keyBlock, offset, serverMACKey, 0, macKeyLength);
+                offset += macKeyLength;
+            }
+
+            clientKey = new byte[encKeyLength];
+            Array.Copy(keyBlock, offset, clientKey, 0, encKeyLength);
+            offset += encKeyLength;
+
+            serverKey = new byte[encKeyLength];
+            Array.Copy(keyBlock, offset, serverKey, 0, encKeyLength);
+            offset += encKeyLength;
+
+            if (cipherSuite.IsAEAD())
+            {
+                clientIV = new byte[implicitIVLength];
+                Array.Copy(keyBlock, offset, clientIV, 0, implicitIVLength);
+                offset += implicitIVLength;
+
+                serverIV = new byte[implicitIVLength];
+                Array.Copy(keyBlock, offset, serverIV, 0, implicitIVLength);
+            }
+        }
+
+        #endregion
+
+        #region extensions
+
         // TODO extensions
 
-        private readonly IDigest handshakeVerify;
-        private byte[] expectedHandshakeVerifyData;
+        #endregion
 
-        public void UpdateHandshakeVerify(byte[] buffer, int offset, int length)
-        {
-            handshakeVerify.Update(buffer, offset, length);
-        }
-        public void ComputeHandshakeVerify()
-        {
-            SecurityAssert.SAssert(state == TlsStateType.WaitingForClientFinished);
-            SecurityAssert.SAssert(ReadProtected);
+        #region certificates
 
-            expectedHandshakeVerifyData = handshakeVerify.Clone().Digest();
-        }
+        public CertificateManager Certificates { get; } = new CertificateManager();
+
+        public X509Certificate Certificate { get; private set; }
+        public X509Certificate[] CertificateChain { get; private set; }
+
 
         public void SetCertificates(X509Certificate cert, X509Certificate[] chain)
         {
@@ -149,6 +273,8 @@ namespace Crypto.IO.TLS
         #endregion
 
         #region handshake
+
+        private readonly ITlsNegotiation negotiator = new DefaultTlsNegotiation();
 
         public void HandleClientHello(ClientHelloMessage message)
         {
@@ -171,7 +297,9 @@ namespace Crypto.IO.TLS
             state = TlsStateType.SendingServerHello;
 
             //TODO extensions
-            yield return new ServerHelloMessage(Version, ServerRandom, sessionId, new HelloExtension[0], cipherSuite, compressionMethod);
+            yield return
+                new ServerHelloMessage(Version, ServerRandom, sessionId, new HelloExtension[0], cipherSuite,
+                    compressionMethod);
 
             foreach (var message in KeyExchange.GenerateHandshakeMessages())
             {
@@ -223,8 +351,11 @@ namespace Crypto.IO.TLS
 
             var prf = new PRF(GetPRFDigest());
 
-            var finishedLabel = Mode != TlsMode.Server ? "server finished" : "client finished";
-            var expectedData = prf.Digest(masterSecret, finishedLabel, expectedHandshakeVerifyData).Take(FinishedHandshakeMessage.VerifyDataLength).ToArray();
+            var finishedLabel = ConnectionEnd != ConnectionEnd.Server ? "server finished" : "client finished";
+            var expectedData =
+                prf.Digest(masterSecret, finishedLabel, expectedHandshakeVerifyData)
+                    .Take(FinishedHandshakeMessage.VerifyDataLength)
+                    .ToArray();
 
             SecurityAssert.HashAssert(message.VerifyData, expectedData);
 
@@ -236,86 +367,16 @@ namespace Crypto.IO.TLS
             var prf = new PRF(GetPRFDigest());
 
             var handshakeVerifyHash = handshakeVerify.Clone().Digest();
-            var finishedLabel = Mode == TlsMode.Server ? "server finished" : "client finished";
+            var finishedLabel = ConnectionEnd == ConnectionEnd.Server ? "server finished" : "client finished";
 
-            var verifyData = prf.Digest(masterSecret, finishedLabel, handshakeVerifyHash).Take(FinishedHandshakeMessage.VerifyDataLength).ToArray();
+            var verifyData =
+                prf.Digest(masterSecret, finishedLabel, handshakeVerifyHash)
+                    .Take(FinishedHandshakeMessage.VerifyDataLength)
+                    .ToArray();
 
             return new FinishedHandshakeMessage(verifyData);
         }
-
-        public void ComputeMasterSecret(byte[] preMasterSecret)
-        {
-            var random = new byte[ClientRandom.Length + ServerRandom.Length];
-
-            Array.Copy(ClientRandom, 0, random, 0, ClientRandom.Length);
-            Array.Copy(ServerRandom, 0, random, ClientRandom.Length, ServerRandom.Length);
-
-            var prf = new PRF(GetPRFDigest());
-
-            var secret = prf.Digest(preMasterSecret, "master secret", random).Take(48).ToArray();
-            SecurityAssert.SAssert(secret.Length == 48);
-
-            masterSecret = secret;
-
-            Console.WriteLine(HexConverter.ToHex(masterSecret));
-
-            ComputeKeys();
-        }
-
-        private void ComputeKeys()
-        {
-            var cipher = cipherSuite.GetCipher();
-            var mac = cipherSuite.GetDigestAlgorithm();
-
-            // assuming server
-            var prf = new PRF(GetPRFDigest());
-
-            var random = new byte[ServerRandom.Length + ClientRandom.Length];
-
-            Array.Copy(ServerRandom, 0, random, 0, ServerRandom.Length);
-            Array.Copy(ClientRandom, 0, random, ServerRandom.Length, ClientRandom.Length);
-
-            var macKeyLength = mac.HashSize / 8;
-            var encKeyLength = cipher.KeySize;
-            // for AEAD - TODO is it constant?
-            var implicitIVLength = 4;
-
-            var keyBlockLength = 2 * macKeyLength + 2 * encKeyLength + 2 * implicitIVLength;
-
-            var keyBlock = prf.Digest(masterSecret, "key expansion", random).Take(keyBlockLength).ToArray();
-
-            int offset = 0;
-
-            if (cipherSuite.IsBlock())
-            {
-                clientMACKey = new byte[macKeyLength];
-                Array.Copy(keyBlock, offset, clientMACKey, 0, macKeyLength);
-                offset += macKeyLength;
-
-                serverMACKey = new byte[macKeyLength];
-                Array.Copy(keyBlock, offset, serverMACKey, 0, macKeyLength);
-                offset += macKeyLength;
-            }
-
-            clientKey = new byte[encKeyLength];
-            Array.Copy(keyBlock, offset, clientKey, 0, encKeyLength);
-            offset += encKeyLength;
-
-            serverKey = new byte[encKeyLength];
-            Array.Copy(keyBlock, offset, serverKey, 0, encKeyLength);
-            offset += encKeyLength;
-
-            if (cipherSuite.IsAEAD())
-            {
-                clientIV = new byte[implicitIVLength];
-                Array.Copy(keyBlock, offset, clientIV, 0, implicitIVLength);
-                offset += implicitIVLength;
-
-                serverIV = new byte[implicitIVLength];
-                Array.Copy(keyBlock, offset, serverIV, 0, implicitIVLength);
-            }
-        }
-
+        
         private void NegotiateParameters()
         {
             SecurityAssert.SAssert(state == TlsStateType.RecievedClientHello);
@@ -347,65 +408,28 @@ namespace Crypto.IO.TLS
             stream.Flush();
         }
 
-        #endregion
-
         public SignedStream GetSignatureStream(Stream baseStream)
         {
-            //TODO pass correct sig algo
             var key = Certificates.GetPrivateKey(Certificate.SubjectPublicKey);
+            //TODO pass correct sig algo
             var signatureAlgo = new RSA(key);
 
             return new SignedStream(baseStream, signatureAlgo, GetDigest());
         }
 
-        public ICipher GetCipher()
-        {
-            return cipherSuite.GetCipher();
-        }
-        private IRecordStrategy GetRecordStrategy()
-        {
-            if (!ReadProtected && !WriteProtected)
-            {
-                return new PlaintextStrategy(this, stream);
-            }
+        #endregion
 
-            RecordStrategy strategy;
-            var cipher = GetCipher();
-            if (cipher is BlockCipherAdapter)
-            {
-                strategy = new BlockCipherStrategy(this, stream);
-            }
-            else if (cipher is AEADCipherAdapter)
-            {
-                strategy = new AEADCipherStrategy(this, stream);
-            }
-            else
-            {
-                throw new NotImplementedException();
-            }
-
-
-            if (ReadProtected && WriteProtected)
-            {
-                return strategy;
-            }
-
-            var plainText = new PlaintextStrategy(this, stream);
-
-            return new CompositeRecordStrategy(
-                ReadProtected ? strategy : plainText,
-                WriteProtected ? strategy : plainText);
-        }
+        #region digest
 
         public IDigest GetDigest()
         {
             return cipherSuite.GetDigestAlgorithm();
         }
+
         public IDigest GetPRFDigest()
         {
             return new SHA256Digest();
         }
-
 
         public IDigest GetMAC(bool reader)
         {
@@ -415,10 +439,19 @@ namespace Crypto.IO.TLS
             var digest = GetDigest();
 
             var key = reader
-                ? (Mode == TlsMode.Server ? clientMACKey : serverMACKey)
-                : (Mode == TlsMode.Server ? serverMACKey : clientMACKey);
+                ? (ConnectionEnd == ConnectionEnd.Server ? clientMACKey : serverMACKey)
+                : (ConnectionEnd == ConnectionEnd.Server ? serverMACKey : clientMACKey);
 
             return new HMAC(digest, key);
+        }
+
+        #endregion
+
+        #region cipher
+
+        public ICipher GetCipher()
+        {
+            return cipherSuite.GetCipher();
         }
 
         public ICipherParameters GetBlockCipherParameters(bool reader)
@@ -427,8 +460,8 @@ namespace Crypto.IO.TLS
             SecurityAssert.SAssert(WriteProtected || reader);
 
             var key = reader
-                ? (Mode == TlsMode.Server ? clientKey : serverKey)
-                : (Mode == TlsMode.Server ? serverKey : clientKey);
+                ? (ConnectionEnd == ConnectionEnd.Server ? clientKey : serverKey)
+                : (ConnectionEnd == ConnectionEnd.Server ? serverKey : clientKey);
 
             return new KeyParameter(key);
         }
@@ -441,7 +474,7 @@ namespace Crypto.IO.TLS
             byte[] key, nonceImplicit;
             if (reader)
             {
-                if (Mode == TlsMode.Server)
+                if (ConnectionEnd == ConnectionEnd.Server)
                 {
                     key = clientKey;
                     nonceImplicit = clientIV;
@@ -454,7 +487,7 @@ namespace Crypto.IO.TLS
             }
             else
             {
-                if (Mode == TlsMode.Server)
+                if (ConnectionEnd == ConnectionEnd.Server)
                 {
                     key = serverKey;
                     nonceImplicit = serverIV;
@@ -472,5 +505,7 @@ namespace Crypto.IO.TLS
 
             return new AADParameter(new IVParameter(new KeyParameter(key), nonce), aad);
         }
+
+        #endregion
     }
 }

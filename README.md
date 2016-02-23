@@ -18,6 +18,14 @@ Implement a TLS1.2 steam wrapper without using any cryptography libraries
 
 * Handle & generate alerts 
 * Implement more ciphers, digests, keyexchanges, etc
+* * NULL (cipher & digest)
+* * RC4
+* * 3DES
+* * MD5
+* * DSS
+* * DH_anon
+* * ECDHE
+* * ECDSA
+* Extensions (HashAndSignature, SAN)
 * Client
 * Client certificate
-* Extensions (HashAndSignature, SAN)

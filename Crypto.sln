@@ -18,9 +18,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Crypto.EllipticCurve", "Crypto.EllipticCurve\Crypto.EllipticCurve.csproj", "{6287D444-CEEA-4672-89DD-ACAAEFF36DE9}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Crypto.GCM", "Crypto.GCM\Crypto.GCM.csproj", "{365C8479-CA8A-4C52-9523-1D0198EB21D3}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Crypto.GCM.Tests", "Crypto.GCM.Tests\Crypto.GCM.Tests.csproj", "{71465D9F-350D-46DB-BD8A-84FF8E6FCA2A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Extensions", "Extensions", "{D0BE5A3A-A3D1-4951-9070-2987D45D470F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Crypto.ECGCM", "Crypto.ECGCM\Crypto.ECGCM.csproj", "{26A490AB-D2C0-44DB-9556-D3BF3CBD50BB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -48,6 +54,10 @@ Global
 		{1A477B1D-AB27-41AE-B8A6-46878D4D0780}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1A477B1D-AB27-41AE-B8A6-46878D4D0780}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1A477B1D-AB27-41AE-B8A6-46878D4D0780}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6287D444-CEEA-4672-89DD-ACAAEFF36DE9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6287D444-CEEA-4672-89DD-ACAAEFF36DE9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6287D444-CEEA-4672-89DD-ACAAEFF36DE9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6287D444-CEEA-4672-89DD-ACAAEFF36DE9}.Release|Any CPU.Build.0 = Release|Any CPU
 		{365C8479-CA8A-4C52-9523-1D0198EB21D3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{365C8479-CA8A-4C52-9523-1D0198EB21D3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{365C8479-CA8A-4C52-9523-1D0198EB21D3}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -56,8 +66,17 @@ Global
 		{71465D9F-350D-46DB-BD8A-84FF8E6FCA2A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{71465D9F-350D-46DB-BD8A-84FF8E6FCA2A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{71465D9F-350D-46DB-BD8A-84FF8E6FCA2A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{26A490AB-D2C0-44DB-9556-D3BF3CBD50BB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{26A490AB-D2C0-44DB-9556-D3BF3CBD50BB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{26A490AB-D2C0-44DB-9556-D3BF3CBD50BB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{26A490AB-D2C0-44DB-9556-D3BF3CBD50BB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{6287D444-CEEA-4672-89DD-ACAAEFF36DE9} = {D0BE5A3A-A3D1-4951-9070-2987D45D470F}
+		{365C8479-CA8A-4C52-9523-1D0198EB21D3} = {D0BE5A3A-A3D1-4951-9070-2987D45D470F}
+		{26A490AB-D2C0-44DB-9556-D3BF3CBD50BB} = {D0BE5A3A-A3D1-4951-9070-2987D45D470F}
 	EndGlobalSection
 EndGlobal

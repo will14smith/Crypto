@@ -1,3 +1,4 @@
+
 # Crypto
 
 **WARNING**: this is a not a serious project, all implementation will be following the specifications as close as possible but none of it will be security reviewed. **DO NOT USE THIS**
@@ -26,6 +27,7 @@ Implement a TLS1.2 steam wrapper without using any cryptography libraries
 * * DH_anon
 * * ECDHE
 * * ECDSA
-* Extensions (HashAndSignature, SAN)
+* Extensions
+* * SNI
 * Client
 * Client certificate

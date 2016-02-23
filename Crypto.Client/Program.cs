@@ -38,6 +38,7 @@ namespace Crypto.Client
                 writer.WriteLine("World");
                 writer.Flush();
 
+                tlsStream.Close();
                 client.Close();
             }
         }

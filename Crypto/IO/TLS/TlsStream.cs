@@ -47,6 +47,13 @@ namespace Crypto.IO.TLS
             state.Flush();
         }
 
+        public override void Close()
+        {
+            dispatcher.SendAlert(AlertLevel.Warning, AlertDescription.CloseNotify);
+
+            base.Close();
+        }
+
         #region unsupported
 
         public override long Seek(long offset, SeekOrigin origin)

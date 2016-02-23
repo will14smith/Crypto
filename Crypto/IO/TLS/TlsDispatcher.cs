@@ -145,5 +145,15 @@ namespace Crypto.IO.TLS
 
             state.ReceivedChangeCipherSpec();
         }
+
+        public void SendAlert(AlertLevel level, AlertDescription description)
+        {
+            state.RecordWriter.WriteRecord(new Record(RecordType.Alert, state.Version, new[]
+            {
+                (byte)level,
+                (byte)description
+            }));
+            state.Flush();
+        }
     }
 }

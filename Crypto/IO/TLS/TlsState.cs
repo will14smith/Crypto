@@ -88,8 +88,8 @@ namespace Crypto.IO.TLS
 
         #region record properties
 
-        public int ReadSeqNum { get; set; }
-        public int WriteSeqNum { get; set; }
+        public long ReadSeqNum { get; set; }
+        public long WriteSeqNum { get; set; }
 
         public bool ReadProtected { get; private set; }
         public bool WriteProtected { get; private set; }

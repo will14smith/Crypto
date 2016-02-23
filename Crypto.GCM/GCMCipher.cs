@@ -1,10 +1,12 @@
 ﻿using System;
+using Crypto.Encryption;
+using Crypto.Encryption.AEAD;
 using Crypto.Encryption.Modes;
 using Crypto.Encryption.Parameters;
 using Crypto.Hashing;
 using Crypto.Utils;
 
-namespace Crypto.Encryption.AEAD
+namespace Crypto.GCM
 {
     public class GCMCipher : IAEADBlockCipher
     {

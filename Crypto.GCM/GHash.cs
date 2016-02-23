@@ -1,8 +1,9 @@
 ﻿using System;
 using Crypto.ASN1;
+using Crypto.Hashing;
 using Crypto.Utils;
 
-namespace Crypto.Hashing
+namespace Crypto.GCM
 {
     public class GHash : BlockDigest
     {

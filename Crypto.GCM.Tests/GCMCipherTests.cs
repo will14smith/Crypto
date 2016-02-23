@@ -1,10 +1,9 @@
-﻿using Crypto.Encryption.AEAD;
-using Crypto.Encryption.Block;
+﻿using Crypto.Encryption.Block;
 using Crypto.Encryption.Parameters;
 using Crypto.Utils;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Crypto.Tests.Encryption.AEAD
+namespace Crypto.GCM.Tests
 {
     [TestClass]
     public class GCMCipherTests

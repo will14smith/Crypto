@@ -70,7 +70,6 @@
     <Compile Include="Encryption\Modes\CBCBlockCipher.cs" />
     <Compile Include="Encryption\Modes\CTRBlockCipher.cs" />
     <Compile Include="Encryption\Modes\ECBBlockCipher.cs" />
-    <Compile Include="Encryption\AEAD\GCMCipher.cs" />
     <Compile Include="Encryption\Modes\IVBlockCipher.cs" />
     <Compile Include="Encryption\NullCipher.cs" />
     <Compile Include="Encryption\Parameters\AADParameter.cs" />
@@ -84,7 +83,6 @@
     <Compile Include="Encryption\Block\ThreeDESCipher.cs" />
     <Compile Include="Encryption\Block\ThreeDESKeyOptions.cs" />
     <Compile Include="Hashing\BlockDigest.cs" />
-    <Compile Include="Hashing\GHash.cs" />
     <Compile Include="Hashing\HMAC.cs" />
     <Compile Include="Hashing\IDigest.cs" />
     <Compile Include="Hashing\MD5Digest.cs" />
@@ -140,6 +138,8 @@
     <Compile Include="IO\TLS\SignedStreamExtensions.cs" />
     <Compile Include="IO\TLS\TlsDispatcher.cs" />
     <Compile Include="IO\TLS\ConnectionEnd.cs" />
+    <Compile Include="IO\TLS\TlsExtension.cs" />
+    <Compile Include="IO\TLS\TlsExtensionManager.cs" />
     <Compile Include="IO\TLS\TlsState.cs" />
     <Compile Include="IO\TLS\TlsStateType.cs" />
     <Compile Include="IO\TLS\TlsStream.cs" />

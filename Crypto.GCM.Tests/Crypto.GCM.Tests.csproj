@@ -3,11 +3,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{1A477B1D-AB27-41AE-B8A6-46878D4D0780}</ProjectGuid>
+    <ProjectGuid>{71465D9F-350D-46DB-BD8A-84FF8E6FCA2A}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Crypto.Tests</RootNamespace>
-    <AssemblyName>Crypto.Tests</AssemblyName>
+    <RootNamespace>Crypto.GCM.Tests</RootNamespace>
+    <AssemblyName>Crypto.GCM.Tests</AssemblyName>
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -36,7 +36,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
-    <Reference Include="System.Numerics" />
   </ItemGroup>
   <Choose>
     <When Condition="('$(VisualStudioVersion)' == '10.0' or '$(VisualStudioVersion)' == '') and '$(TargetFrameworkVersion)' == 'v3.5'">
@@ -46,25 +45,20 @@
     </When>
     <Otherwise>
       <ItemGroup>
-        <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework">
-          <Private>False</Private>
-        </Reference>
+        <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework" />
       </ItemGroup>
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="Encryption\Modes\CBCBlockModeTests.cs" />
-    <Compile Include="Encryption\RSATests.cs" />
-    <Compile Include="Encryption\AESCipherTests.cs" />
-    <Compile Include="Hashing\HMACTests.cs" />
-    <Compile Include="Hashing\PRFTests.cs" />
-    <Compile Include="Hashing\SHA256DigestTests.cs" />
-    <Compile Include="Hashing\SHA1DigestTests.cs" />
-    <Compile Include="IO\TLS\KeyExchange\DHEKeyExchangeTests.cs" />
+    <Compile Include="GCMCipherTests.cs" />
+    <Compile Include="GHashTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
+    <ProjectReference Include="..\Crypto.GCM\Crypto.GCM.csproj">
+      <Project>{365C8479-CA8A-4C52-9523-1D0198EB21D3}</Project>
+      <Name>Crypto.GCM</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Crypto.Utils\Crypto.Utils.csproj">
       <Project>{01C34216-1249-4F84-A73C-046B5AED4B51}</Project>
       <Name>Crypto.Utils</Name>
@@ -73,38 +67,6 @@
       <Project>{556AC40B-520E-4629-BC3F-8CC3BEAC6BE5}</Project>
       <Name>Crypto</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Hashing\TestVectors\SHA1LongMsg.dat">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Include="Hashing\TestVectors\SHA1ShortMsg.dat">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Include="Hashing\TestVectors\SHA224LongMsg.dat">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Include="Hashing\TestVectors\SHA224ShortMsg.dat">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Include="Hashing\TestVectors\SHA256LongMsg.dat">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Include="Hashing\TestVectors\SHA256ShortMsg.dat">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Include="Hashing\TestVectors\SHA384LongMsg.dat">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Include="Hashing\TestVectors\SHA384ShortMsg.dat">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Include="Hashing\TestVectors\SHA512LongMsg.dat">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Include="Hashing\TestVectors\SHA512ShortMsg.dat">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">

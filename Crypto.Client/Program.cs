@@ -2,6 +2,7 @@
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
+using Crypto.GCM;
 using Crypto.IO.TLS;
 
 namespace Crypto.Client
@@ -12,7 +13,12 @@ namespace Crypto.Client
         {
             var server = new TcpListener(IPAddress.Any, 443);
             server.Start();
-
+            
+            // TODO...
+            var tlsManager = new TlsExtensionManager();
+            var gcmExtenion = new GCMExtension();
+            gcmExtenion.Init(tlsManager);
+            // END TODO...
 
             Console.WriteLine("Listening for clients on {0}", server.LocalEndpoint);
 

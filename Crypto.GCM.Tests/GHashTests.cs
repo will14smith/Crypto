@@ -1,8 +1,7 @@
-﻿using Crypto.Hashing;
-using Crypto.Utils;
+﻿using Crypto.Utils;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Crypto.Tests.Hashing
+namespace Crypto.GCM.Tests
 {
     [TestClass]
     public class GHashTests

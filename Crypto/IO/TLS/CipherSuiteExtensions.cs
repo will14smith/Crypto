@@ -130,12 +130,6 @@ namespace Crypto.IO.TLS
                 CipherSuite.TLS_DHE_RSA_WITH_AES_256_CBC_SHA256,
                 CipherSuite.TLS_DH_anon_WITH_AES_128_CBC_SHA256,
                 CipherSuite.TLS_DH_anon_WITH_AES_256_CBC_SHA256,
-                CipherSuite.TLS_RSA_WITH_AES_128_GCM_SHA256,
-                CipherSuite.TLS_DH_DSS_WITH_AES_128_GCM_SHA256,
-                CipherSuite.TLS_DH_RSA_WITH_AES_128_GCM_SHA256,
-                CipherSuite.TLS_DHE_DSS_WITH_AES_128_GCM_SHA256,
-                CipherSuite.TLS_DHE_RSA_WITH_AES_128_GCM_SHA256,
-                CipherSuite.TLS_DH_anon_WITH_AES_128_GCM_SHA256
             }, () => new SHA256Digest());
 
             // signatures
@@ -195,8 +189,6 @@ namespace Crypto.IO.TLS
                 CipherSuite.TLS_RSA_WITH_AES_256_CBC_SHA,
                 CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA256,
                 CipherSuite.TLS_RSA_WITH_AES_256_CBC_SHA256,
-                CipherSuite.TLS_RSA_WITH_AES_128_GCM_SHA256,
-                CipherSuite.TLS_RSA_WITH_AES_256_GCM_SHA384
             }, () => new RSAKeyExchange());
             RegisterKeyExchanges(new[]
             {
@@ -205,8 +197,6 @@ namespace Crypto.IO.TLS
                 CipherSuite.TLS_DH_DSS_WITH_AES_256_CBC_SHA,
                 CipherSuite.TLS_DH_DSS_WITH_AES_128_CBC_SHA256,
                 CipherSuite.TLS_DH_DSS_WITH_AES_256_CBC_SHA256,
-                CipherSuite.TLS_DH_DSS_WITH_AES_128_GCM_SHA256,
-                CipherSuite.TLS_DH_DSS_WITH_AES_256_GCM_SHA384
                 // DH_DSS
             }, () => { throw new NotImplementedException(); });
             RegisterKeyExchanges(new[]
@@ -216,8 +206,6 @@ namespace Crypto.IO.TLS
                 CipherSuite.TLS_DH_RSA_WITH_AES_256_CBC_SHA,
                 CipherSuite.TLS_DH_RSA_WITH_AES_128_CBC_SHA256,
                 CipherSuite.TLS_DH_RSA_WITH_AES_256_CBC_SHA256,
-                CipherSuite.TLS_DH_RSA_WITH_AES_128_GCM_SHA256,
-                CipherSuite.TLS_DH_RSA_WITH_AES_256_GCM_SHA384
                 // DH_RSA
             }, () => new DHKeyExchange(new RSAKeyExchange()));
             RegisterKeyExchanges(new[]
@@ -227,8 +215,6 @@ namespace Crypto.IO.TLS
                 CipherSuite.TLS_DHE_DSS_WITH_AES_256_CBC_SHA,
                 CipherSuite.TLS_DHE_DSS_WITH_AES_128_CBC_SHA256,
                 CipherSuite.TLS_DHE_DSS_WITH_AES_256_CBC_SHA256,
-                CipherSuite.TLS_DHE_DSS_WITH_AES_128_GCM_SHA256,
-                CipherSuite.TLS_DHE_DSS_WITH_AES_256_GCM_SHA384
                 // DHE_DSS
             }, () => { throw new NotImplementedException(); });
             RegisterKeyExchanges(new[]
@@ -238,8 +224,6 @@ namespace Crypto.IO.TLS
                 CipherSuite.TLS_DHE_RSA_WITH_AES_256_CBC_SHA,
                 CipherSuite.TLS_DHE_RSA_WITH_AES_128_CBC_SHA256,
                 CipherSuite.TLS_DHE_RSA_WITH_AES_256_CBC_SHA256,
-                CipherSuite.TLS_DHE_RSA_WITH_AES_128_GCM_SHA256,
-                CipherSuite.TLS_DHE_RSA_WITH_AES_256_GCM_SHA384
                 // DHE_RSA
             }, () => new DHEKeyExchange(new RSAKeyExchange()));
             RegisterKeyExchanges(new[]
@@ -250,8 +234,6 @@ namespace Crypto.IO.TLS
                 CipherSuite.TLS_DH_anon_WITH_AES_256_CBC_SHA,
                 CipherSuite.TLS_DH_anon_WITH_AES_128_CBC_SHA256,
                 CipherSuite.TLS_DH_anon_WITH_AES_256_CBC_SHA256,
-                CipherSuite.TLS_DH_anon_WITH_AES_128_GCM_SHA256,
-                CipherSuite.TLS_DH_anon_WITH_AES_256_GCM_SHA384
                 // DH_anon
             }, () => { throw new NotImplementedException(); });
         }

@@ -6,7 +6,7 @@ using Crypto.Utils;
 
 namespace Crypto.IO.TLS
 {
-    class RSAKeyExchange : IKeyExchange
+    public class RSAKeyExchange : IKeyExchange
     {
         private TlsState state;
 

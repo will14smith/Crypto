@@ -4,17 +4,15 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{DF4A8E15-3FC2-4CB0-8F06-54B19FFAF4FF}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <ProjectGuid>{365C8479-CA8A-4C52-9523-1D0198EB21D3}</ProjectGuid>
+    <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Crypto.Client</RootNamespace>
-    <AssemblyName>Crypto.Client</AssemblyName>
+    <RootNamespace>Crypto.GCM</RootNamespace>
+    <AssemblyName>Crypto.GCM</AssemblyName>
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -24,7 +22,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -43,25 +40,23 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Program.cs" />
+    <Compile Include="GCMCipher.cs" />
+    <Compile Include="GCMCipherSuites.cs" />
+    <Compile Include="GCMExtension.cs" />
+    <Compile Include="GHash.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
-    <None Include="localhost.cert">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="localhost.key">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Crypto.GCM\Crypto.GCM.csproj">
-      <Project>{365C8479-CA8A-4C52-9523-1D0198EB21D3}</Project>
-      <Name>Crypto.GCM</Name>
+    <ProjectReference Include="..\Crypto.ASN1\Crypto.ASN1.csproj">
+      <Project>{7593403B-7C8C-462C-A5B9-9A915928F6E2}</Project>
+      <Name>Crypto.ASN1</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Crypto.Utils\Crypto.Utils.csproj">
+      <Project>{01C34216-1249-4F84-A73C-046B5AED4B51}</Project>
+      <Name>Crypto.Utils</Name>
     </ProjectReference>
     <ProjectReference Include="..\Crypto\Crypto.csproj">
-      <Project>{556ac40b-520e-4629-bc3f-8cc3beac6be5}</Project>
+      <Project>{556AC40B-520E-4629-BC3F-8CC3BEAC6BE5}</Project>
       <Name>Crypto</Name>
     </ProjectReference>
   </ItemGroup>

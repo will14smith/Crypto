@@ -95,6 +95,7 @@
     <Compile Include="IO\TLS\CipherSuiteExtensions.cs" />
     <Compile Include="IO\TLS\CompressionMethod.cs" />
     <Compile Include="IO\TLS\DefaultTlsNegotiation.cs" />
+    <Compile Include="IO\TLS\Extensions\SignatureAlgorithmExtension.cs" />
     <Compile Include="IO\TLS\Extensions\SignatureAlgorithmExtensionConfiguration.cs" />
     <Compile Include="IO\TLS\ITlsNegotiation.cs" />
     <Compile Include="IO\TLS\KeyExchange\DHEKeyExchange.cs" />

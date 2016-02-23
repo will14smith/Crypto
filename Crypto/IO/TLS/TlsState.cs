@@ -256,8 +256,23 @@ namespace Crypto.IO.TLS
 
         #region extensions
 
-        private readonly Dictionary<int, ITlsExtension> extensions
-            = new Dictionary<int, ITlsExtension>();
+        private readonly Dictionary<ushort, ITlsExtension> extensions
+            = new Dictionary<ushort, ITlsExtension>();
+
+        private bool TryGetExtension<T>(ushort key, out T ext)
+            where T : class, ITlsExtension
+        {
+            ITlsExtension tmp;
+
+            if (!extensions.TryGetValue(key, out tmp))
+            {
+                ext = default(T);
+                return false;
+            }
+
+            ext = tmp as T;
+            return ext != null;
+        }
 
         private void HandleClientExtensions(IEnumerable<HelloExtension> clientExtensions)
         {
@@ -440,18 +455,33 @@ namespace Crypto.IO.TLS
 
         public SignedStream GetSignatureStream(Stream baseStream)
         {
+
+            ISignatureCipher signatureAlgo;
+            IDigest hashAlgo;
+
+            SignatureAlgorithmExtension ext;
+            if (TryGetExtension(SignatureAlgorithmExtension.Type, out ext))
+            {
+                signatureAlgo = ext.GetSignatureAlgorithm();
+                hashAlgo = ext.GetDigestAlgorithm();
+            }
+            else
+            {
+                signatureAlgo = cipherSuite.GetSignatureAlgorithm();
+                hashAlgo = GetDigestAlgorithm();
+            }
+
             var key = Certificates.GetPrivateKey(Certificate.SubjectPublicKey);
-            var signatureAlgo = cipherSuite.GetSignatureAlgorithm();
             signatureAlgo.Init(new PrivateKeyParameter(key));
 
-            return new SignedStream(baseStream, signatureAlgo, GetDigest());
+            return new SignedStream(baseStream, signatureAlgo, hashAlgo);
         }
 
         #endregion
 
         #region digest
 
-        public IDigest GetDigest()
+        public IDigest GetDigestAlgorithm()
         {
             return cipherSuite.GetDigestAlgorithm();
         }
@@ -466,7 +496,7 @@ namespace Crypto.IO.TLS
             SecurityAssert.SAssert(ReadProtected || !reader);
             SecurityAssert.SAssert(WriteProtected || reader);
 
-            var digest = GetDigest();
+            var digest = GetDigestAlgorithm();
 
             var key = reader
                 ? (ConnectionEnd == ConnectionEnd.Server ? clientMACKey : serverMACKey)

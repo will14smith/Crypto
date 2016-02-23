@@ -37,26 +37,26 @@ namespace Crypto.IO.TLS
 
             // hashes
             RegisterHash(TlsHashAlgorithm.None, () => new NullDigest());
-            RegisterHash(TlsHashAlgorithm.MD5, () => { throw new NotImplementedException(); });
+            // TODO RegisterHash(TlsHashAlgorithm.MD5, () => { throw new NotImplementedException(); });
             RegisterHash(TlsHashAlgorithm.SHA1, () => new SHA1Digest());
-            RegisterHash(TlsHashAlgorithm.SHA224, () => { throw new NotImplementedException(); });
+            // TODO RegisterHash(TlsHashAlgorithm.SHA224, () => { throw new NotImplementedException(); });
             RegisterHash(TlsHashAlgorithm.SHA256, () => new SHA256Digest());
-            RegisterHash(TlsHashAlgorithm.SHA384, () => { throw new NotImplementedException(); });
-            RegisterHash(TlsHashAlgorithm.SHA512, () => { throw new NotImplementedException(); });
+            // TODO RegisterHash(TlsHashAlgorithm.SHA384, () => { throw new NotImplementedException(); });
+            // TODO RegisterHash(TlsHashAlgorithm.SHA512, () => { throw new NotImplementedException(); });
 
             // signatures
             RegisterSignature(TlsSignatureAlgorithm.Anonymous, () => new NullCipher());
             RegisterSignature(TlsSignatureAlgorithm.RSA, () => new RSA());
-            RegisterSignature(TlsSignatureAlgorithm.DSA, () => { throw new NotImplementedException(); });
+            // TODO RegisterSignature(TlsSignatureAlgorithm.DSA, () => { throw new NotImplementedException(); });
 
             // key exchanges
             RegisterKeyExchange(TlsKeyExchange.Null, () => new NullKeyExchange());
             RegisterKeyExchange(TlsKeyExchange.RSA, () => new RSAKeyExchange());
-            RegisterKeyExchange(TlsKeyExchange.DH_DSS, () => { throw new NotImplementedException(); });
+            // TODO RegisterKeyExchange(TlsKeyExchange.DH_DSS, () => { throw new NotImplementedException(); });
             RegisterKeyExchange(TlsKeyExchange.DH_RSA, () => new DHKeyExchange(new RSAKeyExchange()));
-            RegisterKeyExchange(TlsKeyExchange.DHE_DSS, () => { throw new NotImplementedException(); });
+            // TODO RegisterKeyExchange(TlsKeyExchange.DHE_DSS, () => { throw new NotImplementedException(); });
             RegisterKeyExchange(TlsKeyExchange.DHE_RSA, () => new DHEKeyExchange(new RSAKeyExchange()));
-            RegisterKeyExchange(TlsKeyExchange.DH_anon, () => { throw new NotImplementedException(); });
+            // TODO RegisterKeyExchange(TlsKeyExchange.DH_anon, () => { throw new NotImplementedException(); });
 
             // suites
             RegisterSuite(CipherSuite.TLS_NULL_WITH_NULL_NULL, nullCipher, TlsHashAlgorithm.None, TlsSignatureAlgorithm.Anonymous, TlsKeyExchange.Null);
@@ -159,12 +159,20 @@ namespace Crypto.IO.TLS
 
         public static IDigest GetDigestAlgorithm(this CipherSuite suite)
         {
-            return DigestFactories[DigestMapping[suite]]();
+            return GetDigestAlgorithm(DigestMapping[suite]);
+        }
+        public static IDigest GetDigestAlgorithm(TlsHashAlgorithm algo)
+        {
+            return DigestFactories[algo]();
         }
 
         public static ISignatureCipher GetSignatureAlgorithm(this CipherSuite suite)
         {
-            return SignatureFactories[SignatureMapping[suite]]();
+            return GetSignatureAlgorithm(SignatureMapping[suite]);
+        }
+        public static ISignatureCipher GetSignatureAlgorithm(TlsSignatureAlgorithm algo)
+        {
+            return SignatureFactories[algo]();
         }
 
         public static IKeyExchange GetKeyExchange(this CipherSuite suite)
@@ -176,6 +184,15 @@ namespace Crypto.IO.TLS
         public static IEnumerable<CipherSuite> GetSupportedCipherSuites()
         {
             return Suites;
+        }
+
+        public static bool IsSupported(TlsHashAlgorithm algo)
+        {
+            return HashAlgorithms.Contains(algo);
+        }
+        public static bool IsSupported(TlsSignatureAlgorithm algo)
+        {
+            return SignatureAlgorithms.Contains(algo);
         }
     }
 }

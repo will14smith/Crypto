@@ -22,7 +22,7 @@ namespace Crypto.Tests.Encryption
             var rsa = new RSA(Key);
 
             var encrypted = rsa.Encrypt(input);
-            var decrypted = rsa.Decrypt(encrypted);
+            var decrypted = rsa.Decrypt(encrypted, 0, encrypted.Length);
 
             CollectionAssert.AreEqual(input, decrypted);
         }

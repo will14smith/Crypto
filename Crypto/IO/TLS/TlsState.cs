@@ -161,7 +161,7 @@ namespace Crypto.IO.TLS
         private CipherSuite cipherSuite;
         private CompressionMethod compressionMethod;
 
-        public KeyExchange KeyExchange { get; private set; }
+        public IKeyExchange KeyExchange { get; private set; }
 
         private byte[] masterSecret;
         public byte[] ClientRandom { get; private set; }

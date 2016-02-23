@@ -28,5 +28,15 @@ namespace Crypto.IO.TLS.Messages
 
             public BigInteger Yc { get; }
         }
+
+        public class RSA : ClientKeyExchangeMessage
+        {
+            public byte[] PreMasterSecret { get; }
+
+            public RSA(byte[] preMasterSecret)
+            {
+                PreMasterSecret = preMasterSecret;
+            }
+        }
     }
 }

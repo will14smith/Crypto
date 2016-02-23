@@ -13,11 +13,8 @@ namespace Crypto.IO.TLS
         DH_anon
         */
 
-    public interface KeyExchange
+    public interface IKeyExchange
     {
-        bool RequiresCertificate { get; }
-        bool RequiresKeyExchange { get; }
-
         void Init(TlsState state);
         IEnumerable<HandshakeMessage> GenerateHandshakeMessages();
 

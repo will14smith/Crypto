@@ -97,7 +97,8 @@
     <Compile Include="IO\TLS\DefaultTlsNegotiation.cs" />
     <Compile Include="IO\TLS\ITlsNegotiation.cs" />
     <Compile Include="IO\TLS\KeyExchange\DHEKeyExchange.cs" />
-    <Compile Include="IO\TLS\KeyExchange\KeyExchange.cs" />
+    <Compile Include="IO\TLS\KeyExchange\DHKeyExchange.cs" />
+    <Compile Include="IO\TLS\KeyExchange\IKeyExchange.cs" />
     <Compile Include="IO\TLS\KeyExchange\NullKeyExchange.cs" />
     <Compile Include="IO\TLS\KeyExchange\RSAKeyExchange.cs" />
     <Compile Include="IO\TLS\Messages\AlertDescription.cs" />

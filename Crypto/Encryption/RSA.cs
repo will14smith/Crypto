@@ -47,22 +47,22 @@ namespace Crypto.Encryption
             em[ps.Length + 2] = 0;
             Array.Copy(input, 0, em, ps.Length + 3, input.Length);
 
-            var m = OS2IP(em);
+            var m = OS2IP(em, 0, em.Length);
             var c = EncryptPrimative(m, pub);
 
             return I2OSP(c, k);
         }
 
-        public byte[] Decrypt(byte[] input)
+        public byte[] Decrypt(byte[] input, int offset, int length)
         {
-            SecurityAssert.NotNull(input);
+            SecurityBufferAssert.AssertBuffer(input, offset, length);
             SecurityAssert.NotNull(priv);
 
             var k = priv.Modulus.GetByteLength();
             SecurityAssert.SAssert(k >= 11);
-            SecurityAssert.SAssert(input.Length == k);
+            SecurityAssert.SAssert(length == k);
 
-            var c = OS2IP(input);
+            var c = OS2IP(input, offset, length);
             var m = DecryptPrimative(c, priv);
 
             var em = I2OSP(m, k);
@@ -91,7 +91,7 @@ namespace Crypto.Encryption
 
             var em = EMSA_PKCS1_v1_5_Encode(input, k, hash);
 
-            var m = OS2IP(em);
+            var m = OS2IP(em, 0, em.Length);
             var s = SignPrimative(m, priv);
 
             return I2OSP(s, k);
@@ -106,7 +106,7 @@ namespace Crypto.Encryption
             var k = pub.Modulus.GetByteLength();
             SecurityAssert.SAssert(signature.Length == k);
 
-            var s = OS2IP(signature);
+            var s = OS2IP(signature, 0, signature.Length);
             var m = VerifyPrimative(s, pub);
             var em = I2OSP(m, k);
 
@@ -150,11 +150,16 @@ namespace Crypto.Encryption
                 x /= 256;
             }
 
+            while (bytes.Count < length)
+            {
+                bytes.Add(0);
+            }
+
             return bytes.AsEnumerable().Reverse().ToArray();
         }
-        private static BigInteger OS2IP(IEnumerable<byte> x)
+        private static BigInteger OS2IP(IEnumerable<byte> x, int offset, int length)
         {
-            return x.Aggregate(BigInteger.Zero, (current, b) => current*256 + b);
+            return x.Skip(offset).Take(length).Aggregate(BigInteger.Zero, (current, b) => current * 256 + b);
         }
 
         private static byte[] EMSA_PKCS1_v1_5_Encode(byte[] input, int emLen, IDigest hash)

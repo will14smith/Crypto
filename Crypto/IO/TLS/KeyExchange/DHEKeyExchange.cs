@@ -6,25 +6,21 @@ using Crypto.Utils;
 
 namespace Crypto.IO.TLS
 {
-    public class DHEKeyExchange : KeyExchange
+    public class DHEKeyExchange : IKeyExchange
     {
         public static readonly string ParamP = "DHE_p";
         public static readonly string ParamG = "DHE_g";
         public static readonly string ParamX = "DHE_X";
 
         private TlsState state;
-        private readonly KeyExchange innerKeyExchange;
+        private readonly IKeyExchange innerKeyExchange;
 
-        public DHEKeyExchange(KeyExchange innerKeyExchange)
+        public DHEKeyExchange(IKeyExchange innerKeyExchange)
         {
             SecurityAssert.NotNull(innerKeyExchange);
-            SecurityAssert.SAssert(!innerKeyExchange.RequiresKeyExchange);
 
             this.innerKeyExchange = innerKeyExchange;
         }
-
-        public bool RequiresCertificate => innerKeyExchange.RequiresCertificate;
-        public bool RequiresKeyExchange => true;
 
         public void Init(TlsState state)
         {

@@ -150,7 +150,7 @@ namespace Crypto.IO.TLS
             }
         }
 
-        public static KeyExchange GetKeyExchange(this CipherSuite suite)
+        public static IKeyExchange GetKeyExchange(this CipherSuite suite)
         {
             switch (suite)
             {
@@ -189,7 +189,7 @@ namespace Crypto.IO.TLS
                 case CipherSuite.TLS_DH_RSA_WITH_AES_128_GCM_SHA256:
                 case CipherSuite.TLS_DH_RSA_WITH_AES_256_GCM_SHA384:
                     // DH_RSA
-                    throw new NotImplementedException();
+                    return new DHKeyExchange(new RSAKeyExchange());
 
                 case CipherSuite.TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA:
                 case CipherSuite.TLS_DHE_DSS_WITH_AES_128_CBC_SHA:

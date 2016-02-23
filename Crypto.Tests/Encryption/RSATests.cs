@@ -3,6 +3,7 @@ using System.Text;
 using Crypto.Certificates;
 using Crypto.Certificates.Keys;
 using Crypto.Encryption;
+using Crypto.Encryption.Parameters;
 using Crypto.Hashing;
 using Crypto.Utils;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -19,7 +20,8 @@ namespace Crypto.Tests.Encryption
         {
             var input = new byte[] { 0, 1, 5, 30, 244, 255, 193 };
 
-            var rsa = new RSA(Key);
+            var rsa = new RSA();
+            rsa.Init(new PrivateKeyParameter(Key));
 
             var encrypted = rsa.Encrypt(input);
             var decrypted = rsa.Decrypt(encrypted, 0, encrypted.Length);
@@ -32,7 +34,8 @@ namespace Crypto.Tests.Encryption
         {
             var input = Encoding.UTF8.GetBytes("Hello World");
 
-            var rsa = new RSA(Key);
+            var rsa = new RSA();
+            rsa.Init(new PrivateKeyParameter(Key));
 
             var signature = rsa.Sign(input, new SHA1Digest());
 
@@ -46,7 +49,8 @@ namespace Crypto.Tests.Encryption
         {
             var input = Encoding.UTF8.GetBytes("Hello World");
 
-            var rsa = new RSA(Key);
+            var rsa = new RSA();
+            rsa.Init(new PrivateKeyParameter(Key));
 
             var signature = rsa.Sign(input, new SHA1Digest());
 

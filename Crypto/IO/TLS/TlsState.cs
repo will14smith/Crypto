@@ -195,7 +195,7 @@ namespace Crypto.IO.TLS
 
         private void ComputeKeys()
         {
-            var cipher = cipherSuite.GetCipher();
+            var cipher = cipherSuite.GetCipherAlgorithm();
             var mac = cipherSuite.GetDigestAlgorithm();
 
             // assuming server
@@ -413,8 +413,8 @@ namespace Crypto.IO.TLS
         public SignedStream GetSignatureStream(Stream baseStream)
         {
             var key = Certificates.GetPrivateKey(Certificate.SubjectPublicKey);
-            //TODO pass correct sig algo
-            var signatureAlgo = new RSA(key);
+            var signatureAlgo = cipherSuite.GetSignatureAlgorithm();
+            signatureAlgo.Init(new PrivateKeyParameter(key));
 
             return new SignedStream(baseStream, signatureAlgo, GetDigest());
         }
@@ -453,7 +453,7 @@ namespace Crypto.IO.TLS
 
         public ICipher GetCipher()
         {
-            return cipherSuite.GetCipher();
+            return cipherSuite.GetCipherAlgorithm();
         }
 
         public ICipherParameters GetBlockCipherParameters(bool reader)

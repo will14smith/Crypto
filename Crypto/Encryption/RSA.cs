@@ -5,6 +5,7 @@ using System.Linq;
 using System.Numerics;
 using Crypto.ASN1;
 using Crypto.Certificates.Keys;
+using Crypto.Encryption.Parameters;
 using Crypto.Hashing;
 using Crypto.Utils;
 
@@ -13,26 +14,13 @@ namespace Crypto.Encryption
     // Currently only supports PKCS1-v1_5 scheme, OAEP & PSS are unsupported
     public class RSA : ISignatureCipher
     {
-        private readonly RSAPublicKey pub;
-        private readonly RSAPrivateKey priv;
-
-        public RSA(PrivateKey key)
-        {
-            SecurityAssert.SAssert(key is RSAPrivateKey);
-
-            priv = (RSAPrivateKey)key;
-            pub = (RSAPublicKey)priv.PublicKey;
-        }
-        public RSA(PublicKey key)
-        {
-            SecurityAssert.SAssert(key is RSAPublicKey);
-
-            pub = (RSAPublicKey)key;
-        }
+        private RSAPublicKey pub;
+        private RSAPrivateKey priv;
 
         public byte[] Encrypt(byte[] input)
         {
             SecurityAssert.NotNull(input);
+            SecurityAssert.NotNull(pub);
 
             var k = pub.Modulus.GetByteLength();
             SecurityAssert.SAssert(input.Length <= k - 11);
@@ -82,10 +70,37 @@ namespace Crypto.Encryption
             return result;
         }
 
+        public void Init(ICipherParameters parameters)
+        {
+            var pubKeyParams = parameters as PublicKeyParameter;
+            if (pubKeyParams != null)
+            {
+                SecurityAssert.SAssert(pubKeyParams.Key is RSAPublicKey);
+
+                pub = (RSAPublicKey)pubKeyParams.Key;
+
+                return;
+            }
+
+            var privKeyParams = parameters as PrivateKeyParameter;
+            if (privKeyParams != null)
+            {
+                SecurityAssert.SAssert(privKeyParams.Key is RSAPrivateKey);
+
+                priv = (RSAPrivateKey)privKeyParams.Key;
+                pub = (RSAPublicKey)priv.PublicKey;
+
+                return;
+            }
+
+            throw new InvalidCastException();
+        }
+
         public byte[] Sign(byte[] input, IDigest hash)
         {
             SecurityAssert.NotNull(input);
             SecurityAssert.NotNull(hash);
+            SecurityAssert.NotNull(priv);
 
             var k = priv.Modulus.GetByteLength();
 
@@ -102,6 +117,7 @@ namespace Crypto.Encryption
             SecurityAssert.NotNull(input);
             SecurityAssert.NotNull(signature);
             SecurityAssert.NotNull(hash);
+            SecurityAssert.NotNull(pub);
 
             var k = pub.Modulus.GetByteLength();
             SecurityAssert.SAssert(signature.Length == k);

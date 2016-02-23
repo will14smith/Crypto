@@ -77,6 +77,8 @@
     <Compile Include="Encryption\Parameters\ICipherParameters.cs" />
     <Compile Include="Encryption\Parameters\IVParameter.cs" />
     <Compile Include="Encryption\Parameters\KeyParameter.cs" />
+    <Compile Include="Encryption\Parameters\PrivateKeyParameter.cs" />
+    <Compile Include="Encryption\Parameters\PublicKeyParameter.cs" />
     <Compile Include="Encryption\RC4Cipher.cs" />
     <Compile Include="Encryption\RSA.cs" />
     <Compile Include="Encryption\Block\ThreeDESCipher.cs" />
@@ -158,9 +160,7 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="IO\TLS\Cipher\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

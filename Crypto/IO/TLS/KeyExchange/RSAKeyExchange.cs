@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Crypto.Encryption;
+using Crypto.Encryption.Parameters;
 using Crypto.IO.TLS.Messages;
 using Crypto.Utils;
 
@@ -30,7 +31,8 @@ namespace Crypto.IO.TLS
             SecurityAssert.SAssert(body.Length == length + 2);
 
             var key = state.Certificates.GetPrivateKey(state.Certificate.SubjectPublicKey);
-            var rsa = new RSA(key);
+            var rsa = new RSA();
+            rsa.Init(new PrivateKeyParameter(key));
 
             var preMasterSecret = rsa.Decrypt(body, 2, length);
             SecurityAssert.SAssert(preMasterSecret.Length == 48);

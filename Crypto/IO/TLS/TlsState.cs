@@ -28,6 +28,7 @@ namespace Crypto.IO.TLS
             state = TlsStateType.Initial;
 
             handshakeVerify = GetPRFDigest();
+            RecordStrategy = GetRecordStrategy();
         }
 
         public CertificateManager Certificates { get; } = new CertificateManager();
@@ -41,7 +42,7 @@ namespace Crypto.IO.TLS
 
         #endregion
 
-        #region connection state
+        #region connection State
 
         public TlsMode Mode { get; private set; }
 
@@ -75,6 +76,24 @@ namespace Crypto.IO.TLS
 
         public RecordReader RecordReader { get; }
         public RecordWriter RecordWriter { get; }
+
+        internal IRecordStrategy RecordStrategy { get; private set; }
+
+        private void EnableReadProtection()
+        {
+            SetProtection(true, WriteProtected);
+        }
+        private void EnableWriteProtection()
+        {
+            SetProtection(ReadProtected, true);
+        }
+        private void SetProtection(bool read, bool write)
+        {
+            ReadProtected = read;
+            WriteProtected = write;
+
+            RecordStrategy = GetRecordStrategy();
+        }
 
         public X509Certificate Certificate { get; private set; }
         public X509Certificate[] CertificateChain { get; private set; }
@@ -183,15 +202,17 @@ namespace Crypto.IO.TLS
             SecurityAssert.SAssert(state == TlsStateType.RecievedClientKeyExchange);
             SecurityAssert.SAssert(!ReadProtected && !WriteProtected);
 
-            ReadProtected = true;
+            EnableReadProtection();
+
             state = TlsStateType.WaitingForClientFinished;
         }
+
         public void SentChangeCipherSpec()
         {
             SecurityAssert.SAssert(state == TlsStateType.Active);
             SecurityAssert.SAssert(!WriteProtected);
 
-            WriteProtected = true;
+            EnableWriteProtection();
         }
 
         public void VerifyFinished(FinishedHandshakeMessage message)
@@ -341,11 +362,45 @@ namespace Crypto.IO.TLS
         {
             return cipherSuite.GetCipher();
         }
+        private IRecordStrategy GetRecordStrategy()
+        {
+            if (!ReadProtected && !WriteProtected)
+            {
+                return new PlaintextStrategy(this, stream);
+            }
+
+            RecordStrategy strategy;
+            var cipher = GetCipher();
+            if (cipher is BlockCipherAdapter)
+            {
+                strategy = new BlockCipherStrategy(this, stream);
+            }
+            else if (cipher is AEADCipherAdapter)
+            {
+                strategy = new AEADCipherStrategy(this, stream);
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
+
+
+            if (ReadProtected && WriteProtected)
+            {
+                return strategy;
+            }
+
+            var plainText = new PlaintextStrategy(this, stream);
+
+            return new CompositeRecordStrategy(
+                ReadProtected ? strategy : plainText,
+                WriteProtected ? strategy : plainText);
+        }
+
         public IDigest GetDigest()
         {
             return cipherSuite.GetDigestAlgorithm();
         }
-
         public IDigest GetPRFDigest()
         {
             return new SHA256Digest();

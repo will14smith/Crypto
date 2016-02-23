@@ -123,10 +123,15 @@
     <Compile Include="IO\TLS\Messages\Handshake\ServerHelloMessage.cs" />
     <Compile Include="IO\TLS\Messages\Handshake\SignedKeyExchangeMessage.cs" />
     <Compile Include="IO\TLS\Messages\Message.cs" />
+    <Compile Include="IO\TLS\Records\AEADCipherStrategy.cs" />
+    <Compile Include="IO\TLS\Records\BlockCipherStrategy.cs" />
+    <Compile Include="IO\TLS\Records\CompositeRecordStrategy.cs" />
     <Compile Include="IO\TLS\Records\EndianBinaryReaderExtensions.cs" />
     <Compile Include="IO\TLS\Records\EndianBinaryWriterExtensions.cs" />
+    <Compile Include="IO\TLS\Records\PlaintextStrategy.cs" />
     <Compile Include="IO\TLS\Records\Record.cs" />
     <Compile Include="IO\TLS\Records\RecordReader.cs" />
+    <Compile Include="IO\TLS\Records\RecordStrategy.cs" />
     <Compile Include="IO\TLS\Records\RecordType.cs" />
     <Compile Include="IO\TLS\Records\RecordWriter.cs" />
     <Compile Include="IO\TLS\SignedStreamExtensions.cs" />
@@ -152,7 +157,9 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="IO\TLS\Cipher\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

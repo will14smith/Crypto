@@ -55,8 +55,6 @@
     <Compile Include="HexConverter.cs" />
     <Compile Include="IO\EndianBinaryReader.cs" />
     <Compile Include="IO\EndianBinaryWriter.cs" />
-    <Compile Include="IO\StreamReader.cs" />
-    <Compile Include="IO\StreamWriter.cs" />
     <Compile Include="LittleEndianBitConverter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SecurityAssert.cs" />

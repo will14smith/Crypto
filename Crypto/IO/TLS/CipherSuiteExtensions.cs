@@ -18,6 +18,8 @@ namespace Crypto.IO.TLS
         private static readonly Dictionary<CipherSuite, Func<IKeyExchange>> KeyExchangeFactories
             = new Dictionary<CipherSuite, Func<IKeyExchange>>();
 
+        private static readonly ISet<CipherSuite> Suites = new HashSet<CipherSuite>();
+
         static CipherSuiteExtensions()
         {
             // ciphers
@@ -263,6 +265,7 @@ namespace Crypto.IO.TLS
         {
             foreach (var suite in cipherSuites)
             {
+                Suites.Add(suite);
                 CipherFactories.Add(suite, func);
             }
         }
@@ -271,6 +274,7 @@ namespace Crypto.IO.TLS
         {
             foreach (var suite in cipherSuites)
             {
+                Suites.Add(suite);
                 DigestFactories.Add(suite, func);
             }
         }
@@ -279,6 +283,7 @@ namespace Crypto.IO.TLS
         {
             foreach (var suite in cipherSuites)
             {
+                Suites.Add(suite);
                 SignatureFactories.Add(suite, func);
             }
         }
@@ -287,6 +292,7 @@ namespace Crypto.IO.TLS
         {
             foreach (var suite in cipherSuites)
             {
+                Suites.Add(suite);
                 KeyExchangeFactories.Add(suite, func);
             }
         }
@@ -313,5 +319,10 @@ namespace Crypto.IO.TLS
             return KeyExchangeFactories[suite]();
         }
         #endregion
+
+        public static IEnumerable<CipherSuite> GetSupportedCipherSuites()
+        {
+            return Suites;
+        }
     }
 }

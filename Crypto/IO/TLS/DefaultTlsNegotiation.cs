@@ -12,7 +12,7 @@ namespace Crypto.IO.TLS
 
         public CipherSuite DecideCipherSuite(CipherSuite[] clientCipherSuites)
         {
-            var supportedCiphers = (CipherSuite[]) Enum.GetValues(typeof (CipherSuite));
+            var supportedCiphers = CipherSuiteExtensions.GetSupportedCipherSuites();
             var cipher = clientCipherSuites.FirstOrDefault(x => supportedCiphers.Contains(x));
 
             // WARNING: default is TLS_NULL_WITH_NULL_NULL....

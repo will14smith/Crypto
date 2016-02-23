@@ -88,6 +88,9 @@ namespace Crypto.IO.TLS
 
         #region record properties
 
+        public int ReadSeqNum { get; set; }
+        public int WriteSeqNum { get; set; }
+
         public bool ReadProtected { get; private set; }
         public bool WriteProtected { get; private set; }
 
@@ -258,7 +261,6 @@ namespace Crypto.IO.TLS
 
         public X509Certificate Certificate { get; private set; }
         public X509Certificate[] CertificateChain { get; private set; }
-
 
         public void SetCertificates(X509Certificate cert, X509Certificate[] chain)
         {

@@ -9,9 +9,6 @@ namespace Crypto.IO.TLS
 {
     internal class BlockCipherStrategy : RecordStrategy
     {
-        private long readSeqNum;
-        private long writeSeqNum;
-
         public BlockCipherStrategy(TlsState state, Stream stream) : base(state, stream)
         {
         }
@@ -69,11 +66,9 @@ namespace Crypto.IO.TLS
             var content = new byte[contentLength];
             Array.Copy(plaintext, 0, content, 0, content.Length);
 
-            var computedMac = ComputeMAC(macAlgo, readSeqNum, type, version, content);
+            var computedMac = ComputeMAC(macAlgo, State.ReadSeqNum++, type, version, content);
 
             SecurityAssert.HashAssert(mac, computedMac);
-
-            readSeqNum++;
 
             return new Record(type, version, content);
         }
@@ -83,7 +78,7 @@ namespace Crypto.IO.TLS
             var cipher = GetCipher();
 
             var macAlgo = State.GetMAC(false);
-            var mac = ComputeMAC(macAlgo, writeSeqNum, type, version, data);
+            var mac = ComputeMAC(macAlgo, State.WriteSeqNum++, type, version, data);
 
             var iv = RandomGenerator.RandomBytes(cipher.BlockLength);
 
@@ -112,8 +107,6 @@ namespace Crypto.IO.TLS
 
             cipher.Init(new IVParameter(State.GetBlockCipherParameters(false), iv));
             cipher.Encrypt(plaintext, 0, payload, 0, plaintext.Length);
-
-            writeSeqNum++;
 
             Writer.Write(type);
             Writer.Write(version);

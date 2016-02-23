@@ -8,9 +8,6 @@ namespace Crypto.IO.TLS
 {
     internal class AEADCipherStrategy : RecordStrategy
     {
-        private long readSeqNum;
-        private long writeSeqNum;
-
         public AEADCipherStrategy(TlsState state, Stream stream) : base(state, stream)
         {
         }
@@ -47,7 +44,7 @@ namespace Crypto.IO.TLS
             var payload = Reader.ReadBytes(length - explicitNonceLength);
 
             var aad = new byte[13];
-            Array.Copy(EndianBitConverter.Big.GetBytes(readSeqNum), 0, aad, 0, 8);
+            Array.Copy(EndianBitConverter.Big.GetBytes(State.ReadSeqNum++), 0, aad, 0, 8);
             Array.Copy(new[] { (byte)type, version.Major, version.Major }, 0, aad, 8, 3);
             Array.Copy(EndianBitConverter.Big.GetBytes((ushort)(length - explicitNonceLength - cipher.TagLength)), 0, aad, 11, 2);
 
@@ -58,8 +55,6 @@ namespace Crypto.IO.TLS
             plaintextLength += cipher.Cipher.DecryptFinal(plaintext, plaintextLength);
 
             Array.Resize(ref plaintext, plaintextLength);
-
-            readSeqNum++;
 
             return new Record(type, version, plaintext);
         }
@@ -73,7 +68,7 @@ namespace Crypto.IO.TLS
             var nonce = RandomGenerator.RandomBytes(explicitNonceLength);
 
             var aad = new byte[13];
-            Array.Copy(EndianBitConverter.Big.GetBytes(writeSeqNum), 0, aad, 0, 8);
+            Array.Copy(EndianBitConverter.Big.GetBytes(State.WriteSeqNum++), 0, aad, 0, 8);
             Array.Copy(new[] { (byte)type, version.Major, version.Major }, 0, aad, 8, 3);
             Array.Copy(EndianBitConverter.Big.GetBytes((ushort)data.Length), 0, aad, 11, 2);
 
@@ -82,8 +77,6 @@ namespace Crypto.IO.TLS
 
             cipher.Init(State.GetAEADParameters(false, aad, nonce));
             cipher.Encrypt(data, 0, payload, explicitNonceLength, data.Length);
-
-            writeSeqNum++;
 
             Writer.Write(type);
             Writer.Write(version);

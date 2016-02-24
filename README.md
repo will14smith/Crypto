@@ -18,6 +18,7 @@ Implement a TLS1.2 steam wrapper without using any cryptography libraries
 ## TODO
 
 * Handle & generate alerts 
+* DHE currently has a hard coded parameter
 * Implement more ciphers, digests, keyexchanges, etc
 * * NULL (cipher & digest)
 * * RC4

@@ -1,7 +1,6 @@
 ﻿using System;
 using Crypto.Encryption;
 using Crypto.Encryption.Block;
-using Crypto.Hashing;
 using Crypto.IO.TLS;
 using Crypto.IO.TLS.Extensions;
 

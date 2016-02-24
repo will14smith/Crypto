@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Crypto.Encryption;
 using Crypto.Encryption.Block;
 using Crypto.Encryption.Modes;
@@ -183,9 +184,22 @@ namespace Crypto.IO.TLS
 
         public static IEnumerable<CipherSuite> GetSupportedCipherSuites()
         {
-            return Suites;
+            return Suites.Where(IsSupported);
         }
 
+        private static bool IsSupported(CipherSuite suite)
+        {
+            if (!Suites.Contains(suite)) { return false; }
+            if (!CipherFactories.ContainsKey(suite)) { return false; }
+            if (!DigestMapping.ContainsKey(suite)) { return false; }
+            if (!IsSupported(DigestMapping[suite])) { return false; }
+            if (!SignatureMapping.ContainsKey(suite)) { return false; }
+            if (!IsSupported(SignatureMapping[suite])) { return false; }
+            if (!KeyExchangeMapping.ContainsKey(suite)) { return false; }
+            if (!IsSupported(KeyExchangeMapping[suite])) { return false; }
+
+            return true;
+        }
         public static bool IsSupported(TlsHashAlgorithm algo)
         {
             return HashAlgorithms.Contains(algo);
@@ -193,6 +207,10 @@ namespace Crypto.IO.TLS
         public static bool IsSupported(TlsSignatureAlgorithm algo)
         {
             return SignatureAlgorithms.Contains(algo);
+        }
+        public static bool IsSupported(TlsKeyExchange algo)
+        {
+            return KeyExchanges.Contains(algo);
         }
     }
 }

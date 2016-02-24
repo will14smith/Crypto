@@ -35,7 +35,7 @@ namespace Crypto.IO.TLS
 
         public override Record Read(RecordType type, TlsVersion version, ushort length)
         {
-            var cipher = GetCipher();
+            var cipher = GetCipher().Cipher;
 
             // TODO parametrised from CipherSpec
             var explicitNonceLength = 8;
@@ -50,9 +50,9 @@ namespace Crypto.IO.TLS
 
             cipher.Init(State.GetAEADParameters(true, aad, nonce));
 
-            var plaintext = new byte[payload.Length];
-            var plaintextLength = cipher.Cipher.Decrypt(payload, 0, plaintext, 0, payload.Length);
-            plaintextLength += cipher.Cipher.DecryptFinal(plaintext, plaintextLength);
+            var plaintext = new byte[payload.Length - cipher.TagLength];
+            var plaintextLength = cipher.Decrypt(payload, 0, plaintext, 0, payload.Length - cipher.TagLength);
+            plaintextLength += cipher.DecryptFinal(payload, plaintextLength, plaintext, plaintextLength);
 
             Array.Resize(ref plaintext, plaintextLength);
 
@@ -61,7 +61,7 @@ namespace Crypto.IO.TLS
 
         public override void Write(RecordType type, TlsVersion version, byte[] data)
         {
-            var cipher = GetCipher();
+            var cipher = GetCipher().Cipher;
 
             // TODO parametrised from CipherSpec
             var explicitNonceLength = 8;
@@ -72,16 +72,19 @@ namespace Crypto.IO.TLS
             Array.Copy(new[] { (byte)type, version.Major, version.Major }, 0, aad, 8, 3);
             Array.Copy(EndianBitConverter.Big.GetBytes((ushort)data.Length), 0, aad, 11, 2);
 
-            var payload = new byte[8 + data.Length + cipher.BlockLength];
+            var payload = new byte[explicitNonceLength + data.Length + cipher.TagLength];
             Array.Copy(nonce, payload, explicitNonceLength);
 
             cipher.Init(State.GetAEADParameters(false, aad, nonce));
-            cipher.Encrypt(data, 0, payload, explicitNonceLength, data.Length);
+
+            var payloadLength = explicitNonceLength;
+            payloadLength += cipher.Encrypt(data, 0, payload, payloadLength, data.Length);
+            payloadLength += cipher.EncryptFinal(payload, payloadLength);
 
             Writer.Write(type);
             Writer.Write(version);
-            Writer.Write((ushort)payload.Length);
-            Writer.Write(payload);
+            Writer.Write((ushort)payloadLength);
+            Writer.Write(payload, 0, payloadLength);
         }
     }
 }

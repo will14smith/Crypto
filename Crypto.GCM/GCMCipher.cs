@@ -118,15 +118,19 @@ namespace Crypto.GCM
         private void EncryptBlock(byte[] output, int outputOffset)
         {
             // encrypt block
-            ctr.EncryptBlock(buffer, 0, output, outputOffset);
+            var ciphertext = new byte[BlockLength];
+            ctr.EncryptBlock(buffer, 0, ciphertext, 0);
+
+            // copy to output
+            Array.Copy(ciphertext, 0, output, outputOffset, bufferOffset);
+
+            // update tag hash
+            tagHash.Update(output, outputOffset, bufferOffset);
+            cSize += bufferOffset * 8;
 
             // clear buffer
             bufferOffset = 0;
             Array.Clear(buffer, 0, BlockLength);
-
-            // update tag hash
-            tagHash.Update(output, outputOffset, BlockLength);
-            cSize += BlockLength * 8;
         }
 
         public int EncryptFinal(byte[] output, int offset)
@@ -135,7 +139,12 @@ namespace Crypto.GCM
 
             if (bufferOffset != 0)
             {
-                throw new NotImplementedException();
+                var len = bufferOffset;
+
+                EncryptBlock(output, offset);
+
+                total += len;
+                offset += len;
             }
 
             var tagCiphertextPaddingLength = (16 - (int)(cSize / 8) % 16) % 16;
@@ -158,14 +167,14 @@ namespace Crypto.GCM
 
             for (var i = 0; i < length; i++)
             {
+                buffer[bufferOffset++] = input[inputOffset + i];
+
                 if (bufferOffset == BlockLength)
                 {
                     DecryptBlock(output, outputOffset);
                     outputOffset += BlockLength;
                     total += BlockLength;
                 }
-
-                buffer[bufferOffset++] = input[inputOffset + i];
             }
 
             return total;
@@ -174,35 +183,52 @@ namespace Crypto.GCM
         private void DecryptBlock(byte[] output, int outputOffset)
         {
             // encrypt block
-            ctr.DecryptBlock(buffer, 0, output, outputOffset);
+            var plaintext = new byte[BlockLength];
+            ctr.DecryptBlock(buffer, 0, plaintext, 0);
+
+            // copy to output
+            Array.Copy(plaintext, 0, output, outputOffset, bufferOffset);
 
             // update tag hash
-            tagHash.Update(buffer, 0, BlockLength);
-            cSize += BlockLength * 8;
+            tagHash.Update(buffer, 0, bufferOffset);
+            cSize += bufferOffset * 8;
 
             // clear buffer
             bufferOffset = 0;
             Array.Clear(buffer, 0, BlockLength);
         }
 
-        public int DecryptFinal(byte[] output, int offset)
+        public int DecryptFinal(byte[] input, int inputOffset, byte[] output, int outputOffset)
         {
-            SecurityAssert.SAssert(bufferOffset == BlockLength);
+            SecurityBufferAssert.AssertBuffer(input, inputOffset, TagLength);
+            SecurityBufferAssert.AssertBuffer(output, outputOffset, bufferOffset);
+
+            var total = 0;
+            if (bufferOffset != 0)
+            {
+                total += bufferOffset;
+                inputOffset += bufferOffset;
+
+                DecryptBlock(output, outputOffset);
+            }
 
             var tagCiphertextPaddingLength = (16 - (int)(cSize / 8) % 16) % 16;
             tagHash.Update(new byte[tagCiphertextPaddingLength], 0, tagCiphertextPaddingLength);
             tagHash.Update(EndianBitConverter.Big.GetBytes(aSize), 0, sizeof(long));
             tagHash.Update(EndianBitConverter.Big.GetBytes(cSize), 0, sizeof(long));
-            
+
             var ctr = new CTRBlockCipher(Cipher);
             ctr.Init(new IVParameter(null, j0));
 
-            var tag = new byte[16];
-            ctr.EncryptBlock(tagHash.Digest(), 0, tag, 0);
-            
-            SecurityAssert.HashAssert(buffer, tag);
+            var calculatedTag = new byte[16];
+            ctr.EncryptBlock(tagHash.Digest(), 0, calculatedTag, 0);
 
-            return 0;
+            var tag = new byte[16];
+            Array.Copy(input, inputOffset, tag, 0, TagLength);
+
+            SecurityAssert.HashAssert(calculatedTag, tag);
+
+            return total;
         }
     }
 }

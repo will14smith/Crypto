@@ -41,8 +41,8 @@ namespace Crypto.GCM.Tests
             var decryptInput = HexConverter.FromHex(ciphertext + tag);
             var decryptOutput = new byte[decryptInput.Length - 16];
 
-            gcm.Decrypt(decryptInput, 0, decryptOutput, 0, decryptInput.Length);
-            gcm.DecryptFinal(decryptOutput, decryptInput.Length);
+            var offset = gcm.Decrypt(decryptInput, 0, decryptOutput, 0, decryptInput.Length);
+            gcm.DecryptFinal(decryptInput, offset, decryptOutput, decryptInput.Length);
 
             Assert.AreEqual(plaintext, HexConverter.ToHex(decryptOutput));
         }

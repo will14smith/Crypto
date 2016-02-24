@@ -30,7 +30,7 @@ namespace Crypto.Encryption
         public void Decrypt(byte[] input, int inputOffset, byte[] output, int outputOffset, int length)
         {
             var offset = Cipher.Decrypt(input, inputOffset, output, outputOffset, length);
-            Cipher.DecryptFinal(output, offset);
+            Cipher.DecryptFinal(input, inputOffset + offset, output, outputOffset + offset);
         }
     }
 }

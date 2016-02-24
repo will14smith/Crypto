@@ -16,6 +16,6 @@ namespace Crypto.Encryption.AEAD
         int EncryptFinal(byte[] output, int offset);
 
         int Decrypt(byte[] input, int inputOffset, byte[] output, int outputOffset, int length);
-        int DecryptFinal(byte[] output, int offset);
+        int DecryptFinal(byte[] input, int inputOffset, byte[] output, int outputOffset);
     }
 }

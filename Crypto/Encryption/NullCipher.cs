@@ -4,7 +4,7 @@ using Crypto.Hashing;
 
 namespace Crypto.Encryption
 {
-    class NullCipher : ICipher, ISignatureCipher
+    public class NullCipher : ICipher, ISignatureCipher
     {
         public byte[] Sign(byte[] input, IDigest hash)
         {

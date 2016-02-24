@@ -1,28 +1,30 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using Crypto.IO.TLS;
 using Crypto.IO.TLS.Messages;
 
-namespace Crypto.IO.TLS
+namespace Crypto.EllipticCurve
 {
-    public class NullKeyExchange : ITlsKeyExchange
+    public class ECDHEKeyExchange : ITlsKeyExchange
     {
         public void Init(TlsState state)
         {
-            // nop
+            throw new NotImplementedException();
         }
 
         public IEnumerable<HandshakeMessage> GenerateHandshakeMessages()
         {
-            yield break;
+            throw new NotImplementedException();
         }
 
         public HandshakeMessage ReadClientKeyExchange(byte[] body)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public void HandleClientKeyExchange(ClientKeyExchangeMessage message)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
     }
 }

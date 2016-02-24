@@ -169,7 +169,7 @@ namespace Crypto.IO.TLS
         private CipherSuite cipherSuite;
         private CompressionMethod compressionMethod;
 
-        public IKeyExchange KeyExchange { get; private set; }
+        public ITlsKeyExchange KeyExchange { get; private set; }
 
         private byte[] masterSecret;
         public byte[] ClientRandom { get; private set; }
@@ -200,8 +200,8 @@ namespace Crypto.IO.TLS
 
         private void ComputeKeys()
         {
-            var cipher = cipherSuite.GetCipherAlgorithm();
-            var mac = cipherSuite.GetDigestAlgorithm();
+            var cipher = cipherSuite.CreateCipherAlgorithm();
+            var mac = CipherSuiteExtensions.CreateDigestAlgorithm(cipherSuite.GetDigestAlgorithm());
 
             // assuming server
             var prf = new PRF(GetPRFDigest());
@@ -287,15 +287,7 @@ namespace Crypto.IO.TLS
         }
         private IEnumerable<HelloExtension> GenerateExtensionsHello()
         {
-            foreach (var extension in extensions)
-            {
-                var hello = extension.Value.GenerateHello();
-
-                if (hello != null)
-                {
-                    yield return hello;
-                }
-            }
+            return extensions.Select(extension => extension.Value.GenerateHello()).Where(hello => hello != null);
         }
 
         #endregion
@@ -438,7 +430,7 @@ namespace Crypto.IO.TLS
 
             //TODO extensions
 
-            KeyExchange = cipherSuite.GetKeyExchange();
+            KeyExchange = cipherSuite.CreateKeyExchange();
             KeyExchange.Init(this);
         }
 
@@ -455,36 +447,40 @@ namespace Crypto.IO.TLS
 
         public SignedStream GetSignatureStream(Stream baseStream)
         {
+            var algos = GetSigningAlgorithms();
 
-            ISignatureCipher signatureAlgo;
-            IDigest hashAlgo;
+            var digestAlgorithm = CipherSuiteExtensions.CreateDigestAlgorithm(algos.Item1);
+            var signatureAlgorithm = CipherSuiteExtensions.CreateSignatureAlgorithm(algos.Item2);
+
+            var key = Certificates.GetPrivateKey(Certificate.SubjectPublicKey);
+            signatureAlgorithm.Init(new PrivateKeyParameter(key));
+
+            return new SignedStream(baseStream, signatureAlgorithm, digestAlgorithm);
+        }
+
+        internal Tuple<TlsHashAlgorithm, TlsSignatureAlgorithm> GetSigningAlgorithms()
+        {
+            TlsHashAlgorithm hashAlgo;
+            TlsSignatureAlgorithm signatureAlgo;
 
             SignatureAlgorithmExtension ext;
             if (TryGetExtension(SignatureAlgorithmExtension.Type, out ext))
             {
-                signatureAlgo = ext.GetSignatureAlgorithm();
                 hashAlgo = ext.GetDigestAlgorithm();
+                signatureAlgo = ext.GetSignatureAlgorithm();
             }
             else
             {
+                hashAlgo = cipherSuite.GetDigestAlgorithm();
                 signatureAlgo = cipherSuite.GetSignatureAlgorithm();
-                hashAlgo = GetDigestAlgorithm();
             }
 
-            var key = Certificates.GetPrivateKey(Certificate.SubjectPublicKey);
-            signatureAlgo.Init(new PrivateKeyParameter(key));
-
-            return new SignedStream(baseStream, signatureAlgo, hashAlgo);
+            return Tuple.Create(hashAlgo, signatureAlgo);
         }
 
         #endregion
 
         #region digest
-
-        public IDigest GetDigestAlgorithm()
-        {
-            return cipherSuite.GetDigestAlgorithm();
-        }
 
         public IDigest GetPRFDigest()
         {
@@ -496,7 +492,7 @@ namespace Crypto.IO.TLS
             SecurityAssert.SAssert(ReadProtected || !reader);
             SecurityAssert.SAssert(WriteProtected || reader);
 
-            var digest = GetDigestAlgorithm();
+            var digest = CipherSuiteExtensions.CreateDigestAlgorithm(cipherSuite.GetDigestAlgorithm());
 
             var key = reader
                 ? (ConnectionEnd == ConnectionEnd.Server ? clientMACKey : serverMACKey)
@@ -511,7 +507,7 @@ namespace Crypto.IO.TLS
 
         public ICipher GetCipher()
         {
-            return cipherSuite.GetCipherAlgorithm();
+            return cipherSuite.CreateCipherAlgorithm();
         }
 
         public ICipherParameters GetBlockCipherParameters(bool reader)

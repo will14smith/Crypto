@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Crypto.Encryption
+﻿namespace Crypto.Encryption.Block
 {
-    enum ThreeDESKeyOptions
+    public enum ThreeDESKeyOptions
     {
         // k1, k2, k3 are independant
         Option1,

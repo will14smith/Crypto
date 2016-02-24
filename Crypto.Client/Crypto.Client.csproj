@@ -56,6 +56,14 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Crypto.ECGCM\Crypto.ECGCM.csproj">
+      <Project>{26A490AB-D2C0-44DB-9556-D3BF3CBD50BB}</Project>
+      <Name>Crypto.ECGCM</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Crypto.EllipticCurve\Crypto.EllipticCurve.csproj">
+      <Project>{6287D444-CEEA-4672-89DD-ACAAEFF36DE9}</Project>
+      <Name>Crypto.EllipticCurve</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Crypto.GCM\Crypto.GCM.csproj">
       <Project>{365C8479-CA8A-4C52-9523-1D0198EB21D3}</Project>
       <Name>Crypto.GCM</Name>

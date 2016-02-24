@@ -19,8 +19,6 @@ namespace Crypto.IO.TLS.Extensions
 
         private TlsExtensionManager() { }
 
-
-
         public static void RegisterExtension(TlsExtensionConfiguration extensionConfiguration)
         {
             extensionConfiguration.Configure(Instance);
@@ -41,20 +39,24 @@ namespace Crypto.IO.TLS.Extensions
 
         #region Instance
 
-        public void RegisterSuite<T>(T cipherSuite, Func<ICipher> cipher, TlsHashAlgorithm digest, TlsSignatureAlgorithm signature, TlsKeyExchange exchange)
+        public void RegisterSuite<T>(T cipherSuite, TlsCipherAlgorithm cipher, TlsHashAlgorithm digest, TlsSignatureAlgorithm signature, TlsKeyExchange exchange)
             where T : struct
         {
             SecurityAssert.SAssert(typeof(T).IsEnum);
 
             // yay...
-            var x = (CipherSuite)(ushort)(int)(ValueType)cipherSuite;
+            var x = (CipherSuite)(ushort)(ValueType)cipherSuite;
 
             RegisterSuite(x, cipher, digest, signature, exchange);
         }
 
-        public void RegisterSuite(CipherSuite cipherSuite, Func<ICipher> cipher, TlsHashAlgorithm digest, TlsSignatureAlgorithm signature, TlsKeyExchange exchange)
+        public void RegisterSuite(CipherSuite cipherSuite, TlsCipherAlgorithm cipher, TlsHashAlgorithm digest, TlsSignatureAlgorithm signature, TlsKeyExchange exchange)
         {
             CipherSuiteExtensions.RegisterSuite(cipherSuite, cipher, digest, signature, exchange);
+        }
+        public void RegisterCipher(TlsCipherAlgorithm algorithm, Func<ICipher> factory)
+        {
+            CipherSuiteExtensions.RegisterCipher(algorithm, factory);
         }
         public void RegisterHash(TlsHashAlgorithm algorithm, Func<IDigest> factory)
         {
@@ -63,6 +65,10 @@ namespace Crypto.IO.TLS.Extensions
         public void RegisterSignature(TlsSignatureAlgorithm algorithm, Func<ISignatureCipher> factory)
         {
             CipherSuiteExtensions.RegisterSignature(algorithm, factory);
+        }
+        public void RegisterKeyExchange(TlsKeyExchange keyExchange, Func<ITlsKeyExchange> factory)
+        {
+            CipherSuiteExtensions.RegisterKeyExchange(keyExchange, factory);
         }
 
         public void RegisterHelloExtension(ushort type, ExtensionFactory factory)

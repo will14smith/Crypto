@@ -2,6 +2,8 @@
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
+using Crypto.ECGCM;
+using Crypto.EllipticCurve;
 using Crypto.GCM;
 using Crypto.IO.TLS;
 using Crypto.IO.TLS.Extensions;
@@ -15,7 +17,9 @@ namespace Crypto.Client
             var server = new TcpListener(IPAddress.Any, 443);
             server.Start();
             
+            TlsExtensionManager.RegisterExtension(new ECExtensionConfiguration());
             TlsExtensionManager.RegisterExtension(new GCMExtensionConfiguration());
+            TlsExtensionManager.RegisterExtension(new ECGCMExtensionConfiguration());
             
             Console.WriteLine("Listening for clients on {0}", server.LocalEndpoint);
 

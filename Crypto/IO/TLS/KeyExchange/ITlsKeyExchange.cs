@@ -13,7 +13,7 @@ namespace Crypto.IO.TLS
         DH_anon
         */
 
-    public interface IKeyExchange
+    public interface ITlsKeyExchange
     {
         void Init(TlsState state);
         IEnumerable<HandshakeMessage> GenerateHandshakeMessages();

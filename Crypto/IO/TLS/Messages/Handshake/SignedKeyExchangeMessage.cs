@@ -41,7 +41,7 @@ namespace Crypto.IO.TLS.Messages
             writer.Write(pubBuffer);
 
             stream.Flush();
-            stream.WriteTlsSignature();
+            stream.WriteTlsSignature(state);
         }
     }
 }

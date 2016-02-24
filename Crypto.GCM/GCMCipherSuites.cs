@@ -1,6 +1,6 @@
 ﻿namespace Crypto.GCM
 {
-    public enum GCMCipherSuites
+    public enum GCMCipherSuites : ushort
     {
         TLS_RSA_WITH_AES_128_GCM_SHA256 = 0x009C,
         TLS_RSA_WITH_AES_256_GCM_SHA384 = 0x009D,

@@ -55,7 +55,7 @@ namespace Crypto.IO.TLS.Extensions
                 .FirstOrDefault(algorithm => CipherSuiteExtensions.IsSupported(algorithm.Item2));
         }
 
-        public ISignatureCipher GetSignatureAlgorithm()
+        public TlsSignatureAlgorithm GetSignatureAlgorithm()
         {
             var algo = SelectAlgorithm();
             if (algo == null)
@@ -63,9 +63,9 @@ namespace Crypto.IO.TLS.Extensions
                 throw new InvalidOperationException("No supported algorithms");
             }
 
-            return CipherSuiteExtensions.GetSignatureAlgorithm(algo.Item2);
+            return algo.Item2;
         }
-        public IDigest GetDigestAlgorithm()
+        public TlsHashAlgorithm GetDigestAlgorithm()
         {
             var algo = SelectAlgorithm();
             if (algo == null)
@@ -73,7 +73,7 @@ namespace Crypto.IO.TLS.Extensions
                 throw new InvalidOperationException("No supported algorithms");
             }
 
-            return CipherSuiteExtensions.GetDigestAlgorithm(algo.Item1);
+            return algo.Item1;
         }
     }
 }

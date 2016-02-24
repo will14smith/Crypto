@@ -11,10 +11,13 @@ namespace Crypto.IO.TLS
     internal static class CipherSuiteExtensions
     {
         private static readonly ISet<CipherSuite> Suites = new HashSet<CipherSuite>();
-        private static readonly Dictionary<CipherSuite, Func<ICipher>> CipherFactories = new Dictionary<CipherSuite, Func<ICipher>>();
+        private static readonly Dictionary<CipherSuite, TlsCipherAlgorithm> CipherMapping = new Dictionary<CipherSuite, TlsCipherAlgorithm>();
         private static readonly Dictionary<CipherSuite, TlsHashAlgorithm> DigestMapping = new Dictionary<CipherSuite, TlsHashAlgorithm>();
         private static readonly Dictionary<CipherSuite, TlsSignatureAlgorithm> SignatureMapping = new Dictionary<CipherSuite, TlsSignatureAlgorithm>();
         private static readonly Dictionary<CipherSuite, TlsKeyExchange> KeyExchangeMapping = new Dictionary<CipherSuite, TlsKeyExchange>();
+
+        private static readonly ISet<TlsCipherAlgorithm> CipherAlgorithms = new HashSet<TlsCipherAlgorithm>();
+        private static readonly Dictionary<TlsCipherAlgorithm, Func<ICipher>> CipherFactories = new Dictionary<TlsCipherAlgorithm, Func<ICipher>>();
 
         private static readonly ISet<TlsHashAlgorithm> HashAlgorithms = new HashSet<TlsHashAlgorithm>();
         private static readonly Dictionary<TlsHashAlgorithm, Func<IDigest>> DigestFactories = new Dictionary<TlsHashAlgorithm, Func<IDigest>>();
@@ -23,18 +26,18 @@ namespace Crypto.IO.TLS
         private static readonly Dictionary<TlsSignatureAlgorithm, Func<ISignatureCipher>> SignatureFactories = new Dictionary<TlsSignatureAlgorithm, Func<ISignatureCipher>>();
 
         private static readonly ISet<TlsKeyExchange> KeyExchanges = new HashSet<TlsKeyExchange>();
-        private static readonly Dictionary<TlsKeyExchange, Func<IKeyExchange>> KeyExchangeFactories = new Dictionary<TlsKeyExchange, Func<IKeyExchange>>();
+        private static readonly Dictionary<TlsKeyExchange, Func<ITlsKeyExchange>> KeyExchangeFactories = new Dictionary<TlsKeyExchange, Func<ITlsKeyExchange>>();
 
         // 
 
         static CipherSuiteExtensions()
         {
             // ciphers
-            Func<ICipher> nullCipher = () => new NullCipher();
-            Func<ICipher> rc4 = () => new RC4Cipher(128);
-            Func<ICipher> threeDes = () => new BlockCipherAdapter(new ThreeDESCipher(ThreeDESKeyOptions.Option1));
-            Func<ICipher> aes128 = () => new BlockCipherAdapter(new CBCBlockCipher(new AESCipher(128)));
-            Func<ICipher> aes256 = () => new BlockCipherAdapter(new CBCBlockCipher(new AESCipher(256)));
+            RegisterCipher(TlsCipherAlgorithm.Null, () => new NullCipher());
+            RegisterCipher(TlsCipherAlgorithm.RC4_128, () => new RC4Cipher(128));
+            RegisterCipher(TlsCipherAlgorithm.THREEDES_EDE_CBC, () => new BlockCipherAdapter(new ThreeDESCipher(ThreeDESKeyOptions.Option1)));
+            RegisterCipher(TlsCipherAlgorithm.AES_128_CBC, () => new BlockCipherAdapter(new CBCBlockCipher(new AESCipher(128))));
+            RegisterCipher(TlsCipherAlgorithm.AES_256_CBC, () => new BlockCipherAdapter(new CBCBlockCipher(new AESCipher(256))));
 
             // hashes
             RegisterHash(TlsHashAlgorithm.None, () => new NullDigest());
@@ -60,67 +63,76 @@ namespace Crypto.IO.TLS
             // TODO RegisterKeyExchange(TlsKeyExchange.DH_anon, () => { throw new NotImplementedException(); });
 
             // suites
-            RegisterSuite(CipherSuite.TLS_NULL_WITH_NULL_NULL, nullCipher, TlsHashAlgorithm.None, TlsSignatureAlgorithm.Anonymous, TlsKeyExchange.Null);
-            RegisterSuite(CipherSuite.TLS_RSA_WITH_NULL_MD5, nullCipher, TlsHashAlgorithm.MD5, TlsSignatureAlgorithm.RSA, TlsKeyExchange.RSA);
-            RegisterSuite(CipherSuite.TLS_RSA_WITH_NULL_SHA, nullCipher, TlsHashAlgorithm.SHA1, TlsSignatureAlgorithm.RSA, TlsKeyExchange.RSA);
-            RegisterSuite(CipherSuite.TLS_RSA_WITH_NULL_SHA256, nullCipher, TlsHashAlgorithm.SHA256, TlsSignatureAlgorithm.RSA, TlsKeyExchange.RSA);
-            RegisterSuite(CipherSuite.TLS_RSA_WITH_RC4_128_MD5, rc4, TlsHashAlgorithm.MD5, TlsSignatureAlgorithm.RSA, TlsKeyExchange.RSA);
-            RegisterSuite(CipherSuite.TLS_RSA_WITH_RC4_128_SHA, rc4, TlsHashAlgorithm.SHA1, TlsSignatureAlgorithm.RSA, TlsKeyExchange.RSA);
-            RegisterSuite(CipherSuite.TLS_RSA_WITH_3DES_EDE_CBC_SHA, threeDes, TlsHashAlgorithm.SHA1, TlsSignatureAlgorithm.RSA, TlsKeyExchange.RSA);
-            RegisterSuite(CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA, aes128, TlsHashAlgorithm.SHA1, TlsSignatureAlgorithm.RSA, TlsKeyExchange.RSA);
-            RegisterSuite(CipherSuite.TLS_RSA_WITH_AES_256_CBC_SHA, aes256, TlsHashAlgorithm.SHA1, TlsSignatureAlgorithm.RSA, TlsKeyExchange.RSA);
-            RegisterSuite(CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA256, aes128, TlsHashAlgorithm.SHA256, TlsSignatureAlgorithm.RSA, TlsKeyExchange.RSA);
-            RegisterSuite(CipherSuite.TLS_RSA_WITH_AES_256_CBC_SHA256, aes256, TlsHashAlgorithm.SHA256, TlsSignatureAlgorithm.RSA, TlsKeyExchange.RSA);
-            RegisterSuite(CipherSuite.TLS_DH_DSS_WITH_3DES_EDE_CBC_SHA, threeDes, TlsHashAlgorithm.SHA1, TlsSignatureAlgorithm.DSA, TlsKeyExchange.DH_DSS);
-            RegisterSuite(CipherSuite.TLS_DH_RSA_WITH_3DES_EDE_CBC_SHA, threeDes, TlsHashAlgorithm.SHA1, TlsSignatureAlgorithm.RSA, TlsKeyExchange.DH_RSA);
-            RegisterSuite(CipherSuite.TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA, threeDes, TlsHashAlgorithm.SHA1, TlsSignatureAlgorithm.DSA, TlsKeyExchange.DHE_DSS);
-            RegisterSuite(CipherSuite.TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA, threeDes, TlsHashAlgorithm.SHA1, TlsSignatureAlgorithm.RSA, TlsKeyExchange.DHE_RSA);
-            RegisterSuite(CipherSuite.TLS_DH_DSS_WITH_AES_128_CBC_SHA, aes128, TlsHashAlgorithm.SHA1, TlsSignatureAlgorithm.DSA, TlsKeyExchange.DH_DSS);
-            RegisterSuite(CipherSuite.TLS_DH_RSA_WITH_AES_128_CBC_SHA, aes128, TlsHashAlgorithm.SHA1, TlsSignatureAlgorithm.RSA, TlsKeyExchange.DH_RSA);
-            RegisterSuite(CipherSuite.TLS_DHE_DSS_WITH_AES_128_CBC_SHA, aes128, TlsHashAlgorithm.SHA1, TlsSignatureAlgorithm.DSA, TlsKeyExchange.DHE_DSS);
-            RegisterSuite(CipherSuite.TLS_DHE_RSA_WITH_AES_128_CBC_SHA, aes128, TlsHashAlgorithm.SHA1, TlsSignatureAlgorithm.RSA, TlsKeyExchange.DHE_RSA);
-            RegisterSuite(CipherSuite.TLS_DH_DSS_WITH_AES_256_CBC_SHA, aes256, TlsHashAlgorithm.SHA1, TlsSignatureAlgorithm.DSA, TlsKeyExchange.DH_DSS);
-            RegisterSuite(CipherSuite.TLS_DH_RSA_WITH_AES_256_CBC_SHA, aes256, TlsHashAlgorithm.SHA1, TlsSignatureAlgorithm.RSA, TlsKeyExchange.DH_RSA);
-            RegisterSuite(CipherSuite.TLS_DHE_DSS_WITH_AES_256_CBC_SHA, aes256, TlsHashAlgorithm.SHA1, TlsSignatureAlgorithm.DSA, TlsKeyExchange.DHE_DSS);
-            RegisterSuite(CipherSuite.TLS_DHE_RSA_WITH_AES_256_CBC_SHA, aes256, TlsHashAlgorithm.SHA1, TlsSignatureAlgorithm.RSA, TlsKeyExchange.DHE_RSA);
-            RegisterSuite(CipherSuite.TLS_DH_DSS_WITH_AES_128_CBC_SHA256, aes128, TlsHashAlgorithm.SHA256, TlsSignatureAlgorithm.DSA, TlsKeyExchange.DH_DSS);
-            RegisterSuite(CipherSuite.TLS_DH_RSA_WITH_AES_128_CBC_SHA256, aes128, TlsHashAlgorithm.SHA256, TlsSignatureAlgorithm.RSA, TlsKeyExchange.DH_RSA);
-            RegisterSuite(CipherSuite.TLS_DHE_DSS_WITH_AES_128_CBC_SHA256, aes128, TlsHashAlgorithm.SHA256, TlsSignatureAlgorithm.DSA, TlsKeyExchange.DHE_DSS);
-            RegisterSuite(CipherSuite.TLS_DHE_RSA_WITH_AES_128_CBC_SHA256, aes128, TlsHashAlgorithm.SHA256, TlsSignatureAlgorithm.RSA, TlsKeyExchange.DHE_RSA);
-            RegisterSuite(CipherSuite.TLS_DH_DSS_WITH_AES_256_CBC_SHA256, aes256, TlsHashAlgorithm.SHA256, TlsSignatureAlgorithm.DSA, TlsKeyExchange.DH_DSS);
-            RegisterSuite(CipherSuite.TLS_DH_RSA_WITH_AES_256_CBC_SHA256, aes256, TlsHashAlgorithm.SHA256, TlsSignatureAlgorithm.RSA, TlsKeyExchange.DH_RSA);
-            RegisterSuite(CipherSuite.TLS_DHE_DSS_WITH_AES_256_CBC_SHA256, aes256, TlsHashAlgorithm.SHA256, TlsSignatureAlgorithm.DSA, TlsKeyExchange.DHE_DSS);
-            RegisterSuite(CipherSuite.TLS_DHE_RSA_WITH_AES_256_CBC_SHA256, aes256, TlsHashAlgorithm.SHA256, TlsSignatureAlgorithm.RSA, TlsKeyExchange.DHE_RSA);
-            RegisterSuite(CipherSuite.TLS_DH_anon_WITH_RC4_128_MD5, rc4, TlsHashAlgorithm.MD5, TlsSignatureAlgorithm.Anonymous, TlsKeyExchange.DH_anon);
-            RegisterSuite(CipherSuite.TLS_DH_anon_WITH_3DES_EDE_CBC_SHA, threeDes, TlsHashAlgorithm.SHA1, TlsSignatureAlgorithm.Anonymous, TlsKeyExchange.DH_anon);
-            RegisterSuite(CipherSuite.TLS_DH_anon_WITH_AES_128_CBC_SHA, aes128, TlsHashAlgorithm.SHA1, TlsSignatureAlgorithm.Anonymous, TlsKeyExchange.DH_anon);
-            RegisterSuite(CipherSuite.TLS_DH_anon_WITH_AES_256_CBC_SHA, aes256, TlsHashAlgorithm.SHA1, TlsSignatureAlgorithm.Anonymous, TlsKeyExchange.DH_anon);
-            RegisterSuite(CipherSuite.TLS_DH_anon_WITH_AES_128_CBC_SHA256, aes128, TlsHashAlgorithm.SHA256, TlsSignatureAlgorithm.Anonymous, TlsKeyExchange.DH_anon);
-            RegisterSuite(CipherSuite.TLS_DH_anon_WITH_AES_256_CBC_SHA256, aes256, TlsHashAlgorithm.SHA256, TlsSignatureAlgorithm.Anonymous, TlsKeyExchange.DH_anon);
+            RegisterSuite(CipherSuite.TLS_NULL_WITH_NULL_NULL, TlsCipherAlgorithm.Null, TlsHashAlgorithm.None, TlsSignatureAlgorithm.Anonymous, TlsKeyExchange.Null);
+            RegisterSuite(CipherSuite.TLS_RSA_WITH_NULL_MD5, TlsCipherAlgorithm.Null, TlsHashAlgorithm.MD5, TlsSignatureAlgorithm.RSA, TlsKeyExchange.RSA);
+            RegisterSuite(CipherSuite.TLS_RSA_WITH_NULL_SHA, TlsCipherAlgorithm.Null, TlsHashAlgorithm.SHA1, TlsSignatureAlgorithm.RSA, TlsKeyExchange.RSA);
+            RegisterSuite(CipherSuite.TLS_RSA_WITH_NULL_SHA256, TlsCipherAlgorithm.Null, TlsHashAlgorithm.SHA256, TlsSignatureAlgorithm.RSA, TlsKeyExchange.RSA);
+            RegisterSuite(CipherSuite.TLS_RSA_WITH_RC4_128_MD5, TlsCipherAlgorithm.RC4_128, TlsHashAlgorithm.MD5, TlsSignatureAlgorithm.RSA, TlsKeyExchange.RSA);
+            RegisterSuite(CipherSuite.TLS_RSA_WITH_RC4_128_SHA, TlsCipherAlgorithm.RC4_128, TlsHashAlgorithm.SHA1, TlsSignatureAlgorithm.RSA, TlsKeyExchange.RSA);
+            RegisterSuite(CipherSuite.TLS_RSA_WITH_3DES_EDE_CBC_SHA, TlsCipherAlgorithm.THREEDES_EDE_CBC, TlsHashAlgorithm.SHA1, TlsSignatureAlgorithm.RSA, TlsKeyExchange.RSA);
+            RegisterSuite(CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA, TlsCipherAlgorithm.AES_128_CBC, TlsHashAlgorithm.SHA1, TlsSignatureAlgorithm.RSA, TlsKeyExchange.RSA);
+            RegisterSuite(CipherSuite.TLS_RSA_WITH_AES_256_CBC_SHA, TlsCipherAlgorithm.AES_256_CBC, TlsHashAlgorithm.SHA1, TlsSignatureAlgorithm.RSA, TlsKeyExchange.RSA);
+            RegisterSuite(CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA256, TlsCipherAlgorithm.AES_128_CBC, TlsHashAlgorithm.SHA256, TlsSignatureAlgorithm.RSA, TlsKeyExchange.RSA);
+            RegisterSuite(CipherSuite.TLS_RSA_WITH_AES_256_CBC_SHA256, TlsCipherAlgorithm.AES_256_CBC, TlsHashAlgorithm.SHA256, TlsSignatureAlgorithm.RSA, TlsKeyExchange.RSA);
+            RegisterSuite(CipherSuite.TLS_DH_DSS_WITH_3DES_EDE_CBC_SHA, TlsCipherAlgorithm.THREEDES_EDE_CBC, TlsHashAlgorithm.SHA1, TlsSignatureAlgorithm.DSA, TlsKeyExchange.DH_DSS);
+            RegisterSuite(CipherSuite.TLS_DH_RSA_WITH_3DES_EDE_CBC_SHA, TlsCipherAlgorithm.THREEDES_EDE_CBC, TlsHashAlgorithm.SHA1, TlsSignatureAlgorithm.RSA, TlsKeyExchange.DH_RSA);
+            RegisterSuite(CipherSuite.TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA, TlsCipherAlgorithm.THREEDES_EDE_CBC, TlsHashAlgorithm.SHA1, TlsSignatureAlgorithm.DSA, TlsKeyExchange.DHE_DSS);
+            RegisterSuite(CipherSuite.TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA, TlsCipherAlgorithm.THREEDES_EDE_CBC, TlsHashAlgorithm.SHA1, TlsSignatureAlgorithm.RSA, TlsKeyExchange.DHE_RSA);
+            RegisterSuite(CipherSuite.TLS_DH_DSS_WITH_AES_128_CBC_SHA, TlsCipherAlgorithm.AES_128_CBC, TlsHashAlgorithm.SHA1, TlsSignatureAlgorithm.DSA, TlsKeyExchange.DH_DSS);
+            RegisterSuite(CipherSuite.TLS_DH_RSA_WITH_AES_128_CBC_SHA, TlsCipherAlgorithm.AES_128_CBC, TlsHashAlgorithm.SHA1, TlsSignatureAlgorithm.RSA, TlsKeyExchange.DH_RSA);
+            RegisterSuite(CipherSuite.TLS_DHE_DSS_WITH_AES_128_CBC_SHA, TlsCipherAlgorithm.AES_128_CBC, TlsHashAlgorithm.SHA1, TlsSignatureAlgorithm.DSA, TlsKeyExchange.DHE_DSS);
+            RegisterSuite(CipherSuite.TLS_DHE_RSA_WITH_AES_128_CBC_SHA, TlsCipherAlgorithm.AES_128_CBC, TlsHashAlgorithm.SHA1, TlsSignatureAlgorithm.RSA, TlsKeyExchange.DHE_RSA);
+            RegisterSuite(CipherSuite.TLS_DH_DSS_WITH_AES_256_CBC_SHA, TlsCipherAlgorithm.AES_256_CBC, TlsHashAlgorithm.SHA1, TlsSignatureAlgorithm.DSA, TlsKeyExchange.DH_DSS);
+            RegisterSuite(CipherSuite.TLS_DH_RSA_WITH_AES_256_CBC_SHA, TlsCipherAlgorithm.AES_256_CBC, TlsHashAlgorithm.SHA1, TlsSignatureAlgorithm.RSA, TlsKeyExchange.DH_RSA);
+            RegisterSuite(CipherSuite.TLS_DHE_DSS_WITH_AES_256_CBC_SHA, TlsCipherAlgorithm.AES_256_CBC, TlsHashAlgorithm.SHA1, TlsSignatureAlgorithm.DSA, TlsKeyExchange.DHE_DSS);
+            RegisterSuite(CipherSuite.TLS_DHE_RSA_WITH_AES_256_CBC_SHA, TlsCipherAlgorithm.AES_256_CBC, TlsHashAlgorithm.SHA1, TlsSignatureAlgorithm.RSA, TlsKeyExchange.DHE_RSA);
+            RegisterSuite(CipherSuite.TLS_DH_DSS_WITH_AES_128_CBC_SHA256, TlsCipherAlgorithm.AES_128_CBC, TlsHashAlgorithm.SHA256, TlsSignatureAlgorithm.DSA, TlsKeyExchange.DH_DSS);
+            RegisterSuite(CipherSuite.TLS_DH_RSA_WITH_AES_128_CBC_SHA256, TlsCipherAlgorithm.AES_128_CBC, TlsHashAlgorithm.SHA256, TlsSignatureAlgorithm.RSA, TlsKeyExchange.DH_RSA);
+            RegisterSuite(CipherSuite.TLS_DHE_DSS_WITH_AES_128_CBC_SHA256, TlsCipherAlgorithm.AES_128_CBC, TlsHashAlgorithm.SHA256, TlsSignatureAlgorithm.DSA, TlsKeyExchange.DHE_DSS);
+            RegisterSuite(CipherSuite.TLS_DHE_RSA_WITH_AES_128_CBC_SHA256, TlsCipherAlgorithm.AES_128_CBC, TlsHashAlgorithm.SHA256, TlsSignatureAlgorithm.RSA, TlsKeyExchange.DHE_RSA);
+            RegisterSuite(CipherSuite.TLS_DH_DSS_WITH_AES_256_CBC_SHA256, TlsCipherAlgorithm.AES_256_CBC, TlsHashAlgorithm.SHA256, TlsSignatureAlgorithm.DSA, TlsKeyExchange.DH_DSS);
+            RegisterSuite(CipherSuite.TLS_DH_RSA_WITH_AES_256_CBC_SHA256, TlsCipherAlgorithm.AES_256_CBC, TlsHashAlgorithm.SHA256, TlsSignatureAlgorithm.RSA, TlsKeyExchange.DH_RSA);
+            RegisterSuite(CipherSuite.TLS_DHE_DSS_WITH_AES_256_CBC_SHA256, TlsCipherAlgorithm.AES_256_CBC, TlsHashAlgorithm.SHA256, TlsSignatureAlgorithm.DSA, TlsKeyExchange.DHE_DSS);
+            RegisterSuite(CipherSuite.TLS_DHE_RSA_WITH_AES_256_CBC_SHA256, TlsCipherAlgorithm.AES_256_CBC, TlsHashAlgorithm.SHA256, TlsSignatureAlgorithm.RSA, TlsKeyExchange.DHE_RSA);
+            RegisterSuite(CipherSuite.TLS_DH_anon_WITH_RC4_128_MD5, TlsCipherAlgorithm.RC4_128, TlsHashAlgorithm.MD5, TlsSignatureAlgorithm.Anonymous, TlsKeyExchange.DH_anon);
+            RegisterSuite(CipherSuite.TLS_DH_anon_WITH_3DES_EDE_CBC_SHA, TlsCipherAlgorithm.THREEDES_EDE_CBC, TlsHashAlgorithm.SHA1, TlsSignatureAlgorithm.Anonymous, TlsKeyExchange.DH_anon);
+            RegisterSuite(CipherSuite.TLS_DH_anon_WITH_AES_128_CBC_SHA, TlsCipherAlgorithm.AES_128_CBC, TlsHashAlgorithm.SHA1, TlsSignatureAlgorithm.Anonymous, TlsKeyExchange.DH_anon);
+            RegisterSuite(CipherSuite.TLS_DH_anon_WITH_AES_256_CBC_SHA, TlsCipherAlgorithm.AES_256_CBC, TlsHashAlgorithm.SHA1, TlsSignatureAlgorithm.Anonymous, TlsKeyExchange.DH_anon);
+            RegisterSuite(CipherSuite.TLS_DH_anon_WITH_AES_128_CBC_SHA256, TlsCipherAlgorithm.AES_128_CBC, TlsHashAlgorithm.SHA256, TlsSignatureAlgorithm.Anonymous, TlsKeyExchange.DH_anon);
+            RegisterSuite(CipherSuite.TLS_DH_anon_WITH_AES_256_CBC_SHA256, TlsCipherAlgorithm.AES_256_CBC, TlsHashAlgorithm.SHA256, TlsSignatureAlgorithm.Anonymous, TlsKeyExchange.DH_anon);
         }
 
         #region helpers
         public static bool IsBlock(this CipherSuite suite)
         {
-            return suite.GetCipherAlgorithm() is BlockCipherAdapter;
+            return suite.CreateCipherAlgorithm() is BlockCipherAdapter;
         }
         public static bool IsAEAD(this CipherSuite suite)
         {
-            return suite.GetCipherAlgorithm() is AEADCipherAdapter;
+            return suite.CreateCipherAlgorithm() is AEADCipherAdapter;
         }
         #endregion
 
         #region registration
-        internal static void RegisterSuite(CipherSuite suite, Func<ICipher> cipher, TlsHashAlgorithm digest, TlsSignatureAlgorithm signature, TlsKeyExchange exchange)
+        internal static void RegisterSuite(CipherSuite suite, TlsCipherAlgorithm cipher, TlsHashAlgorithm digest, TlsSignatureAlgorithm signature, TlsKeyExchange exchange)
         {
             Suites.Add(suite);
 
-            CipherFactories.Add(suite, cipher);
+            CipherMapping.Add(suite, cipher);
             DigestMapping.Add(suite, digest);
             SignatureMapping.Add(suite, signature);
             KeyExchangeMapping.Add(suite, exchange);
         }
 
+        internal static void RegisterCipher(TlsCipherAlgorithm algo, Func<ICipher> factory)
+        {
+            if (!CipherAlgorithms.Add(algo))
+            {
+                throw new InvalidOperationException("Algorithm already registered");
+            }
+
+            CipherFactories.Add(algo, factory);
+        }
         internal static void RegisterHash(TlsHashAlgorithm algo, Func<IDigest> factory)
         {
             if (!HashAlgorithms.Add(algo))
@@ -141,7 +153,7 @@ namespace Crypto.IO.TLS
             SignatureFactories.Add(algo, factory);
         }
 
-        internal static void RegisterKeyExchange(TlsKeyExchange algo, Func<IKeyExchange> factory)
+        internal static void RegisterKeyExchange(TlsKeyExchange algo, Func<ITlsKeyExchange> factory)
         {
             if (!KeyExchanges.Add(algo))
             {
@@ -153,30 +165,30 @@ namespace Crypto.IO.TLS
         #endregion
 
         #region resolvers
-        public static ICipher GetCipherAlgorithm(this CipherSuite suite)
+        public static ICipher CreateCipherAlgorithm(this CipherSuite suite)
         {
-            return CipherFactories[suite]();
+            return CipherFactories[CipherMapping[suite]]();
         }
 
-        public static IDigest GetDigestAlgorithm(this CipherSuite suite)
+        public static TlsHashAlgorithm GetDigestAlgorithm(this CipherSuite suite)
         {
-            return GetDigestAlgorithm(DigestMapping[suite]);
+            return DigestMapping[suite];
         }
-        public static IDigest GetDigestAlgorithm(TlsHashAlgorithm algo)
+        public static IDigest CreateDigestAlgorithm(TlsHashAlgorithm algo)
         {
             return DigestFactories[algo]();
         }
 
-        public static ISignatureCipher GetSignatureAlgorithm(this CipherSuite suite)
+        public static TlsSignatureAlgorithm GetSignatureAlgorithm(this CipherSuite suite)
         {
-            return GetSignatureAlgorithm(SignatureMapping[suite]);
+            return SignatureMapping[suite];
         }
-        public static ISignatureCipher GetSignatureAlgorithm(TlsSignatureAlgorithm algo)
+        public static ISignatureCipher CreateSignatureAlgorithm(TlsSignatureAlgorithm algo)
         {
             return SignatureFactories[algo]();
         }
 
-        public static IKeyExchange GetKeyExchange(this CipherSuite suite)
+        public static ITlsKeyExchange CreateKeyExchange(this CipherSuite suite)
         {
             return KeyExchangeFactories[KeyExchangeMapping[suite]]();
         }
@@ -189,16 +201,26 @@ namespace Crypto.IO.TLS
 
         private static bool IsSupported(CipherSuite suite)
         {
+            // suite
             if (!Suites.Contains(suite)) { return false; }
-            if (!CipherFactories.ContainsKey(suite)) { return false; }
+            // cipher
+            if (!CipherMapping.ContainsKey(suite)) { return false; }
+            if (!IsSupported(CipherMapping[suite])) { return false; }
+            // digest
             if (!DigestMapping.ContainsKey(suite)) { return false; }
             if (!IsSupported(DigestMapping[suite])) { return false; }
+            // signature
             if (!SignatureMapping.ContainsKey(suite)) { return false; }
             if (!IsSupported(SignatureMapping[suite])) { return false; }
+            // keyexchange
             if (!KeyExchangeMapping.ContainsKey(suite)) { return false; }
             if (!IsSupported(KeyExchangeMapping[suite])) { return false; }
 
             return true;
+        }
+        public static bool IsSupported(TlsCipherAlgorithm algo)
+        {
+            return CipherAlgorithms.Contains(algo);
         }
         public static bool IsSupported(TlsHashAlgorithm algo)
         {

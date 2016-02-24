@@ -1,8 +1,8 @@
 ﻿using Crypto.Encryption.Parameters;
 
-namespace Crypto.Encryption
+namespace Crypto.Encryption.Block
 {
-    class ThreeDESCipher : IBlockCipher
+    public class ThreeDESCipher : IBlockCipher
     {
         private readonly ThreeDESKeyOptions keyMode;
 

@@ -8,12 +8,12 @@ using Crypto.Utils;
 
 namespace Crypto.IO.TLS
 {
-    public class DHKeyExchange : IKeyExchange
+    public class DHKeyExchange : ITlsKeyExchange
     {
-        private readonly IKeyExchange innerKeyExchange;
+        private readonly ITlsKeyExchange innerKeyExchange;
         private TlsState state;
 
-        public DHKeyExchange(IKeyExchange innerKeyExchange)
+        public DHKeyExchange(ITlsKeyExchange innerKeyExchange)
         {
             SecurityAssert.NotNull(innerKeyExchange);
 

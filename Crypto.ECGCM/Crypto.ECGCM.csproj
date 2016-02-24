@@ -41,10 +41,18 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ECGCMCipherSuites.cs" />
-    <Compile Include="ECGCMExtension.cs" />
+    <Compile Include="ECGCMExtensionConfiguration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Crypto.EllipticCurve\Crypto.EllipticCurve.csproj">
+      <Project>{6287d444-ceea-4672-89dd-acaaeff36de9}</Project>
+      <Name>Crypto.EllipticCurve</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Crypto.GCM\Crypto.GCM.csproj">
+      <Project>{365c8479-ca8a-4c52-9523-1d0198eb21d3}</Project>
+      <Name>Crypto.GCM</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Crypto\Crypto.csproj">
       <Project>{556AC40B-520E-4629-BC3F-8CC3BEAC6BE5}</Project>
       <Name>Crypto</Name>

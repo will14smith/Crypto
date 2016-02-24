@@ -6,16 +6,16 @@ using Crypto.Utils;
 
 namespace Crypto.IO.TLS
 {
-    public class DHEKeyExchange : IKeyExchange
+    public class DHEKeyExchange : ITlsKeyExchange
     {
         public static readonly string ParamP = "DHE_p";
         public static readonly string ParamG = "DHE_g";
         public static readonly string ParamX = "DHE_X";
 
         private TlsState state;
-        private readonly IKeyExchange innerKeyExchange;
+        private readonly ITlsKeyExchange innerKeyExchange;
 
-        public DHEKeyExchange(IKeyExchange innerKeyExchange)
+        public DHEKeyExchange(ITlsKeyExchange innerKeyExchange)
         {
             SecurityAssert.NotNull(innerKeyExchange);
 

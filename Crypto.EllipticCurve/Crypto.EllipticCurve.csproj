@@ -41,7 +41,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ECCipherSuites.cs" />
+    <Compile Include="ECDHEKeyExchange.cs" />
     <Compile Include="ECExtensionConfiguration.cs" />
+    <Compile Include="ECDHKeyExchange.cs" />
+    <Compile Include="ECKeyExchange.cs" />
+    <Compile Include="ECSignatureAlgorithm.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

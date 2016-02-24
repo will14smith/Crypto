@@ -2,7 +2,7 @@
 
 namespace Crypto.Encryption
 {
-    class RC4Cipher : ICipher
+    public class RC4Cipher : ICipher
     {
         private readonly int keySize;
 

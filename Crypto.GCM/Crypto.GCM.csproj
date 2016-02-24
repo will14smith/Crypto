@@ -41,6 +41,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="GCMCipher.cs" />
+    <Compile Include="GCMCipherAlgorithms.cs" />
     <Compile Include="GCMCipherSuites.cs" />
     <Compile Include="GCMExtensionConfiguration.cs" />
     <Compile Include="GHash.cs" />

@@ -46,9 +46,15 @@
     <Compile Include="ECDHKeyExchange.cs" />
     <Compile Include="ECKeyExchange.cs" />
     <Compile Include="ECSignatureAlgorithm.cs" />
+    <Compile Include="SupportedPointFormatsExtension.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SupportedGroupsExtension.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Crypto.Utils\Crypto.Utils.csproj">
+      <Project>{01C34216-1249-4F84-A73C-046B5AED4B51}</Project>
+      <Name>Crypto.Utils</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Crypto\Crypto.csproj">
       <Project>{556AC40B-520E-4629-BC3F-8CC3BEAC6BE5}</Project>
       <Name>Crypto</Name>

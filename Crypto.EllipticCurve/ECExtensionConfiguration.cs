@@ -1,6 +1,5 @@
 ﻿using Crypto.IO.TLS;
 using Crypto.IO.TLS.Extensions;
-using Crypto.IO.TLS.Messages.Handshake;
 
 namespace Crypto.EllipticCurve
 {
@@ -8,6 +7,9 @@ namespace Crypto.EllipticCurve
     {
         public override void Configure(TlsExtensionManager manager)
         {
+            manager.RegisterHelloExtension(SupportedGroupsExtension.HelloType, (state, data) => new SupportedGroupsExtension(state, data));
+            manager.RegisterHelloExtension(SupportedPointFormatsExtension.HelloType, (state, data) => new SupportedPointFormatsExtension(state, data));
+
             manager.RegisterKeyExchange(ECKeyExchange.ECDH_RSA, () => new ECDHKeyExchange());
             manager.RegisterKeyExchange(ECKeyExchange.ECDHE_RSA, () => new ECDHEKeyExchange());
 

@@ -18,6 +18,17 @@ namespace Crypto.Utils
 
             return length;
         }
+        public static int GetBitLength(this BigInteger val)
+        {
+            var length = 0;
+
+            do
+            {
+                length++;
+            } while ((val >>= 1) != 0);
+
+            return length;
+        }
 
         public static byte[] ToTlsBytes(this BigInteger val)
         {
@@ -33,9 +44,14 @@ namespace Crypto.Utils
             return bytes.AsEnumerable().Reverse().ToArray();
         }
 
-        public static BigInteger FromTlsBytes(byte[] bytes)
+        public static BigInteger FromTlsBytes(IEnumerable<byte> bytes)
         {
             return bytes.Aggregate(BigInteger.Zero, (current, b) => current * 256 + b);
+        }
+
+        public static BigInteger FromTlsHex(string hex)
+        {
+            return FromTlsBytes(HexConverter.FromHex(hex));
         }
     }
 }

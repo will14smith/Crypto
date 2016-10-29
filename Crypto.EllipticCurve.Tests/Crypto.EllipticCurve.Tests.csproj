@@ -53,6 +53,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="Math\Curves\Secp256K1Tests.cs" />
     <Compile Include="Math\PointTests.cs" />
     <Compile Include="Math\PrimeCurveTests.cs" />
     <Compile Include="Math\PrimeFieldTests.cs" />
@@ -62,6 +63,14 @@
     <ProjectReference Include="..\Crypto.EllipticCurve\Crypto.EllipticCurve.csproj">
       <Project>{6287D444-CEEA-4672-89DD-ACAAEFF36DE9}</Project>
       <Name>Crypto.EllipticCurve</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Crypto.Utils\Crypto.Utils.csproj">
+      <Project>{01C34216-1249-4F84-A73C-046B5AED4B51}</Project>
+      <Name>Crypto.Utils</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Crypto\Crypto.csproj">
+      <Project>{556ac40b-520e-4629-bc3f-8cc3beac6be5}</Project>
+      <Name>Crypto</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

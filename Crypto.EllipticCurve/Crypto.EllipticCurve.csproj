@@ -41,7 +41,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Algorithms\ECCipherParameters.cs" />
     <Compile Include="Algorithms\ECDSA.cs" />
+    <Compile Include="Algorithms\ECPrivateKey.cs" />
+    <Compile Include="Algorithms\ECPublicKey.cs" />
+    <Compile Include="Maths\Curves\Secp256K1.cs" />
+    <Compile Include="Maths\PointUtils.cs" />
     <Compile Include="ECCipherSuites.cs" />
     <Compile Include="ECDHEKeyExchange.cs" />
     <Compile Include="ECExtensionConfiguration.cs" />
@@ -51,6 +56,7 @@
     <Compile Include="Maths\Curve.cs" />
     <Compile Include="Maths\IField.cs" />
     <Compile Include="Maths\IFieldValue.cs" />
+    <Compile Include="Maths\PrimeDomainParameters.cs" />
     <Compile Include="Maths\PrimeField.cs" />
     <Compile Include="Maths\RealField.cs" />
     <Compile Include="Maths\Point.cs" />
@@ -73,9 +79,7 @@
       <Name>Crypto</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="FiniteFields\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

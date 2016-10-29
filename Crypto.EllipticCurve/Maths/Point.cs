@@ -1,5 +1,4 @@
 using System;
-using System.Numerics;
 
 namespace Crypto.EllipticCurve.Maths
 {
@@ -43,25 +42,27 @@ namespace Crypto.EllipticCurve.Maths
             return new Point<TFieldValue>(x, field.Negate(y));
         }
 
-        public static Point<TFieldValue> Multiply(Curve<TFieldValue> curve, BigInteger a, Point<TFieldValue> b)
+        public static Point<TFieldValue> Multiply(Curve<TFieldValue> curve, TFieldValue a, Point<TFieldValue> b)
         {
-            if (a < 0)
+            var i = a.ToInt();
+
+            if (i < 0)
             {
                 throw new NotImplementedException();
             }
 
             Point<TFieldValue> result = null;
 
-            while (a > 0)
+            while (i > 0)
             {
-                if ((a & 1) == 1)
+                if ((i & 1) == 1)
                 {
                     result = Add(curve, result, b);
                 }
 
                 b = Add(curve, b, b);
 
-                a >>= 1;
+                i >>= 1;
             }
 
             return result;

@@ -49,7 +49,7 @@ namespace Crypto.EllipticCurve.Tests.Math
 
             var a = new Point<PrimeFieldValue>(field.Int(3), field.Int(6));
 
-            var c = Point<PrimeFieldValue>.Multiply(curve, 1, a);
+            var c = Point<PrimeFieldValue>.Multiply(curve, field.Int(1), a);
 
             Assert.AreEqual(field.Int(3), c.X);
             Assert.AreEqual(field.Int(6), c.Y);
@@ -63,7 +63,7 @@ namespace Crypto.EllipticCurve.Tests.Math
 
             var a = new Point<PrimeFieldValue>(field.Int(3), field.Int(6));
 
-            var c = Point<PrimeFieldValue>.Multiply(curve, 2, a);
+            var c = Point<PrimeFieldValue>.Multiply(curve, field.Int(2), a);
 
             Assert.AreEqual(field.Int(80), c.X);
             Assert.AreEqual(field.Int(10), c.Y);
@@ -77,7 +77,7 @@ namespace Crypto.EllipticCurve.Tests.Math
 
             var a = new Point<PrimeFieldValue>(field.Int(3), field.Int(6));
 
-            var c = Point<PrimeFieldValue>.Multiply(curve, 3, a);
+            var c = Point<PrimeFieldValue>.Multiply(curve, field.Int(3), a);
 
             Assert.AreEqual(field.Int(80), c.X);
             Assert.AreEqual(field.Int(87), c.Y);

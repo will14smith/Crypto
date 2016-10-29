@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Crypto.IO.TLS;
 using Crypto.IO.TLS.Extensions;
 using Crypto.IO.TLS.Messages.Handshake;
@@ -34,7 +35,15 @@ namespace Crypto.EllipticCurve
 
         public HelloExtension GenerateHello()
         {
-            throw new System.NotImplementedException();
+            if (state.ConnectionEnd == ConnectionEnd.Server)
+            {
+                // TODO return support point formats, currently null means UNCOMPRESSED ONLY
+                return null;
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
         }
     }
 }

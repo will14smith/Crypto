@@ -33,7 +33,14 @@ namespace Crypto.EllipticCurve
 
         public HelloExtension GenerateHello()
         {
-            throw new NotImplementedException();
+            if (state.ConnectionEnd == ConnectionEnd.Server)
+            {
+                return null;
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
         }
     }
 }

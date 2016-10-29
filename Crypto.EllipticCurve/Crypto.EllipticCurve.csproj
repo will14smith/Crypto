@@ -46,6 +46,7 @@
     <Compile Include="ECDHKeyExchange.cs" />
     <Compile Include="ECKeyExchange.cs" />
     <Compile Include="ECSignatureAlgorithm.cs" />
+    <Compile Include="NamedCurve.cs" />
     <Compile Include="SupportedPointFormatsExtension.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SupportedGroupsExtension.cs" />

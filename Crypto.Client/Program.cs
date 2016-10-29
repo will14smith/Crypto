@@ -41,8 +41,11 @@ namespace Crypto.Client
                 var reader = new StreamReader(tlsStream);
                 var writer = new StreamWriter(tlsStream);
 
-                // Console.WriteLine(reader.ReadLine());
-                writer.WriteLine("World");
+                Console.WriteLine(reader.ReadLine());
+
+                writer.WriteLine("HTTP/1.1 200 OK");
+                writer.WriteLine("");
+                writer.WriteLine("Hello browser!");
                 writer.Flush();
 
                 tlsStream.Close();

@@ -28,6 +28,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Extensions", "Extensions", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Crypto.ECGCM", "Crypto.ECGCM\Crypto.ECGCM.csproj", "{26A490AB-D2C0-44DB-9556-D3BF3CBD50BB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Crypto.EllipticCurve.Tests", "Crypto.EllipticCurve.Tests\Crypto.EllipticCurve.Tests.csproj", "{4A361D50-B9A1-44BA-8F1B-282E5441876A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -70,6 +72,10 @@ Global
 		{26A490AB-D2C0-44DB-9556-D3BF3CBD50BB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{26A490AB-D2C0-44DB-9556-D3BF3CBD50BB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{26A490AB-D2C0-44DB-9556-D3BF3CBD50BB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4A361D50-B9A1-44BA-8F1B-282E5441876A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4A361D50-B9A1-44BA-8F1B-282E5441876A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4A361D50-B9A1-44BA-8F1B-282E5441876A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4A361D50-B9A1-44BA-8F1B-282E5441876A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

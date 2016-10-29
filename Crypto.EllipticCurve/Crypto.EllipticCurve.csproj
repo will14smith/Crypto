@@ -32,6 +32,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Numerics" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -40,18 +41,29 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Algorithms\ECDSA.cs" />
     <Compile Include="ECCipherSuites.cs" />
     <Compile Include="ECDHEKeyExchange.cs" />
     <Compile Include="ECExtensionConfiguration.cs" />
     <Compile Include="ECDHKeyExchange.cs" />
     <Compile Include="ECKeyExchange.cs" />
     <Compile Include="ECSignatureAlgorithm.cs" />
+    <Compile Include="Maths\Curve.cs" />
+    <Compile Include="Maths\IField.cs" />
+    <Compile Include="Maths\IFieldValue.cs" />
+    <Compile Include="Maths\PrimeField.cs" />
+    <Compile Include="Maths\RealField.cs" />
+    <Compile Include="Maths\Point.cs" />
     <Compile Include="NamedCurve.cs" />
     <Compile Include="SupportedPointFormatsExtension.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SupportedGroupsExtension.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Crypto.ASN1\Crypto.ASN1.csproj">
+      <Project>{7593403B-7C8C-462C-A5B9-9A915928F6E2}</Project>
+      <Name>Crypto.ASN1</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Crypto.Utils\Crypto.Utils.csproj">
       <Project>{01C34216-1249-4F84-A73C-046B5AED4B51}</Project>
       <Name>Crypto.Utils</Name>
@@ -60,6 +72,9 @@
       <Project>{556AC40B-520E-4629-BC3F-8CC3BEAC6BE5}</Project>
       <Name>Crypto</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="FiniteFields\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

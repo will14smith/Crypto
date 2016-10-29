@@ -1,4 +1,5 @@
-﻿using Crypto.IO.TLS;
+﻿using Crypto.EllipticCurve.Algorithms;
+using Crypto.IO.TLS;
 using Crypto.IO.TLS.Extensions;
 
 namespace Crypto.EllipticCurve
@@ -9,6 +10,8 @@ namespace Crypto.EllipticCurve
         {
             manager.RegisterHelloExtension(SupportedGroupsExtension.HelloType, (state, data) => new SupportedGroupsExtension(state, data));
             manager.RegisterHelloExtension(SupportedPointFormatsExtension.HelloType, (state, data) => new SupportedPointFormatsExtension(state, data));
+
+            manager.RegisterSignature(ECSignatureAlgorithm.ECDSA, () => new ECDSA());
 
             manager.RegisterKeyExchange(ECKeyExchange.ECDH_RSA, () => new ECDHKeyExchange());
             manager.RegisterKeyExchange(ECKeyExchange.ECDHE_RSA, () => new ECDHEKeyExchange());

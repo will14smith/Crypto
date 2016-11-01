@@ -37,8 +37,9 @@ namespace Crypto.EllipticCurve
         {
             if (state.ConnectionEnd == ConnectionEnd.Server)
             {
-                // TODO return support point formats, currently null means UNCOMPRESSED ONLY
-                return null;
+                // TODO actually determine this?
+                // [1, 0] means: 1 item: 0 (uncompressed)
+                return new HelloExtension(HelloType, new byte[] { 1, 0 });
             }
             else
             {

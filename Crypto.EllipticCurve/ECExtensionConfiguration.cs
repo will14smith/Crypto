@@ -21,6 +21,8 @@ namespace Crypto.EllipticCurve
 
             manager.RegisterKeyExchange(ECKeyExchange.ECDH_RSA, () => new ECDHKeyExchange());
             manager.RegisterKeyExchange(ECKeyExchange.ECDHE_RSA, () => new ECDHEKeyExchange());
+            manager.RegisterKeyExchange(ECKeyExchange.ECDH_ECDSA, () => new ECDHKeyExchange());
+            manager.RegisterKeyExchange(ECKeyExchange.ECDHE_ECDSA, () => new ECDHEKeyExchange());
 
             manager.RegisterSuite(ECCipherSuites.TLS_ECDH_ECDSA_WITH_NULL_SHA, TlsCipherAlgorithm.Null, TlsHashAlgorithm.SHA1, ECSignatureAlgorithm.ECDSA, ECKeyExchange.ECDH_ECDSA);
             manager.RegisterSuite(ECCipherSuites.TLS_ECDH_ECDSA_WITH_RC4_128_SHA, TlsCipherAlgorithm.RC4_128, TlsHashAlgorithm.SHA1, ECSignatureAlgorithm.ECDSA, ECKeyExchange.ECDH_ECDSA);

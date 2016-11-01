@@ -1,4 +1,5 @@
-﻿using Crypto.IO.TLS.Messages.Handshake;
+﻿using System.Linq;
+using Crypto.IO.TLS.Messages.Handshake;
 using Crypto.Utils;
 using Crypto.Utils.IO;
 
@@ -36,8 +37,18 @@ namespace Crypto.IO.TLS.Messages
             writer.WriteVariable(1, SessionId);
             WriteHello(writer);
 
-            // TODO extensions
-            SecurityAssert.SAssert(Extensions.Length == 0);
+            if (Extensions.Length != 0)
+            {
+                var totalLength = Extensions.Sum(x => 4 + x.Data.Length);
+
+                writer.Write((ushort)totalLength);
+                foreach (var extension in Extensions)
+                {
+                    writer.Write(extension.Type);
+                    writer.Write((ushort)extension.Data.Length);
+                    writer.Write(extension.Data);
+                }
+            }
         }
 
         protected abstract void WriteHello(EndianBinaryWriter writer);

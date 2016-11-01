@@ -32,8 +32,11 @@ namespace Crypto.Client
 
                 var tlsStream = new TlsStream(clientStream);
 
-                tlsStream.Certificates.AddCertificate(File.ReadAllBytes("localhost.cert"));
-                tlsStream.Certificates.AddPrivateKey(File.ReadAllBytes("localhost.key"));
+                tlsStream.Certificates.AddCertificate(File.ReadAllBytes("localhost_secp256k1.cert"));
+                tlsStream.Certificates.AddPrivateKey(File.ReadAllBytes("localhost_secp256k1.key"));
+
+                //tlsStream.Certificates.AddCertificate(File.ReadAllBytes("localhost.cert"));
+                //tlsStream.Certificates.AddPrivateKey(File.ReadAllBytes("localhost.key"));
 
                 Console.WriteLine("Starting TLS connection");
                 tlsStream.AuthenticateAsServer();

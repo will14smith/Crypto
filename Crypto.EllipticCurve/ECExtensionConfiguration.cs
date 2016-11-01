@@ -1,4 +1,5 @@
-﻿using Crypto.EllipticCurve.Algorithms;
+﻿using Crypto.ASN1;
+using Crypto.EllipticCurve.Algorithms;
 using Crypto.IO.TLS;
 using Crypto.IO.TLS.Extensions;
 
@@ -6,8 +7,13 @@ namespace Crypto.EllipticCurve
 {
     public class ECExtensionConfiguration : TlsExtensionConfiguration
     {
+        public static readonly ASN1ObjectIdentifier IdEcPublicKey = new ASN1ObjectIdentifier("1.2.840.10045.2.1");
+
+
         public override void Configure(TlsExtensionManager manager)
         {
+            manager.RegisterPublicKeyReader(IdEcPublicKey, () => new ECKeyReader());
+
             manager.RegisterHelloExtension(SupportedGroupsExtension.HelloType, (state, data) => new SupportedGroupsExtension(state, data));
             manager.RegisterHelloExtension(SupportedPointFormatsExtension.HelloType, (state, data) => new SupportedPointFormatsExtension(state, data));
 

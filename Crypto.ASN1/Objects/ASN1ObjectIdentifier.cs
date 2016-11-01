@@ -7,7 +7,7 @@ using Crypto.Utils;
 
 namespace Crypto.ASN1
 {
-    public class ASN1ObjectIdentifier : ASN1Object
+    public class ASN1ObjectIdentifier : ASN1Object, IEquatable<ASN1ObjectIdentifier>
     {
         public ASN1ObjectIdentifier(string identifier)
         {
@@ -104,6 +104,42 @@ namespace Crypto.ASN1
                 yield return (byte)((value & 0x7f) | 0x80);
                 value = value >> 7;
             }
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((ASN1ObjectIdentifier)obj);
+        }
+
+        public bool Equals(ASN1ObjectIdentifier other)
+        {
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+
+            if (Count != 0 || other.Count != 0)
+            {
+                throw new NotImplementedException();
+            }
+
+            return string.Equals(Identifier, other.Identifier);
+        }
+
+        public override int GetHashCode()
+        {
+            return Identifier?.GetHashCode() ?? 0;
+        }
+
+        public static bool operator ==(ASN1ObjectIdentifier left, ASN1ObjectIdentifier right)
+        {
+            return Equals(left, right);
+        }
+
+        public static bool operator !=(ASN1ObjectIdentifier left, ASN1ObjectIdentifier right)
+        {
+            return !Equals(left, right);
         }
     }
 }

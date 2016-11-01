@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.IO;
 
 namespace Crypto.Utils
 {
@@ -31,6 +32,13 @@ namespace Crypto.Utils
             }
 
             return buffer;
+        }
+
+        public static byte[] ToArray(this BitArray arr)
+        {
+            var dataLength = (int)Math.Ceiling(arr.Length / 8m);
+
+            return arr.GetBytes(0, dataLength);
         }
     }
 }

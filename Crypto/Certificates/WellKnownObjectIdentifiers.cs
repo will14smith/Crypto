@@ -1,7 +1,9 @@
-﻿namespace Crypto.Certificates
+﻿using Crypto.ASN1;
+
+namespace Crypto.Certificates
 {
     public static class WellKnownObjectIdentifiers
     {
-        public const string RSAEncryption = "1.2.840.113549.1.1.1"; // PKCS#1
+        public static readonly ASN1ObjectIdentifier RSAEncryption = new ASN1ObjectIdentifier("1.2.840.113549.1.1.1"); // PKCS#1
     }
 }

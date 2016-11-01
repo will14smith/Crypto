@@ -1,8 +1,7 @@
 ﻿using System.IO;
 using Crypto.ASN1;
-using Crypto.Certificates.Keys;
 
-namespace Crypto.Certificates
+namespace Crypto.Certificates.Keys
 {
     public class PrivateKeyReader
     {

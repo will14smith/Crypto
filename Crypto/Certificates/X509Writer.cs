@@ -76,7 +76,7 @@ namespace Crypto.Certificates
 
         private ASN1Object GetAlgorithmIdentifier(X509AlgorithmIdentifier algorithm)
         {
-            return new ASN1Sequence(new[] { new ASN1ObjectIdentifier(algorithm.Algorithm) }.Concat(algorithm.Parameters));
+            return new ASN1Sequence(new[] { algorithm.Algorithm }.Concat(algorithm.Parameters));
         }
 
         private ASN1Object GetName(X509Name name)

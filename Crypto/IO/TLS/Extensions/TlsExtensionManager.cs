@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using Crypto.ASN1;
+using Crypto.Certificates.Keys;
 using Crypto.Encryption;
 using Crypto.Hashing;
 using Crypto.Utils;
@@ -74,6 +76,11 @@ namespace Crypto.IO.TLS.Extensions
         public void RegisterHelloExtension(ushort type, ExtensionFactory factory)
         {
             HelloExtensionFactories.Add(type, factory);
+        }
+
+        public void RegisterPublicKeyReader(ASN1ObjectIdentifier algorithm, Func<IPublicKeyReader> factory)
+        {
+            KeyReaderRegistry.Register(algorithm, factory);
         }
 
         #endregion

@@ -6,13 +6,13 @@ namespace Crypto.Certificates
 {
     public class X509AlgorithmIdentifier
     {
-        public X509AlgorithmIdentifier(string algorithm, IEnumerable<ASN1Object> parameters)
+        public X509AlgorithmIdentifier(ASN1ObjectIdentifier algorithm, IEnumerable<ASN1Object> parameters)
         {
             Algorithm = algorithm;
             Parameters = parameters.ToList();
         }
 
-        public string Algorithm { get; }
+        public ASN1ObjectIdentifier Algorithm { get; }
         public IReadOnlyList<ASN1Object> Parameters { get; }
     }
 }

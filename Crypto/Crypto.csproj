@@ -48,11 +48,14 @@
     <Compile Include="Certificates\ASN1ObjectExtensions.cs" />
     <Compile Include="Certificates\CertificateManager.cs" />
     <Compile Include="Certificates\DERReadingHelper.cs" />
+    <Compile Include="Certificates\Keys\IPublicKeyReader.cs" />
+    <Compile Include="Certificates\Keys\KeyReaderRegistry.cs" />
     <Compile Include="Certificates\Keys\PrivateKey.cs" />
     <Compile Include="Certificates\Keys\RSAPrivateKey.cs" />
     <Compile Include="Certificates\Keys\RSAPublicKey.cs" />
-    <Compile Include="Certificates\PrivateKeyReader.cs" />
+    <Compile Include="Certificates\Keys\PrivateKeyReader.cs" />
     <Compile Include="Certificates\Keys\PublicKey.cs" />
+    <Compile Include="Certificates\Keys\RSAKeyReader.cs" />
     <Compile Include="Certificates\WellKnownObjectIdentifiers.cs" />
     <Compile Include="Certificates\X509AlgorithmIdentifier.cs" />
     <Compile Include="Certificates\X509Extension.cs" />

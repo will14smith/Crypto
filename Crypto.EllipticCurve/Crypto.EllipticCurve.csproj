@@ -45,6 +45,7 @@
     <Compile Include="Algorithms\ECDSA.cs" />
     <Compile Include="Algorithms\ECPrivateKey.cs" />
     <Compile Include="Algorithms\ECPublicKey.cs" />
+    <Compile Include="ECKeyReader.cs" />
     <Compile Include="Maths\Curves\Secp256K1.cs" />
     <Compile Include="Maths\PointUtils.cs" />
     <Compile Include="ECCipherSuites.cs" />

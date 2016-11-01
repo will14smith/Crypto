@@ -125,6 +125,7 @@ namespace Crypto.ASN1
                         return new ASN1Null();
                     case ASN1UniversalTag.ObjectIdentifier:
                         return ReadObjectIdentifier(length);
+                    case ASN1UniversalTag.PrintableString:
                     case ASN1UniversalTag.UTF8String:
                         return ReadUTF8String(length);
                     case ASN1UniversalTag.UTCTime:

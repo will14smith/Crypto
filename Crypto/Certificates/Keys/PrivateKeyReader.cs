@@ -1,5 +1,7 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using Crypto.ASN1;
+using Crypto.Utils;
 
 namespace Crypto.Certificates.Keys
 {
@@ -9,19 +11,25 @@ namespace Crypto.Certificates.Keys
 
         public PrivateKeyReader(byte[] input)
         {
-            this.input = DERReadingHelper.TryConvertFromBase64(input).Item2;
+            this.input = input;
         }
 
         public PrivateKey ReadKey()
         {
-            ASN1Object asn1;
-            using (var ms = new MemoryStream(input))
+            var readerFactories = KeyReaderRegistry.GetPrivateReaders();
+
+            foreach (var readerFactory in readerFactories)
             {
-                asn1 = new DERReader(ms).Read();
+                var reader = readerFactory();
+
+                var result = reader.TryRead(input);
+                if (result.HasValue)
+                {
+                    return result.Value;
+                }
             }
 
-            // NOTE: currently only supporting RSA private keys
-            return new RSAPrivateKey(asn1);
+            throw new FormatException("Unable to read key");
         }
     }
 }

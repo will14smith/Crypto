@@ -1,5 +1,37 @@
-﻿namespace Crypto.EllipticCurve
+﻿using System;
+using System.Collections.Generic;
+using Crypto.ASN1;
+using Crypto.EllipticCurve.Maths;
+using Crypto.EllipticCurve.Maths.Curves;
+
+namespace Crypto.EllipticCurve
 {
+    public static class NamedCurves
+    {
+        private static readonly Dictionary<NamedCurve, Func<PrimeDomainParameters>> CurvesByEnum = new Dictionary<NamedCurve, Func<PrimeDomainParameters>>();
+        private static readonly Dictionary<ASN1ObjectIdentifier, Func<PrimeDomainParameters>> CurvesByOID = new Dictionary<ASN1ObjectIdentifier, Func<PrimeDomainParameters>>();
+
+        static NamedCurves()
+        {
+            Register(NamedCurve.secp256k1, new ASN1ObjectIdentifier("1.3.132.0.10"), () => Secp256K1.Parameters);
+        }
+
+        public static void Register(NamedCurve name, ASN1ObjectIdentifier oid, Func<PrimeDomainParameters> func)
+        {
+            CurvesByEnum.Add(name, func);
+            CurvesByOID.Add(oid, func);
+        }
+
+        public static PrimeDomainParameters Get(NamedCurve curve)
+        {
+            return CurvesByEnum[curve]();
+        }
+        public static PrimeDomainParameters Get(ASN1ObjectIdentifier curve)
+        {
+            return CurvesByOID[curve]();
+        }
+    }
+
     public enum NamedCurve
     {
         sect163k1 = 1,

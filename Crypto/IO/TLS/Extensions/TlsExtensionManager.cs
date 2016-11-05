@@ -82,6 +82,10 @@ namespace Crypto.IO.TLS.Extensions
         {
             KeyReaderRegistry.Register(algorithm, factory);
         }
+        public void RegisterPrivateKeyReader(Func<IPrivateKeyReader> factory)
+        {
+            KeyReaderRegistry.Register(factory);
+        }
 
         #endregion
     }

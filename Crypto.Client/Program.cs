@@ -2,6 +2,8 @@
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
+using Crypto.Certificates;
+using Crypto.Certificates.Keys;
 using Crypto.ECGCM;
 using Crypto.EllipticCurve;
 using Crypto.GCM;
@@ -22,6 +24,12 @@ namespace Crypto.Client
             TlsExtensionManager.RegisterExtension(new ECGCMExtensionConfiguration());
             
             Console.WriteLine("Listening for clients on {0}", server.LocalEndpoint);
+
+            var certReader = new X509Reader(File.ReadAllBytes("localhost_secp256k1.cert"));
+            var cert = certReader.ReadCertificate();
+
+            var keyReader = new PrivateKeyReader(File.ReadAllBytes("localhost_secp256k1.key"));
+            var key = keyReader.ReadKey();
 
             while (true)
             {

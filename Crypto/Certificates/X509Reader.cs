@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Crypto.ASN1;
@@ -15,7 +13,11 @@ namespace Crypto.Certificates
 
         public X509Reader(byte[] input)
         {
-            this.input = DERReadingHelper.TryConvertFromBase64(input).Item2;
+            var pems = PEMReader.TryConvertFromBase64(input);
+            SecurityAssert.SAssert(pems.Count == 1);
+            SecurityAssert.SAssert(pems[0].Name == "CERTIFICATE");
+
+            this.input = pems[0].RawData;
         }
 
         // http://www.itu.int/ITU-T/studygroups/com17/languages/X.690-0207.pdf for reading the DER format

@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using System.IO;
 using Crypto.ASN1;
@@ -6,7 +5,7 @@ using Crypto.Utils;
 
 namespace Crypto.Certificates.Keys
 {
-    public class RSAKeyReader : IPublicKeyReader
+    public class RSAKeyReader : IPublicKeyReader, IPrivateKeyReader
     {
         public PublicKey Read(X509AlgorithmIdentifier algorithm, BitArray bits)
         {
@@ -30,6 +29,31 @@ namespace Crypto.Certificates.Keys
             SecurityAssert.SAssert(exponentInt != null);
 
             return new RSAPublicKey(modulusInt.Value, exponentInt.Value);
+        }
+
+        public Option<PrivateKey> TryRead(byte[] base64Input)
+        {
+            var pems = PEMReader.TryConvertFromBase64(base64Input);
+            if (pems.Count != 1)
+            {
+                return Option.None<PrivateKey>();
+            }
+
+            var pem = pems[0];
+            if (pem.Name != "RSA PRIVATE KEY")
+            {
+                return Option.None<PrivateKey>();
+            }
+
+            // TODO handle decoding errors and return None
+
+            ASN1Object asn1;
+            using (var ms = new MemoryStream(pem.RawData))
+            {
+                asn1 = new DERReader(ms).Read();
+            }
+
+            return Option.Some<PrivateKey>(new RSAPrivateKey(asn1));
         }
     }
 }

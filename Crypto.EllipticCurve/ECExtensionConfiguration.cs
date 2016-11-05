@@ -13,6 +13,7 @@ namespace Crypto.EllipticCurve
         public override void Configure(TlsExtensionManager manager)
         {
             manager.RegisterPublicKeyReader(IdEcPublicKey, () => new ECKeyReader());
+            manager.RegisterPrivateKeyReader(() => new ECKeyReader());
 
             manager.RegisterHelloExtension(SupportedGroupsExtension.HelloType, (state, data) => new SupportedGroupsExtension(state, data));
             manager.RegisterHelloExtension(SupportedPointFormatsExtension.HelloType, (state, data) => new SupportedPointFormatsExtension(state, data));
